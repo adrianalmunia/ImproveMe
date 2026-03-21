@@ -1,0 +1,11 @@
+# Dependencias
+node_modules/
+dist/
+build/
+
+# Variables de entorno (Seguridad)
+.env
+
+# Logs y varios
+npm-debug.log*
+.DS_Store
