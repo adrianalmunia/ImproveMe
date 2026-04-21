@@ -1,0 +1,40 @@
+# ================================================================================
+# GITIGNORE - ARCHIVOS QUE NO DEBEN SUBIRSE AL REPOSITORIO
+# ================================================================================
+
+# Variables de entorno (contienen datos sensibles)
+.env
+.env.local
+.env.*.local
+
+# Dependencias de npm
+node_modules/
+package-lock.json
+yarn.lock
+
+# Archivos generados por Prisma
+prisma/migrations/
+generated/
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Caché
+.cache/
+dist/
+build/
+
+# Archivos temporales
+temp/
+tmp/
+*.tmp

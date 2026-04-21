@@ -1,124 +1,87 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+// ================================================================================
+// APP.JSX - COMPONENTE RAÍZ DE LA APLICACIÓN
+// ================================================================================
+// Este es el punto de entrada de la aplicación React.
+// Aquí establecemos el contexto de autenticación y gestionamos
+// la navegación entre diferentes vistas (login, registro, dashboard, etc.).
 
-function App() {
-  const [count, setCount] = useState(0)
+import { useState } from 'react';
+import { ProveedorAutenticacion, useAutenticacion } from './contextos/ContextoAutenticacion';
+import PaginaLogin from './paginas/PaginaLogin';
+import PaginaRegistro from './paginas/PaginaRegistro';
+import './App.css';
 
+/**
+ * Componente principal de la aplicación
+ * NOTA: Este componente DEBE estar dentro de ProveedorAutenticacion
+ */
+function ContenidoApp() {
+  // Obtenemos estado del contexto de autenticación
+  const { estaAutenticado, estaCargando, usuario } = useAutenticacion();
+
+  // Estado local: qué vista mostrar (login o registro)
+  const [vistaActual, setVistaActual] = useState('login');
+
+  // Mientras está cargando, mostramos un spinner
+  if (estaCargando) {
+    return (
+      <div className="contenedor-carga">
+        <div className="spinner"></div>
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+
+  // Si el usuario está autenticado, mostramos un mensaje de bienvenida
+  // (PRÓXIMA: crear dashboard)
+  if (estaAutenticado) {
+    return (
+      <div className="contenedor-autenticado">
+        <h1>¡Bienvenido, {usuario?.username}! 🎉</h1>
+        <p>Dashboard próximamente...</p>
+      </div>
+    );
+  }
+
+  // Si NO está autenticado, mostramos login o registro
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-          
-        </button>
-        <button className="btn btn-primary">Hola Daisy</button>
-        <div className="card bg-base-100 shadow-xl p-4">Tarjeta</div>
-      </section>
+    <div className="contenedor-autenticacion">
+      {vistaActual === 'login' ? (
+        <PaginaLogin
+          onLoginExitoso={() => {
+            // Cuando login es exitoso, redirigimos a dashboard
+            // Por ahora, simplemente mostramos el mensaje anterior
+          }}
+        />
+      ) : (
+        <PaginaRegistro
+          onRegistroExitoso={() => {
+            // Cuando registro es exitoso, redirigimos a dashboard
+            // Por ahora, simplemente mostramos el mensaje anterior
+          }}
+        />
+      )}
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {/* Botón para cambiar entre login y registro */}
+      <button
+        className="boton-cambiar-vista"
+        onClick={() => setVistaActual(vistaActual === 'login' ? 'registro' : 'login')}
+      >
+        {vistaActual === 'login'
+          ? '¿No tienes cuenta? Regístrate'
+          : '¿Ya tienes cuenta? Inicia sesión'}
+      </button>
+    </div>
+  );
 }
 
-export default App
+/**
+ * Componente raíz que envuelve todo con el contexto
+ */
+export function App() {
+  return (
+    <ProveedorAutenticacion hijos={<ContenidoApp />} />
+  );
+}
+
+export default App;

@@ -1,0 +1,104 @@
+/* ============================================================================
+   ESTILOS: BOTÓN
+   ============================================================================ */
+
+.boton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ============ VARIANTE PRIMARIA (azul) ============ */
+.boton-primario {
+    background: linear-gradient(135deg, #4f99cc 0%, #3d7aa9 100%);
+    color: white;
+    box-shadow: 0 4px 6px rgba(79, 153, 204, 0.2);
+}
+
+.boton-primario:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(79, 153, 204, 0.3);
+    background: linear-gradient(135deg, #3d7aa9 0%, #2b5a7f 100%);
+}
+
+.boton-primario:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(79, 153, 204, 0.2);
+}
+
+/* ============ VARIANTE SECUNDARIA (gris) ============ */
+.boton-secundario {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    border: 1px solid #bdc3c7;
+}
+
+.boton-secundario:hover:not(:disabled) {
+    background-color: #d5dbdb;
+    border-color: #95a5a6;
+}
+
+.boton-secundario:active:not(:disabled) {
+    background-color: #bdc3c7;
+}
+
+/* ============ VARIANTE PELIGRO (rojo) ============ */
+.boton-peligro {
+    background-color: #e74c3c;
+    color: white;
+    box-shadow: 0 4px 6px rgba(231, 76, 60, 0.2);
+}
+
+.boton-peligro:hover:not(:disabled) {
+    background-color: #c0392b;
+    box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
+    transform: translateY(-2px);
+}
+
+.boton-peligro:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+/* ============ ESTADOS GENERALES ============ */
+.boton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.boton:focus {
+    outline: 2px solid #4f99cc;
+    outline-offset: 2px;
+}
+
+/* ============ ANIMACIÓN DE CARGA ============ */
+.spinner-cargando {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.icono-boton {
+    font-size: 1.1em;
+    display: inline-flex;
+}

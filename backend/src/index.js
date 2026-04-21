@@ -85,4 +85,18 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// --- RUTA OBTENER HÁBITOS DE UN USUARIO ---
+app.get('/api/habitos/:usuarioId', async (req, res) => {
+    const { usuarioId } = req.params;
+
+    try {
+        const misHabitos = await prisma.habitos.findMany({
+            where: { id_usuario: parseInt(usuarioId) }
+        });
+        res.json(misHabitos);
+    } catch (error) {
+        res.status(500).json({ error: "Error al obtener hábitos" });
+    }
+});
+
 app.listen(3000, () => console.log("Servidor en http://localhost:3000"));

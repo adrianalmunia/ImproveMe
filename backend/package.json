@@ -1,13 +1,20 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend de ImproveMe - App de desarrollo personal con hábitos y gamificación",
+  "main": "src/servidor.js",
   "scripts": {
+    "dev": "cross-env NODE_ENV=desarrollo nodemon src/servidor.js",
+    "start": "cross-env NODE_ENV=produccion node src/servidor.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "habits",
+    "productivity",
+    "wellness",
+    "gamification"
+  ],
+  "author": "Adrian",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
@@ -15,9 +22,11 @@
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "nodemon": "^3.1.14",
     "prisma": "^6.19.3"
   }
