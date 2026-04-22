@@ -115,6 +115,10 @@ export function PaginaDiario() {
 
       if (archivoImagen) formData.append('imagen', archivoImagen);
       if (archivoAudio) formData.append('audio', archivoAudio);
+      
+      // Enviar señales de borrado si el usuario eliminó el archivo en la UI
+      if (!imagen) formData.append('borrar_imagen', 'true');
+      if (!audio) formData.append('borrar_audio', 'true');
 
       await guardarEntradaDiaria(formData);
 

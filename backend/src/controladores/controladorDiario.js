@@ -9,8 +9,9 @@ async function guardarEntradaDiaria(req, res) {
     }
 
     try {
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
+        // Creamos la fecha "hoy" normalizada a medianoche UTC para evitar desfases de zona horaria
+        const ahora = new Date();
+        const hoy = new Date(Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()));
 
         // 1. Guardar o actualizar la entrada principal
         const entrada = await prisma.entradas_diario.upsert({
@@ -34,38 +35,49 @@ async function guardarEntradaDiaria(req, res) {
             }
         });
 
-        // 2. Procesar archivos multimedia si existen
-        if (req.files) {
-            
-            if (req.files.imagen) {
-                // Borrar la imagen anterior si existe
-                await prisma.multimedia.deleteMany({
-                    where: { entrada_id: entrada.id, tipo_archivo: 'imagen' }
-                });
-                
-                await prisma.multimedia.create({
-                    data: {
-                        entrada_id: entrada.id,
-                        tipo_archivo: 'imagen',
-                        url_archivo: `/uploads/${req.files.imagen[0].filename}`
-                    }
-                });
-            }
+        // 2. Procesar archivos multimedia si existen o si se solicitó borrar
+        const { borrar_imagen, borrar_audio } = req.body;
 
-            if (req.files.audio) {
-                // Borrar el audio anterior si existe
-                await prisma.multimedia.deleteMany({
-                    where: { entrada_id: entrada.id, tipo_archivo: 'audio' }
-                });
-                
-                await prisma.multimedia.create({
-                    data: {
-                        entrada_id: entrada.id,
-                        tipo_archivo: 'audio',
-                        url_archivo: `/uploads/${req.files.audio[0].filename}`
-                    }
-                });
-            }
+        // Manejo de Imagen
+        if (req.files?.imagen) {
+            // Borrar la imagen anterior si existe y guardar la nueva
+            await prisma.multimedia.deleteMany({
+                where: { entrada_id: entrada.id, tipo_archivo: 'imagen' }
+            });
+            
+            await prisma.multimedia.create({
+                data: {
+                    entrada_id: entrada.id,
+                    tipo_archivo: 'imagen',
+                    url_archivo: `/uploads/${req.files.imagen[0].filename}`
+                }
+            });
+        } else if (borrar_imagen === 'true') {
+            // Si el usuario marcó borrar y no hay archivo nuevo
+            await prisma.multimedia.deleteMany({
+                where: { entrada_id: entrada.id, tipo_archivo: 'imagen' }
+            });
+        }
+
+        // Manejo de Audio
+        if (req.files?.audio) {
+            // Borrar el audio anterior si existe y guardar el nuevo
+            await prisma.multimedia.deleteMany({
+                where: { entrada_id: entrada.id, tipo_archivo: 'audio' }
+            });
+            
+            await prisma.multimedia.create({
+                data: {
+                    entrada_id: entrada.id,
+                    tipo_archivo: 'audio',
+                    url_archivo: `/uploads/${req.files.audio[0].filename}`
+                }
+            });
+        } else if (borrar_audio === 'true') {
+            // Si el usuario marcó borrar y no hay archivo nuevo
+            await prisma.multimedia.deleteMany({
+                where: { entrada_id: entrada.id, tipo_archivo: 'audio' }
+            });
         }
 
         res.status(200).json({ mensaje: "Entrada guardada correctamente", entrada });
@@ -77,8 +89,8 @@ async function guardarEntradaDiaria(req, res) {
 
 async function obtenerEntradaHoy(req, res) {
     const { usuarioId } = req.params;
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    const ahora = new Date();
+    const hoy = new Date(Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()));
 
     try {
         const entrada = await prisma.entradas_diario.findUnique({

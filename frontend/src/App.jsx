@@ -6,6 +6,7 @@ import { ProveedorAutenticacion, useAutenticacion } from './contextos/ContextoAu
 import Autenticacion from './paginas/Autenticacion';
 import PaginaDiario from './paginas/PaginaDiario';
 import PaginaRegistros from './paginas/PaginaRegistros';
+import PaginaUsuario from './paginas/PaginaUsuario';
 import LayoutPrincipal from './componentes/LayoutPrincipal';
 import { motion } from 'framer-motion';
 
@@ -24,7 +25,8 @@ function ContenidoApp() {
       <LayoutPrincipal vistaActual={vistaActual} setVistaActual={setVistaActual}>
         {vistaActual === 'diario' && <PaginaDiario />}
         {vistaActual === 'registros' && <PaginaRegistros />}
-        {vistaActual !== 'diario' && vistaActual !== 'registros' && (
+        {vistaActual === 'perfil' && <PaginaUsuario />}
+        {vistaActual !== 'diario' && vistaActual !== 'registros' && vistaActual !== 'perfil' && (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-xl text-gray-400 font-['Tilt_Warp']">Vista en construcción: {vistaActual}</p>
           </div>

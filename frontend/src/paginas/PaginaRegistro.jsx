@@ -4,7 +4,10 @@
 // Componente para que nuevos usuarios se registren en la aplicación.
 // Utiliza el diseño exacto exportado desde Figma con los mismos refinamientos que Login.
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import logoImproveMe from '../assets/logo_improveme.png';
 
 export function PaginaRegistro({ onRegistroExitoso = () => { }, onIrALogin = () => { } }) {
     const { registrar, estaCargando, error } = useAutenticacion();
@@ -49,7 +52,7 @@ export function PaginaRegistro({ onRegistroExitoso = () => { }, onIrALogin = () 
                 <div data-svg-wrapper className="left-[304px] top-[45px] absolute">
                     <svg width="840" height="602" viewBox="0 0 840 602" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g filter="url(#filter0_di_194_74)">
-                            <path d="M4 20C4 8.95429 12.9543 0 24 0H816C827.046 0 836 8.95431 836 20V574C836 585.046 827.046 594 816 594H24C12.9543 594 4 585.046 4 574V20Z" fill="white" />
+                            <path d="M4 20C4 8.95429 12.9543 0 24 0H816C827.046 0 836 8.95431 836 20V574C836 585.046 827.046 594 816 594H24C12.9543 594 4 585.046 4 574V20Z" className="fill-white" />
                             <path d="M24 1H816C826.493 1 835 9.50659 835 20V574C835 584.493 826.493 593 816 593H24C13.5066 593 5 584.493 5 574V20C5 9.50659 13.5066 1 24 1Z" stroke="url(#paint0_linear_194_74)" strokeWidth="2" />
                         </g>
                         <defs>
@@ -144,7 +147,7 @@ export function PaginaRegistro({ onRegistroExitoso = () => { }, onIrALogin = () 
                         type="text"
                         value={nombreUsuario}
                         onChange={(e) => setNombreUsuario(e.target.value)}
-                        className="w-72 h-7 left-[3.43px] top-[40.52px] absolute rounded-[44.44px] shadow-[0px_3.1px_3.1px_0px_rgba(0,0,0,0.25)] outline outline-[0.78px] outline-offset-[-0.39px] outline-Gris-Bonito px-4 text-xs focus:outline-Azul-Principal focus:ring-0"
+                        className="w-72 h-7 left-[3.43px] top-[40.52px] absolute rounded-[44.44px] shadow-[0px_3.1px_3.1px_0px_rgba(0,0,0,0.25)] outline outline-[0.78px] outline-offset-[-0.39px] outline-Gris-Bonito bg-white px-4 text-xs focus:outline-Azul-Principal focus:ring-0"
                         placeholder="tu_usuario"
                     />
 
@@ -154,7 +157,7 @@ export function PaginaRegistro({ onRegistroExitoso = () => { }, onIrALogin = () 
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-72 h-7 left-[3.43px] top-[114.46px] absolute rounded-[44.44px] shadow-[0px_3.1px_3.1px_0px_rgba(0,0,0,0.25)] outline outline-[0.78px] outline-offset-[-0.39px] outline-Gris-Bonito px-4 text-xs focus:outline-Azul-Principal focus:ring-0"
+                        className="w-72 h-7 left-[3.43px] top-[114.46px] absolute rounded-[44.44px] shadow-[0px_3.1px_3.1px_0px_rgba(0,0,0,0.25)] outline outline-[0.78px] outline-offset-[-0.39px] outline-Gris-Bonito bg-white px-4 text-xs focus:outline-Azul-Principal focus:ring-0"
                         placeholder="ejemplo@correo.com"
                     />
 
@@ -164,7 +167,7 @@ export function PaginaRegistro({ onRegistroExitoso = () => { }, onIrALogin = () 
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-72 h-7 left-[3.43px] top-[188.40px] absolute rounded-[44.44px] shadow-[0px_3.1px_3.1px_0px_rgba(0,0,0,0.25)] outline outline-[0.78px] outline-offset-[-0.39px] outline-Gris-Bonito px-4 text-xs focus:outline-Azul-Principal focus:ring-0"
+                        className="w-72 h-7 left-[3.43px] top-[188.40px] absolute rounded-[44.44px] shadow-[0px_3.1px_3.1px_0px_rgba(0,0,0,0.25)] outline outline-[0.78px] outline-offset-[-0.39px] outline-Gris-Bonito bg-white px-4 text-xs focus:outline-Azul-Principal focus:ring-0"
                         placeholder="••••••••"
                     />
 

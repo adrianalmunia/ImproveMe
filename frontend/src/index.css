@@ -2,16 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* TEMA CLARO (Defecto) */
+  --bg-principal: #F6F5F7;
+  --bg-tarjeta: rgba(255, 255, 255, 0.8);
+  --bg-sidebar: #FFFFFF;
+  --texto-principal: #1f2937;
+  --texto-secundario: #6b7280;
+  --borde: #f3f4f6;
+  --bg-modal: rgba(255, 255, 255, 1);
+  --sombra: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  background-color: #F6F5F7; 
+  background-color: var(--bg-principal);
+  color: var(--texto-principal);
+  transition: background-color 0.3s ease, color 0.3s ease;
   overflow: hidden; 
 }
 
-/* Scrollbar Personalizado y Elegante para contenedores internos */
+/* Scrollbar Personalizado */
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }

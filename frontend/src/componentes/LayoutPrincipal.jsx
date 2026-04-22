@@ -29,11 +29,11 @@ export function LayoutPrincipal({ children, vistaActual, setVistaActual }) {
       {/* --- SIDEBAR LATERAL --- */}
       <aside className="w-24 h-screen bg-white shadow-[4px_0_24px_rgba(0,0,0,0.05)] border-r border-gray-100 flex flex-col items-center py-4 z-[100] shrink-0 overflow-y-auto custom-scrollbar">
         <div 
-          className="mb-6 w-12 h-12 rounded-full p-[2px] shadow-lg cursor-pointer hover:scale-105 transition-transform shrink-0"
+          className="mb-8 w-16 h-16 rounded-full p-[2px] shadow-lg cursor-pointer hover:scale-105 transition-transform shrink-0"
           style={{ background: 'linear-gradient(135deg, #4F99CC 0%, #C6A55E 100%)' }}
           onClick={() => setVistaActual('diario')}
         >
-          <div className="w-full h-full bg-white rounded-full overflow-hidden flex items-center justify-center p-1">
+          <div className="w-full h-full bg-white rounded-full overflow-hidden flex items-center justify-center p-1.5">
             <img src={logoImproveMe} alt="Logo" className="w-full h-full object-contain" />
           </div>
         </div>

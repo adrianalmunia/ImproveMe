@@ -81,7 +81,7 @@ async function realizarSolicitud(ruta, metodo = 'GET', datos = null, token = nul
  * @param {string} password - Contraseña sin encriptar
  */
 export async function registrarUsuario(nombreUsuario, email, password) {
-    return realizarSolicitud('auth/registro', 'POST', {
+    return realizarSolicitud('autenticacion/registro', 'POST', {
         nombre_usuario: nombreUsuario,
         correo: email,
         contrasena: password,
@@ -92,7 +92,7 @@ export async function registrarUsuario(nombreUsuario, email, password) {
  * Inicia sesión con email y contraseña
  */
 export async function iniciarSesion(email, password) {
-    return realizarSolicitud('auth/login', 'POST', {
+    return realizarSolicitud('autenticacion/login', 'POST', {
         correo: email,
         contrasena: password,
     });
@@ -104,7 +104,7 @@ export async function iniciarSesion(email, password) {
  * @returns {object} { usuario, mensaje }
  */
 export async function obtenerPerfilUsuario(token) {
-    return realizarSolicitud('auth/perfil', 'GET', null, token);
+    return realizarSolicitud('autenticacion/perfil', 'GET', null, token);
 }
 
 // ============ FUNCIONES DE HÁBITOS ============

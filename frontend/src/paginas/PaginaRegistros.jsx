@@ -53,7 +53,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
 
   const humorInfo = humores.find(h => h.id === entrada.puntuacion_animo) || humores[2];
   const fechaObj = new Date(entrada.fecha);
-  const fechaStr = `${fechaObj.getDate()} de ${meses[fechaObj.getMonth()].charAt(0).toUpperCase() + meses[fechaObj.getMonth()].slice(1).toLowerCase()} de ${fechaObj.getFullYear()}`;
+  const fechaStr = `${fechaObj.getUTCDate()} de ${meses[fechaObj.getUTCMonth()].charAt(0).toUpperCase() + meses[fechaObj.getUTCMonth()].slice(1).toLowerCase()} de ${fechaObj.getUTCFullYear()}`;
 
   // Extraer un fragmento del texto
   const extracto = entrada.contenido_texto && entrada.contenido_texto.length > 100 
@@ -79,9 +79,15 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
         <div className="w-full h-full bg-white rounded-[37px] relative overflow-hidden flex flex-col items-center">
           <div className="absolute inset-0 bg-gradient-to-b from-white to-[#4F99CC]/5 pointer-events-none"></div>
           
-          <div className="mb-2 mt-4 relative z-10 shrink-0" style={{ transform: "translateZ(20px)" }}>
+          <div className="mb-2 mt-4 relative z-10 shrink-0 text-center flex flex-col items-center" style={{ transform: "translateZ(20px)" }}>
             <p className="text-[10px] font-black text-[#4F99CC] uppercase tracking-[0.1em]">{fechaStr}</p>
-            <div className="w-8 h-0.5 bg-[#4F99CC]/30 mx-auto mt-1 rounded-full"></div>
+            <div className="w-8 h-0.5 bg-[#4F99CC]/30 mx-auto mt-1 rounded-full mb-2"></div>
+            
+            <div className="bg-[#4F99CC]/5 border border-[#4F99CC]/10 px-2 py-0.5 rounded-full shadow-sm">
+              <p className="text-[9px] font-bold text-[#4F99CC] leading-none">
+                {entrada.horas_sueno >= 10 ? '+10' : entrada.horas_sueno}h de sueño
+              </p>
+            </div>
           </div>
 
           {/* Previsualización de Imagen si existe */}
@@ -184,10 +190,10 @@ export function PaginaRegistros() {
 
       <div className="max-w-6xl mx-auto">
         {/* SELECTOR DE MES */}
-        <div className="flex justify-center items-center gap-6 mb-12">
+          <div className="flex justify-center items-center gap-6 mb-12">
           <button 
             onClick={() => cambiarMes(-1)}
-            className="w-10 h-10 bg-gray-200 hover:bg-[#4F99CC] hover:text-white rounded-full flex items-center justify-center transition-colors text-xl shadow-sm"
+            className="w-10 h-10 bg-gray-200 text-gray-600 hover:bg-[#4F99CC] hover:text-white rounded-full flex items-center justify-center transition-colors text-xl shadow-sm"
           >
             &#9664;
           </button>
@@ -214,7 +220,7 @@ export function PaginaRegistros() {
           </div>
           <button 
             onClick={() => cambiarMes(1)}
-            className="w-10 h-10 bg-gray-200 hover:bg-[#4F99CC] hover:text-white rounded-full flex items-center justify-center transition-colors text-xl shadow-sm"
+            className="w-10 h-10 bg-gray-200 text-gray-600 hover:bg-[#4F99CC] hover:text-white rounded-full flex items-center justify-center transition-colors text-xl shadow-sm"
           >
             &#9654;
           </button>
@@ -278,7 +284,7 @@ export function PaginaRegistros() {
 
                   <div className="mb-2 relative z-10 shrink-0 text-center">
                     <p className="text-xs font-black text-[#4F99CC] uppercase tracking-[0.2em]">
-                      {new Date(entradaSeleccionada.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      {new Date(entradaSeleccionada.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}
                     </p>
                     <div className="w-12 h-0.5 bg-[#4F99CC]/30 mx-auto mt-1 rounded-full"></div>
                   </div>
