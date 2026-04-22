@@ -12,4 +12,7 @@ router.post('/', upload.fields([
 // Ruta para obtener la entrada de hoy de un usuario específico
 router.get('/hoy/:usuarioId', controladorDiario.obtenerEntradaHoy);
 
+// Ruta para obtener entradas de un mes específico (requiere query params: ?mes=MM&anio=YYYY)
+router.get('/mes/:usuarioId', controladorDiario.obtenerEntradasPorMes);
+
 module.exports = router;

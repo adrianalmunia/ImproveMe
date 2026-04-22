@@ -171,6 +171,13 @@ export async function obtenerEntradaHoy(usuarioId) {
     return realizarSolicitud(`diario/hoy/${usuarioId}`, 'GET');
 }
 
+/**
+ * Obtiene las entradas de un mes específico para un usuario
+ */
+export async function obtenerEntradasPorMes(usuarioId, mes, anio) {
+    return realizarSolicitud(`diario/mes/${usuarioId}?mes=${mes}&anio=${anio}`, 'GET');
+}
+
 export default {
     registrarUsuario,
     iniciarSesion,
@@ -181,4 +188,5 @@ export default {
     eliminarHabito,
     guardarEntradaDiaria,
     obtenerEntradaHoy,
+    obtenerEntradasPorMes,
 };

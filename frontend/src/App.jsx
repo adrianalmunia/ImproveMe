@@ -1,9 +1,12 @@
 // ================================================================================
 // APP.JSX - COMPONENTE RAÍZ DE LA APLICACIÓN
 // ================================================================================
+import { useState } from 'react';
 import { ProveedorAutenticacion, useAutenticacion } from './contextos/ContextoAutenticacion';
 import Autenticacion from './paginas/Autenticacion';
 import PaginaDiario from './paginas/PaginaDiario';
+import PaginaRegistros from './paginas/PaginaRegistros';
+import LayoutPrincipal from './componentes/LayoutPrincipal';
 import { motion } from 'framer-motion';
 
 /**
@@ -11,10 +14,23 @@ import { motion } from 'framer-motion';
  */
 function ContenidoApp() {
   const { usuario } = useAutenticacion();
+  const [vistaActual, setVistaActual] = useState('diario');
 
-  // Si el usuario está autenticado, mostramos la página de Registro Diario
+  console.log("ContenidoApp renderizando con usuario:", usuario?.nombre_usuario, "y vista:", vistaActual);
+
+  // Si el usuario está autenticado, mostramos el layout con la vista correspondiente
   if (usuario) {
-    return <PaginaDiario />;
+    return (
+      <LayoutPrincipal vistaActual={vistaActual} setVistaActual={setVistaActual}>
+        {vistaActual === 'diario' && <PaginaDiario />}
+        {vistaActual === 'registros' && <PaginaRegistros />}
+        {vistaActual !== 'diario' && vistaActual !== 'registros' && (
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-xl text-gray-400 font-['Tilt_Warp']">Vista en construcción: {vistaActual}</p>
+          </div>
+        )}
+      </LayoutPrincipal>
+    );
   }
 
   // Si NO está autenticado, mostramos la pantalla de Login/Registro unificada.

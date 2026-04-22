@@ -36,33 +36,34 @@ async function guardarEntradaDiaria(req, res) {
 
         // 2. Procesar archivos multimedia si existen
         if (req.files) {
-            const multimedia = [];
             
             if (req.files.imagen) {
-                multimedia.push({
-                    entrada_id: entrada.id,
-                    tipo_archivo: 'imagen',
-                    url_archivo: `/uploads/${req.files.imagen[0].filename}`
+                // Borrar la imagen anterior si existe
+                await prisma.multimedia.deleteMany({
+                    where: { entrada_id: entrada.id, tipo_archivo: 'imagen' }
+                });
+                
+                await prisma.multimedia.create({
+                    data: {
+                        entrada_id: entrada.id,
+                        tipo_archivo: 'imagen',
+                        url_archivo: `/uploads/${req.files.imagen[0].filename}`
+                    }
                 });
             }
 
             if (req.files.audio) {
-                multimedia.push({
-                    entrada_id: entrada.id,
-                    tipo_archivo: 'audio',
-                    url_archivo: `/uploads/${req.files.audio[0].filename}`
-                });
-            }
-
-            if (multimedia.length > 0) {
-                // Para simplificar, si ya existen archivos para esta entrada, los borramos antes de meter los nuevos
-                // (O podrías gestionarlo de forma que se acumulen)
+                // Borrar el audio anterior si existe
                 await prisma.multimedia.deleteMany({
-                    where: { entrada_id: entrada.id }
+                    where: { entrada_id: entrada.id, tipo_archivo: 'audio' }
                 });
-
-                await prisma.multimedia.createMany({
-                    data: multimedia
+                
+                await prisma.multimedia.create({
+                    data: {
+                        entrada_id: entrada.id,
+                        tipo_archivo: 'audio',
+                        url_archivo: `/uploads/${req.files.audio[0].filename}`
+                    }
                 });
             }
         }
@@ -97,7 +98,44 @@ async function obtenerEntradaHoy(req, res) {
     }
 }
 
+async function obtenerEntradasPorMes(req, res) {
+    const { usuarioId } = req.params;
+    const { mes, anio } = req.query;
+
+    if (!usuarioId || !mes || !anio) {
+        return res.status(400).json({ error: "Faltan parámetros (usuarioId, mes, anio)" });
+    }
+
+    try {
+        // Crear fechas de inicio y fin del mes
+        const fechaInicio = new Date(anio, mes - 1, 1);
+        const fechaFin = new Date(anio, mes, 1);
+
+        const entradas = await prisma.entradas_diario.findMany({
+            where: {
+                usuario_id: parseInt(usuarioId),
+                fecha: {
+                    gte: fechaInicio,
+                    lt: fechaFin
+                }
+            },
+            include: {
+                archivos_multimedia: true
+            },
+            orderBy: {
+                fecha: 'desc'
+            }
+        });
+
+        res.status(200).json(entradas);
+    } catch (error) {
+        console.error("Error al obtener entradas por mes:", error);
+        res.status(500).json({ error: "Error al obtener las entradas del mes" });
+    }
+}
+
 module.exports = {
     guardarEntradaDiaria,
-    obtenerEntradaHoy
+    obtenerEntradaHoy,
+    obtenerEntradasPorMes
 };
