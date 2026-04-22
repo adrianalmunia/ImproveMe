@@ -1,73 +1,88 @@
-//Generación del cliente JS
-generator client {
+// Generación del cliente de Prisma para poder usarlo en nuestro código JavaScript
+generator cliente {
   provider = "prisma-client-js"
 }
 
-//Confguración del proovedor de la base de datos, postgreSQL, la url real viende de .env
+// Configuración de la conexión a la base de datos PostgreSQL
+// La URL de conexión se guarda de forma segura en el archivo .env
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+// --- MODELOS DE LA APLICACIÓN ---
+
+// Tabla que guarda la información principal de las personas que usan la app
+model usuarios {
+  id               Int                @id @default(autoincrement())
+  nombre_usuario   String             @unique @db.VarChar(50)
+  correo           String             @unique @db.VarChar(100)
+  contrasena_hash  String             // La contraseña se guarda encriptada por seguridad
+  puntos_experiencia Int?             @default(0) // Puntos acumulados para el sistema de rangos
+  fecha_registro   DateTime?          @default(now()) @db.Timestamp(6)
+  
+  // Relaciones: Un usuario tiene sus propios hábitos y entradas de diario
+  entradas_diario  entradas_diario[]
+  habitos          habitos[]
+}
+
+// Tabla para el seguimiento emocional y notas del día a día
 model entradas_diario {
   id              Int          @id @default(autoincrement())
   usuario_id      Int?
   fecha           DateTime?    @default(dbgenerated("CURRENT_DATE")) @db.Date
-  mood_score      Int?
+  puntuacion_animo Int?        // Valor numérico para saber cómo se sentía el usuario
   horas_sueno     Decimal?     @db.Decimal(4, 2)
-  contenido_texto String?
-  usuarios        usuarios?    @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  multimedia      multimedia[]
+  contenido_texto String?      // Espacio para que el usuario escriba sus reflexiones
+  
+  // Conexiones con otras tablas
+  usuario         usuarios?    @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  archivos_multimedia multimedia[]
 
+  // Evita que un usuario cree dos entradas para el mismo día
   @@unique([usuario_id, fecha])
 }
 
+// Tabla para definir qué hábitos quiere mejorar el usuario
 model habitos {
-  id                Int                 @id @default(autoincrement())
-  usuario_id        Int?
-  nombre            String              @db.VarChar(100)
-  categoria         String?             @db.VarChar(50)
-  icono             String?             @db.VarChar(50)
-  activo            Boolean?            @default(true)
-  fecha_creacion    DateTime?           @default(dbgenerated("CURRENT_DATE")) @db.Date
-  usuarios          usuarios?           @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  registros_habitos registros_habitos[]
+  id              Int                 @id @default(autoincrement())
+  usuario_id      Int?
+  nombre          String              @db.VarChar(100)
+  categoria       String?             @db.VarChar(50) // Ejemplo: Salud, Trabajo, Deporte
+  icono           String?             @db.VarChar(50) // Nombre del dibujo que se mostrará
+  esta_activo     Boolean?            @default(true)  // Si el hábito sigue vigente o se ha pausado
+  fecha_creacion  DateTime?           @default(dbgenerated("CURRENT_DATE")) @db.Date
+  
+  usuario         usuarios?           @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  registros_cumplimiento registros_habitos[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model multimedia {
-  id              Int              @id @default(autoincrement())
-  entrada_id      Int?
-  tipo_archivo    String?          @db.VarChar(10)
-  url_archivo     String
-  entradas_diario entradas_diario? @relation(fields: [entrada_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-model rangos_referencia {
-  id           Int     @id @default(autoincrement())
-  nombre_rango String  @db.VarChar(50)
-  xp_minima    Int
-  icono_ruta   String?
-}
-
+// Tabla que registra qué días se ha cumplido cada hábito
 model registros_habitos {
-  id         Int      @id @default(autoincrement())
-  habito_id  Int?
-  fecha      DateTime @db.Date
-  completado Boolean? @default(false)
-  habitos    habitos? @relation(fields: [habito_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id              Int      @id @default(autoincrement())
+  habito_id       Int?
+  fecha           DateTime @db.Date
+  fue_completado  Boolean? @default(false) // Indica si el usuario cumplió el hábito ese día
+  
+  habito          habitos? @relation(fields: [habito_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  // No permite duplicar el registro de un mismo hábito en la misma fecha
   @@unique([habito_id, fecha])
 }
 
-model usuarios {
-  id              Int               @id @default(autoincrement())
-  username        String            @unique @db.VarChar(50)
-  email           String            @unique @db.VarChar(100)
-  password_hash   String
-  puntos_xp       Int?              @default(0)
-  fecha_registro  DateTime?         @default(now()) @db.Timestamp(6)
-  entradas_diario entradas_diario[]
-  habitos         habitos[]
+// Tabla para gestionar los niveles y rangos según la experiencia ganada
+model rangos_referencia {
+  id           Int     @id @default(autoincrement())
+  nombre_rango String  @db.VarChar(50) // Ejemplo: "Novato", "Maestro"
+  xp_minima    Int     // Cuántos puntos necesitas para alcanzar este rango
+  ruta_icono   String? // Imagen del emblema del rango
+}
+
+// Tabla para guardar enlaces a fotos o archivos subidos en el diario
+model multimedia {
+  id              Int              @id @default(autoincrement())
+  entrada_id      Int?
+  tipo_archivo    String?          @db.VarChar(10) // Ejemplo: jpg, png, mp4
+  url_archivo     String           // Dirección donde está guardado el archivo
+  entrada_diario  entradas_diario? @relation(fields: [entrada_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }

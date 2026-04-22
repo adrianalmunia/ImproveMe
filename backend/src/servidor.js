@@ -95,7 +95,7 @@ async function iniciarServidor() {
             `);
         });
     } catch (error) {
-        console.error('❌ Error al iniciar servidor:', error.message);
+        console.error('Error al iniciar servidor:', error.message);
         process.exit(1); // Salir con código de error
     }
 }
@@ -106,7 +106,7 @@ async function iniciarServidor() {
 process.on('SIGINT', async () => {
     console.log('\n\n⏹️  Cerrando servidor gracefully...');
     await prisma.$disconnect();
-    console.log('✅ Conexión a BD cerrada');
+    console.log('Conexión a BD cerrada');
     process.exit(0);
 });
 

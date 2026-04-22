@@ -10,6 +10,14 @@ const prisma = new PrismaClient();
 app.use(cors());
 app.use(express.json());
 
+// Importamos las rutas modulares
+const rutasAutenticacion = require('./rutas/rutasAutenticacion');
+const rutasDiario = require('./rutas/rutasDiario');
+
+// Registro de Rutas
+app.use('/api/auth', rutasAutenticacion); // Todas las rutas de auth ahora cuelgan de /api/auth
+app.use('/api/diario', rutasDiario);
+
 app.get('/probar', async (req, res) => {
     try {
         const listaUsuarios = await prisma.usuarios.findMany();

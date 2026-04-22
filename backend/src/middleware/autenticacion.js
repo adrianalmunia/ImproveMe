@@ -55,7 +55,7 @@ function verificarAutenticacion(req, res, siguiente) {
         // 6. Pasamos el control al siguiente middleware o controlador
         siguiente();
     } catch (error) {
-        console.error('❌ Error en autenticación:', error.message);
+        console.error('Error en autenticación:', error.message);
         return res.status(401).json({
             error: 'Autenticación fallida',
             mensaje: error.message

@@ -29,8 +29,8 @@ const prisma = new PrismaClient({
 // En desarrollo, podemos monitorear las queries que se ejecutan
 if (process.env.NODE_ENV === 'desarrollo') {
     prisma.$on('query', (evento) => {
-        console.log('⚡ Query ejecutada:', evento.query);
-        console.log('⏱️  Duración:', evento.duration, 'ms');
+        console.log('Query ejecutada:', evento.query);
+        console.log('Duración:', evento.duration, 'ms');
     });
 }
 

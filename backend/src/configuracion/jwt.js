@@ -33,7 +33,7 @@ function generarToken(idUsuario) {
         );
         return token;
     } catch (error) {
-        console.error('❌ Error al generar token:', error.message);
+        console.error('Error al generar token:', error.message);
         throw new Error('No se pudo generar el token de autenticación');
     }
 }
@@ -48,7 +48,7 @@ function validarToken(token) {
         const datos = jwt.verify(token, CLAVE_SECRETA);
         return datos;
     } catch (error) {
-        console.error('❌ Error al validar token:', error.message);
+        console.error('Error al validar token:', error.message);
         throw new Error('Token inválido o expirado');
     }
 }

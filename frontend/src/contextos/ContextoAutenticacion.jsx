@@ -15,7 +15,7 @@ const ContextoAutenticacion = createContext(null);
  * Proveedor de contexto de autenticación
  * Envuelve la app para que todos los componentes accedan al estado de autenticación
  */
-export function ProveedorAutenticacion({ hijos }) {
+export function ProveedorAutenticacion({ children }) {
     // Estado: usuario autenticado
     const [usuario, setUsuario] = useState(null);
 
@@ -148,7 +148,7 @@ export function ProveedorAutenticacion({ hijos }) {
 
     return (
         <ContextoAutenticacion.Provider value={valor}>
-            {hijos}
+            {children}
         </ContextoAutenticacion.Provider>
     );
 }

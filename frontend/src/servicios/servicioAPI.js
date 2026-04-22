@@ -48,8 +48,8 @@ async function realizarSolicitud(ruta, metodo = 'GET', datos = null, token = nul
         // Si la respuesta no fue OK (200-299), lanzamos un error
         if (!respuesta.ok) {
             throw new Error(
-                datosRespuesta.mensaje || 
-                datosRespuesta.error || 
+                datosRespuesta.mensaje ||
+                datosRespuesta.error ||
                 'Error desconocido del servidor'
             );
         }
@@ -58,10 +58,12 @@ async function realizarSolicitud(ruta, metodo = 'GET', datos = null, token = nul
         return datosRespuesta;
     } catch (error) {
         // Si hay error de red o parsing JSON, lo mostramos
-        console.error('❌ Error en solicitud:', error.message);
+        console.error('Error en solicitud:', error.message);
         throw error;
     }
 }
+
+// ============ FUNCIONES DE AUTENTICACIÓN ============
 
 // ============ FUNCIONES DE AUTENTICACIÓN ============
 
@@ -70,26 +72,22 @@ async function realizarSolicitud(ruta, metodo = 'GET', datos = null, token = nul
  * @param {string} nombreUsuario - Nombre de usuario
  * @param {string} email - Email del usuario
  * @param {string} password - Contraseña sin encriptar
- * @returns {object} { usuario, token, mensaje }
  */
 export async function registrarUsuario(nombreUsuario, email, password) {
-    return realizarSolicitud('autenticacion/registro', 'POST', {
-        nombreUsuario,
-        email,
-        password,
+    return realizarSolicitud('auth/registro', 'POST', {
+        nombre_usuario: nombreUsuario,
+        correo: email,
+        contrasena: password,
     });
 }
 
 /**
  * Inicia sesión con email y contraseña
- * @param {string} email - Email del usuario
- * @param {string} password - Contraseña sin encriptar
- * @returns {object} { usuario, token, mensaje }
  */
 export async function iniciarSesion(email, password) {
-    return realizarSolicitud('autenticacion/login', 'POST', {
-        email,
-        password,
+    return realizarSolicitud('auth/login', 'POST', {
+        correo: email,
+        contrasena: password,
     });
 }
 
@@ -99,11 +97,11 @@ export async function iniciarSesion(email, password) {
  * @returns {object} { usuario, mensaje }
  */
 export async function obtenerPerfilUsuario(token) {
-    return realizarSolicitud('autenticacion/perfil', 'GET', null, token);
+    return realizarSolicitud('auth/perfil', 'GET', null, token);
 }
 
 // ============ FUNCIONES DE HÁBITOS ============
-// (Se irán añadiendo según avancemos)
+// (Se irán añadiendo según se avance)
 
 /**
  * Obtiene todos los hábitos del usuario autenticado
@@ -150,6 +148,22 @@ export async function eliminarHabito(idHabito, token) {
     return realizarSolicitud(`habitos/${idHabito}`, 'DELETE', null, token);
 }
 
+// ============ FUNCIONES DE DIARIO ============
+
+/**
+ * Guarda o actualiza la entrada de diario de hoy
+ */
+export async function guardarEntradaDiaria(datosEntrada) {
+    return realizarSolicitud('diario', 'POST', datosEntrada);
+}
+
+/**
+ * Obtiene la entrada de diario de hoy para un usuario
+ */
+export async function obtenerEntradaHoy(usuarioId) {
+    return realizarSolicitud(`diario/hoy/${usuarioId}`, 'GET');
+}
+
 export default {
     registrarUsuario,
     iniciarSesion,
@@ -158,4 +172,6 @@ export default {
     crearHabito,
     actualizarHabito,
     eliminarHabito,
+    guardarEntradaDiaria,
+    obtenerEntradaHoy,
 };

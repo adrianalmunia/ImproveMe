@@ -1,13 +1,16 @@
 /** @type {import('tailwindcss').Config} */
-import daisyui from "daisyui";
-
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'Gris-Bonito': '#3C3C3C',
+        'Azul-Principal': '#4F99CC',
+      },
+    },
   },
-  plugins: [daisyui],
+  plugins: [],
 }

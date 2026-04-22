@@ -50,8 +50,8 @@ async function registrarUsuario(nombreUsuario, email, password) {
     const usuarioExistente = await prisma.usuarios.findFirst({
         where: {
             OR: [
-                { username: nombreUsuario },
-                { email: email }
+                { nombre_usuario: nombreUsuario },
+                { correo: email }
             ]
         }
     });
@@ -66,16 +66,16 @@ async function registrarUsuario(nombreUsuario, email, password) {
     // 4. CREAR USUARIO EN BD
     const nuevoUsuario = await prisma.usuarios.create({
         data: {
-            username: nombreUsuario,
-            email: email,
-            password_hash: passwordEncriptada,
-            puntos_xp: 0
+            nombre_usuario: nombreUsuario,
+            correo: email,
+            contrasena_hash: passwordEncriptada,
+            puntos_experiencia: 0
         },
         select: {
             id: true,
-            username: true,
-            email: true,
-            puntos_xp: true,
+            nombre_usuario: true,
+            correo: true,
+            puntos_experiencia: true,
             fecha_registro: true
         }
     });
@@ -87,7 +87,7 @@ async function registrarUsuario(nombreUsuario, email, password) {
     return {
         usuario: nuevoUsuario,
         token: token,
-        mensaje: '✅ Registro exitoso'
+        mensaje: 'Registro exitoso'
     };
 }
 
@@ -109,13 +109,13 @@ async function iniciarSesion(email, password) {
 
     // 2. BUSCAR USUARIO POR EMAIL
     const usuario = await prisma.usuarios.findUnique({
-        where: { email: email },
+        where: { correo: email },
         select: {
             id: true,
-            username: true,
-            email: true,
-            password_hash: true,
-            puntos_xp: true
+            nombre_usuario: true,
+            correo: true,
+            contrasena_hash: true,
+            puntos_experiencia: true
         }
     });
 
@@ -125,7 +125,7 @@ async function iniciarSesion(email, password) {
     }
 
     // 4. VERIFICAR CONTRASEÑA USANDO BCRYPT
-    const passwordCorrecta = await bcrypt.compare(password, usuario.password_hash);
+    const passwordCorrecta = await bcrypt.compare(password, usuario.contrasena_hash);
 
     if (!passwordCorrecta) {
         throw new Error('Email o contraseña incorrectos');
@@ -135,11 +135,11 @@ async function iniciarSesion(email, password) {
     const token = generarToken(usuario.id);
 
     // 6. RETORNAR DATOS (sin password)
-    const { password_hash, ...usuarioSeguro } = usuario;
+    const { contrasena_hash, ...usuarioSeguro } = usuario;
     return {
         usuario: usuarioSeguro,
         token: token,
-        mensaje: '✅ Sesión iniciada exitosamente'
+        mensaje: 'Sesión iniciada exitosamente'
     };
 }
 
@@ -153,9 +153,9 @@ async function obtenerPerfilUsuario(idUsuario) {
         where: { id: idUsuario },
         select: {
             id: true,
-            username: true,
-            email: true,
-            puntos_xp: true,
+            nombre_usuario: true,
+            correo: true,
+            puntos_experiencia: true,
             fecha_registro: true
         }
     });

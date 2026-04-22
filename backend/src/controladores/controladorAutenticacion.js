@@ -17,15 +17,15 @@ const {
  */
 async function controlarRegistro(req, res) {
     try {
-        const { nombreUsuario, email, password } = req.body;
+        const { nombre_usuario, correo, contrasena } = req.body;
 
         // Llamamos al servicio para registrar
-        const resultado = await registrarUsuario(nombreUsuario, email, password);
+        const resultado = await registrarUsuario(nombre_usuario, correo, contrasena);
 
         // Si todo es correcto, devolvemos 201 (Created)
         return res.status(201).json(resultado);
     } catch (error) {
-        console.error('❌ Error en registro:', error.message);
+        console.error('Error en registro:', error.message);
 
         // Devolvemos el error con código 400 (Bad Request)
         return res.status(400).json({
@@ -38,19 +38,19 @@ async function controlarRegistro(req, res) {
 /**
  * Controlador: Iniciar sesión (login)
  * POST /api/autenticacion/login
- * Body esperado: { email, password }
+ * Body esperado: { correo, contrasena }
  */
 async function controlarLogin(req, res) {
     try {
-        const { email, password } = req.body;
+        const { correo, contrasena } = req.body;
 
         // Llamamos al servicio para iniciar sesión
-        const resultado = await iniciarSesion(email, password);
+        const resultado = await iniciarSesion(correo, contrasena);
 
         // Si todo es correcto, devolvemos 200 (OK)
         return res.status(200).json(resultado);
     } catch (error) {
-        console.error('❌ Error en login:', error.message);
+        console.error('Error en login:', error.message);
 
         // Devolvemos el error con código 401 (Unauthorized)
         return res.status(401).json({
@@ -77,10 +77,10 @@ async function controlarObtenerPerfil(req, res) {
         // Devolvemos los datos del usuario
         return res.status(200).json({
             usuario: usuario,
-            mensaje: '✅ Perfil obtenido'
+            mensaje: 'Perfil obtenido'
         });
     } catch (error) {
-        console.error('❌ Error al obtener perfil:', error.message);
+        console.error('Error al obtener perfil:', error.message);
 
         return res.status(404).json({
             error: 'No encontrado',
