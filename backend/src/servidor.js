@@ -6,9 +6,11 @@
 
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const prisma = require('./configuracion/baseDatos');
 const rutasAutenticacion = require('./rutas/rutasAutenticacion');
+const rutasDiario = require('./rutas/rutasDiario');
 
 // ============ CONFIGURACIÓN BÁSICA ============
 const app = express();
@@ -26,6 +28,9 @@ app.use(cors({
 
 // Parser JSON: Convierte el body de las solicitudes a objetos JavaScript
 app.use(express.json());
+
+// Servir archivos estáticos de la carpeta uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Middleware para logging (mostrar información de las solicitudes)
 app.use((req, res, siguiente) => {
@@ -63,6 +68,9 @@ app.get('/probar', async (req, res) => {
 
 // Rutas de autenticación
 app.use('/api/autenticacion', rutasAutenticacion);
+
+// Rutas de diario
+app.use('/api/diario', rutasDiario);
 
 // ============ MANEJO DE ERRORES 404 ============
 // Si ninguna ruta anterior coincide, devolvemos 404

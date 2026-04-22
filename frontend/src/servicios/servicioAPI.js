@@ -34,9 +34,16 @@ async function realizarSolicitud(ruta, metodo = 'GET', datos = null, token = nul
             opciones.headers.Authorization = `Bearer ${token}`;
         }
 
-        // Si hay datos (POST o PUT), los convertimos a JSON
+        // Si hay datos, los procesamos
         if (datos) {
-            opciones.body = JSON.stringify(datos);
+            if (datos instanceof FormData) {
+                // Si es FormData, dejamos que el navegador gestione el Content-Type (para multipart/form-data)
+                // y no lo stringificamos
+                opciones.body = datos;
+                delete opciones.headers['Content-Type'];
+            } else {
+                opciones.body = JSON.stringify(datos);
+            }
         }
 
         // Realizamos la solicitud
@@ -151,7 +158,7 @@ export async function eliminarHabito(idHabito, token) {
 // ============ FUNCIONES DE DIARIO ============
 
 /**
- * Guarda o actualiza la entrada de diario de hoy
+ * Guarda o actualiza la entrada de diario de hoy (soporta FormData para archivos)
  */
 export async function guardarEntradaDiaria(datosEntrada) {
     return realizarSolicitud('diario', 'POST', datosEntrada);

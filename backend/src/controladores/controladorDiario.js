@@ -9,11 +9,10 @@ async function guardarEntradaDiaria(req, res) {
     }
 
     try {
-        // Intentamos crear la entrada (o actualizarla si ya existe para hoy)
-        // El esquema tiene un @@unique([usuario_id, fecha])
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
 
+        // 1. Guardar o actualizar la entrada principal
         const entrada = await prisma.entradas_diario.upsert({
             where: {
                 usuario_id_fecha: {
@@ -35,6 +34,39 @@ async function guardarEntradaDiaria(req, res) {
             }
         });
 
+        // 2. Procesar archivos multimedia si existen
+        if (req.files) {
+            const multimedia = [];
+            
+            if (req.files.imagen) {
+                multimedia.push({
+                    entrada_id: entrada.id,
+                    tipo_archivo: 'imagen',
+                    url_archivo: `/uploads/${req.files.imagen[0].filename}`
+                });
+            }
+
+            if (req.files.audio) {
+                multimedia.push({
+                    entrada_id: entrada.id,
+                    tipo_archivo: 'audio',
+                    url_archivo: `/uploads/${req.files.audio[0].filename}`
+                });
+            }
+
+            if (multimedia.length > 0) {
+                // Para simplificar, si ya existen archivos para esta entrada, los borramos antes de meter los nuevos
+                // (O podrías gestionarlo de forma que se acumulen)
+                await prisma.multimedia.deleteMany({
+                    where: { entrada_id: entrada.id }
+                });
+
+                await prisma.multimedia.createMany({
+                    data: multimedia
+                });
+            }
+        }
+
         res.status(200).json({ mensaje: "Entrada guardada correctamente", entrada });
     } catch (error) {
         console.error("Error al guardar entrada:", error);
@@ -54,6 +86,9 @@ async function obtenerEntradaHoy(req, res) {
                     usuario_id: parseInt(usuarioId),
                     fecha: hoy
                 }
+            },
+            include: {
+                archivos_multimedia: true
             }
         });
         res.json(entrada || null);

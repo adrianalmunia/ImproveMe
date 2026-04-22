@@ -1,12 +1,13 @@
 // ================================================================================
 // PÁGINA: REGISTRO DIARIO (JOURNALING)
 // ================================================================================
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { guardarEntradaDiaria, obtenerEntradaHoy } from '../servicios/servicioAPI';
 import logoImproveMe from '../assets/logo_improveme.png';
 import logoCompleto from '../assets/logo_completo.png';
+import { PenLine, Library, BarChart2, ListTodo, Trophy, Calendar, User, Flower2 } from 'lucide-react';
 
 // Importar imágenes de estados de ánimo
 import moodFatal from '../assets/estados_animo/fatal.png';
@@ -15,24 +16,69 @@ import moodDecente from '../assets/estados_animo/decente.png';
 import moodBien from '../assets/estados_animo/bien.png';
 import moodGenial from '../assets/estados_animo/genial.png';
 
-// Iconos simplificados para el Sidebar (puedes sustituirlos por Lucide-React o FontAwesome después)
-const SidebarIcon = ({ name, active }) => (
+// Iconos simplificados para el Sidebar usando Lucide React
+const SidebarIcon = ({ Icon, active }) => (
   <motion.div
-    whileHover={{ scale: 1.2, x: 5 }}
-    className={`w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer mb-4 transition-colors ${active ? 'bg-black text-white shadow-lg' : 'bg-white/50 text-gray-600 hover:bg-white'}`}
+    whileHover={{ scale: 1.15, x: 5 }}
+    className={`w-12 h-12 rounded-[16px] flex items-center justify-center cursor-pointer mb-5 transition-all duration-300 ${active ? 'bg-gradient-to-tr from-[#4F99CC] to-[#C6A55E] text-white shadow-md' : 'bg-white/40 text-[#2C4159] hover:bg-white hover:text-[#4F99CC] shadow-sm hover:shadow-md border border-white/60'}`}
   >
-    <span className="text-xl">{name}</span>
+    <Icon strokeWidth={2} size={24} />
   </motion.div>
 );
 
 export function PaginaDiario() {
   const { usuario } = useAutenticacion();
   const [humor, setHumor] = useState(3); // 1-5
-  const [sueno, setSueno] = useState(50);
+  const [sueno, setSueno] = useState(8); // Horas de sueño (0-16)
   const [texto, setTexto] = useState('');
+  const [imagen, setImagen] = useState(null); // URL local para preview o URL del backend
+  const [audio, setAudio] = useState(null); // URL local para preview o URL del backend
+  const [archivoImagen, setArchivoImagen] = useState(null); // Objeto File real
+  const [archivoAudio, setArchivoAudio] = useState(null); // Objeto File real
   const [fecha] = useState(new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }));
   const [mensajeStatus, setMensajeStatus] = useState({ texto: '', tipo: '' }); // { texto, tipo: 'exito' | 'error' }
   const [estaGuardando, setEstaGuardando] = useState(false);
+  
+  // Estados para nuevas funcionalidades
+  const [estaGrabando, setEstaGrabando] = useState(false);
+  const [imagenExpandida, setImagenExpandida] = useState(false);
+
+  // Refs
+  const inputImagenRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const trozosAudioRef = useRef([]);
+  const reproductorAudioRef = useRef(null);
+  const [reproduciendo, setReproduciendo] = useState(false);
+  const [progresoAudio, setProgresoAudio] = useState(0);
+  const [duracionAudio, setDuracionAudio] = useState(0);
+  const [tiempoActual, setTiempoActual] = useState(0);
+  const [velocidadAudio, setVelocidadAudio] = useState(1);
+
+  // Efecto 3D interactivo para la tarjeta
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { damping: 25, stiffness: 300, mass: 0.5 };
+  const xSpring = useSpring(mouseX, springConfig);
+  const ySpring = useSpring(mouseY, springConfig);
+
+  // Rotaciones máximas de 6 grados para un efecto más sutil y menos mareante
+  const rotateX = useTransform(ySpring, [-0.5, 0.5], [6, -6]);
+  const rotateY = useTransform(xSpring, [-0.5, 0.5], [-6, 6]);
+
+  const manejarMouseMoveTarjeta = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const xPos = e.clientX - rect.left;
+    const yPos = e.clientY - rect.top;
+    
+    mouseX.set((xPos / rect.width) - 0.5);
+    mouseY.set((yPos / rect.height) - 0.5);
+  };
+
+  const manejarMouseLeaveTarjeta = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
 
   // Cargar datos si ya existen para hoy
   useEffect(() => {
@@ -42,8 +88,17 @@ export function PaginaDiario() {
           const entrada = await obtenerEntradaHoy(usuario.id);
           if (entrada) {
             setHumor(entrada.puntuacion_animo || 3);
-            setSueno(entrada.horas_sueno ? parseFloat(entrada.horas_sueno) * 10 : 50);
+            setSueno(entrada.horas_sueno ? parseFloat(entrada.horas_sueno) : 8);
             setTexto(entrada.contenido_texto || '');
+            
+            // Cargar archivos multimedia si existen
+            if (entrada.archivos_multimedia) {
+              entrada.archivos_multimedia.forEach(archivo => {
+                const urlCompleta = `http://localhost:3000${archivo.url_archivo}`;
+                if (archivo.tipo_archivo === 'imagen') setImagen(urlCompleta);
+                if (archivo.tipo_archivo === 'audio') setAudio(urlCompleta);
+              });
+            }
           }
         } catch (error) {
           console.error("Error al cargar entrada:", error);
@@ -60,13 +115,20 @@ export function PaginaDiario() {
     setMensajeStatus({ texto: '', tipo: '' });
 
     try {
-      await guardarEntradaDiaria({
-        usuario_id: usuario.id,
-        puntuacion_animo: humor,
-        horas_sueno: (sueno / 10).toFixed(2), // Convertimos a formato Decimal(4,2)
-        contenido_texto: texto
-      });
+      const formData = new FormData();
+      formData.append('usuario_id', usuario.id);
+      formData.append('puntuacion_animo', humor);
+      formData.append('horas_sueno', sueno);
+      formData.append('contenido_texto', texto);
+      
+      if (archivoImagen) formData.append('imagen', archivoImagen);
+      if (archivoAudio) formData.append('audio', archivoAudio);
+
+      await guardarEntradaDiaria(formData);
+      
       setMensajeStatus({ texto: '¡Entrada guardada con éxito!', tipo: 'exito' });
+      setArchivoImagen(null);
+      setArchivoAudio(null);
       // Limpiar mensaje tras 3 segundos
       setTimeout(() => setMensajeStatus({ texto: '', tipo: '' }), 3000);
     } catch (error) {
@@ -75,6 +137,142 @@ export function PaginaDiario() {
       setEstaGuardando(false);
     }
   }
+
+  // Manejador de imagen
+  const manejarCambioImagen = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setArchivoImagen(file);
+      setImagen(URL.createObjectURL(file));
+    }
+  };
+
+  // Controladores del reproductor de audio personalizado
+  const toggleReproduccion = () => {
+    if (reproductorAudioRef.current) {
+      if (reproduciendo) {
+        reproductorAudioRef.current.pause();
+      } else {
+        reproductorAudioRef.current.play();
+      }
+      setReproduciendo(!reproduciendo);
+    }
+  };
+
+  const formatearTiempo = (segundos) => {
+    if (isNaN(segundos) || !isFinite(segundos)) return "0:00";
+    const min = Math.floor(segundos / 60);
+    const sec = Math.floor(segundos % 60);
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  const actualizarProgreso = () => {
+    const audioEl = reproductorAudioRef.current;
+    if (audioEl) {
+      setTiempoActual(audioEl.currentTime);
+      if (audioEl.duration && audioEl.duration !== Infinity) {
+        setProgresoAudio((audioEl.currentTime / audioEl.duration) * 100);
+      }
+    }
+  };
+
+  const manejarMetadatosAudio = (e) => {
+    if (e.target.duration && e.target.duration !== Infinity) {
+      setDuracionAudio(e.target.duration);
+    }
+  };
+
+  const manejarFinAudio = () => {
+    setReproduciendo(false);
+    setProgresoAudio(0);
+    setTiempoActual(0);
+  };
+
+  const alternarVelocidad = () => {
+    const audioEl = reproductorAudioRef.current;
+    if (!audioEl) return;
+    
+    let nuevaVelocidad = 1;
+    if (velocidadAudio === 1) nuevaVelocidad = 1.5;
+    else if (velocidadAudio === 1.5) nuevaVelocidad = 2;
+    else nuevaVelocidad = 1;
+    
+    setVelocidadAudio(nuevaVelocidad);
+    audioEl.playbackRate = nuevaVelocidad;
+  };
+
+  const manejarClickBarraProgreso = (e) => {
+    const audioEl = reproductorAudioRef.current;
+    if (!audioEl || !audioEl.duration || audioEl.duration === Infinity) return;
+    
+    const barra = e.currentTarget;
+    const rect = barra.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const width = rect.width;
+    const porcentaje = clickX / width;
+    
+    audioEl.currentTime = porcentaje * audioEl.duration;
+    setProgresoAudio(porcentaje * 100);
+    setTiempoActual(audioEl.currentTime);
+  };
+
+
+  // Manejadores de grabación de audio
+  const iniciarGrabacion = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      trozosAudioRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          trozosAudioRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blobAudio = new Blob(trozosAudioRef.current, { type: 'audio/webm' });
+        const file = new File([blobAudio], 'grabacion.webm', { type: 'audio/webm' });
+        setArchivoAudio(file);
+        setAudio(URL.createObjectURL(blobAudio));
+      };
+
+      mediaRecorder.start();
+      setEstaGrabando(true);
+    } catch (err) {
+      console.error("Error al acceder al micrófono:", err);
+      alert("No se pudo acceder al micrófono. Por favor, revisa los permisos.");
+    }
+  };
+
+  const detenerGrabacion = () => {
+    if (mediaRecorderRef.current && estaGrabando) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setEstaGrabando(false);
+    }
+  };
+
+  const manejarAudioClick = () => {
+    if (estaGrabando) {
+      detenerGrabacion();
+    } else {
+      iniciarGrabacion();
+    }
+  };
+
+  const eliminarImagen = (e) => {
+    e.stopPropagation();
+    setImagen(null);
+    setArchivoImagen(null);
+  };
+
+  const eliminarAudio = (e) => {
+    e.stopPropagation();
+    setAudio(null);
+    setArchivoAudio(null);
+  };
 
   const humores = [
     { id: 1, imagen: moodFatal, color: '#EF4444', label: 'Fatal' },
@@ -88,23 +286,24 @@ export function PaginaDiario() {
     <div className="h-screen bg-neutral-100 flex font-['Inter'] overflow-hidden">
       
       {/* --- SIDEBAR LATERAL --- */}
-      <aside className="w-20 h-screen bg-white/30 backdrop-blur-md border-r border-white/50 flex flex-col items-center py-8 z-30 shrink-0">
+      <aside className="w-28 h-screen bg-white/40 backdrop-blur-md border-r border-white/60 flex flex-col items-center py-8 z-30 shrink-0">
         <div 
-          className="mb-12 w-12 h-12 rounded-full p-[2px] shadow-lg"
+          className="mb-12 w-16 h-16 rounded-full p-[3px] shadow-xl"
           style={{ background: 'linear-gradient(135deg, #4F99CC 0%, #C6A55E 100%)' }}
         >
-          <div className="w-full h-full bg-white rounded-full overflow-hidden flex items-center justify-center">
-            <img src={logoImproveMe} alt="Logo" className="w-full h-full object-cover" />
+          <div className="w-full h-full bg-white rounded-full overflow-hidden flex items-center justify-center p-1">
+            <img src={logoImproveMe} alt="Logo" className="w-full h-full object-contain" />
           </div>
         </div>
-        <SidebarIcon name="📝" active />
-        <SidebarIcon name="🎭" />
-        <SidebarIcon name="📊" />
-        <SidebarIcon name="📅" />
-        <SidebarIcon name="🏆" />
-        <SidebarIcon name="🧘" />
+        <SidebarIcon Icon={PenLine} active />
+        <SidebarIcon Icon={Library} />
+        <SidebarIcon Icon={BarChart2} />
+        <SidebarIcon Icon={ListTodo} />
+        <SidebarIcon Icon={Trophy} />
+        <SidebarIcon Icon={Calendar} />
+        <SidebarIcon Icon={Flower2} />
         <div className="mt-auto">
-          <SidebarIcon name="👤" />
+          <SidebarIcon Icon={User} />
         </div>
       </aside>
 
@@ -129,8 +328,8 @@ export function PaginaDiario() {
             
             {/* Título y Fecha */}
             <div>
-              <h2 className="text-xl font-['Tilt_Warp'] text-gray-800">Entrada del día {fecha.split('de')[0]}</h2>
-              <p className="text-sm text-gray-500">¿Cómo te sientes hoy?</p>
+              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 tracking-tight">Entrada del {fecha}</h2>
+              <p className="text-md text-gray-500 mt-1">¿Cómo te sientes hoy?</p>
             </div>
 
             {/* Selector de Humor (Imágenes más grandes y sin punto) */}
@@ -156,35 +355,38 @@ export function PaginaDiario() {
             {/* Área de Texto */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-gray-400 ml-4 uppercase tracking-widest">Tu Diario</label>
-              <textarea
-                value={texto}
-                onChange={(e) => setTexto(e.target.value)}
-                placeholder="Escribe aquí tus pensamientos..."
-                className="w-full h-64 bg-white/80 backdrop-blur-sm rounded-[40px] p-8 shadow-inner border-2 border-white focus:border-[#4F99CC] outline-none transition-all resize-none text-gray-700 leading-relaxed"
-              ></textarea>
+              <div className="w-full h-96 bg-white/80 backdrop-blur-sm rounded-[40px] shadow-inner border-2 border-white focus-within:border-[#4F99CC] transition-all py-6 px-4">
+                <textarea
+                  value={texto}
+                  onChange={(e) => setTexto(e.target.value)}
+                  placeholder="Escribe aquí tus pensamientos..."
+                  className="w-full h-full bg-transparent outline-none resize-none text-gray-700 leading-relaxed custom-scrollbar overflow-y-auto pr-4"
+                ></textarea>
+              </div>
             </div>
 
             {/* Slider de Sueño (Custom) */}
             <div className="space-y-4 px-4">
               <div className="flex justify-between items-end">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Calidad del Sueño</label>
-                <span className="text-[#4F99CC] font-bold">{Math.round(sueno / 10)} horas</span>
+                <span className="text-[#4F99CC] font-bold">{sueno >= 10 ? '10+' : sueno} horas</span>
               </div>
               <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-visible">
                 <div 
                   className="absolute h-full rounded-full bg-gradient-to-r from-[#4F99CC] to-[#A855F7]" 
-                  style={{ width: `${sueno}%` }}
+                  style={{ width: `${(sueno / 10) * 100}%` }}
                 ></div>
                 <input 
                   type="range" 
                   min="0" 
-                  max="100" 
+                  max="10" 
+                  step="0.5"
                   value={sueno} 
-                  onChange={(e) => setSueno(e.target.value)}
+                  onChange={(e) => setSueno(parseFloat(e.target.value))}
                   className="absolute -top-1 w-full h-4 opacity-0 cursor-pointer z-10"
                 />
                 <motion.div 
-                  animate={{ left: `${sueno}%` }}
+                  animate={{ left: `${(sueno / 10) * 100}%` }}
                   className="absolute top-1/2 -translate-y-1/2 -ml-3 w-6 h-6 bg-white rounded-full shadow-lg border-2 border-[#4F99CC] pointer-events-none"
                 />
               </div>
@@ -192,11 +394,50 @@ export function PaginaDiario() {
 
             {/* Botones de Acción */}
             <div className="flex gap-4">
-              <button className="flex-1 py-3 px-6 bg-white border border-gray-200 rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors">
-                <span>📷</span> Añadir Imagen
+              <input 
+                type="file" 
+                ref={inputImagenRef} 
+                onChange={manejarCambioImagen} 
+                accept="image/*" 
+                className="hidden" 
+              />
+              
+              <button 
+                onClick={() => inputImagenRef.current.click()}
+                className={`flex-1 relative py-3 px-6 bg-white border rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors ${imagen ? 'border-[#4F99CC] text-[#4F99CC]' : 'border-gray-200 text-gray-600'}`}
+              >
+                {imagen ? 'Imagen Lista' : 'Añadir Imagen'}
+                {imagen && (
+                  <motion.div 
+                    initial={{ scale: 0 }} animate={{ scale: 1 }}
+                    onClick={eliminarImagen}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600"
+                  >
+                    ✕
+                  </motion.div>
+                )}
               </button>
-              <button className="flex-1 py-3 px-6 bg-white border border-gray-200 rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors">
-                <span>🎤</span> Añadir Audio
+              
+              <button 
+                onClick={manejarAudioClick}
+                className={`flex-1 relative py-3 px-6 bg-white border rounded-full text-xs font-bold flex items-center justify-center gap-2 transition-colors ${
+                  estaGrabando 
+                    ? 'border-red-500 text-red-500 animate-pulse' 
+                    : audio 
+                      ? 'border-[#4F99CC] text-[#4F99CC] hover:bg-gray-50' 
+                      : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {estaGrabando ? 'Grabando...' : audio ? 'Audio Listo' : 'Grabar Audio'}
+                {audio && !estaGrabando && (
+                  <motion.div 
+                    initial={{ scale: 0 }} animate={{ scale: 1 }}
+                    onClick={eliminarAudio}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600"
+                  >
+                    ✕
+                  </motion.div>
+                )}
               </button>
             </div>
 
@@ -226,60 +467,168 @@ export function PaginaDiario() {
 
           {/* LADO DERECHO: PREVIEW (TARJETA) */}
           <div className="lg:col-span-5 flex items-center justify-center">
-            <div className="relative">
+            <div className="relative" style={{ perspective: 1200 }}>
               {/* Tarjeta de Preview con Borde Degradado */}
               <motion.div 
                 layout
-                className="w-80 h-[500px] rounded-[55px] shadow-2xl p-[3px] flex flex-col items-center justify-center text-center relative z-10 overflow-hidden"
-                style={{ background: 'linear-gradient(180deg, #4F99CC 0%, #C6A55E 100%)' }}
+                onMouseMove={manejarMouseMoveTarjeta}
+                onMouseLeave={manejarMouseLeaveTarjeta}
+                className="w-[420px] h-[600px] rounded-[55px] shadow-2xl p-[3px] flex flex-col items-center justify-center text-center relative z-10 cursor-default"
+                style={{ 
+                  background: 'linear-gradient(180deg, #4F99CC 0%, #C6A55E 100%)',
+                  rotateX,
+                  rotateY,
+                  transformStyle: "preserve-3d",
+                  willChange: "transform",
+                  backfaceVisibility: "hidden"
+                }}
               >
                 <div className="w-full h-full bg-white rounded-[52px] relative overflow-hidden">
                   {/* Degradado sutil de fondo en la tarjeta */}
                   <div className="absolute inset-0 bg-gradient-to-b from-white to-[#4F99CC]/5 pointer-events-none"></div>
                   
-                  {/* Contenedor con Scroll desplazado del borde */}
-                  <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-10 flex flex-col items-center">
-                    <div className="mb-4 relative z-10">
+                  {/* Contenedor SIN scroll general, solo en el texto */}
+                  <div className="absolute inset-0 p-8 flex flex-col items-center">
+                    <div className="mb-2 relative z-10 shrink-0">
                       <p className="text-xs font-black text-[#4F99CC] uppercase tracking-[0.2em]">{fecha}</p>
                       <div className="w-12 h-0.5 bg-[#4F99CC]/30 mx-auto mt-1 rounded-full"></div>
                     </div>
 
                     {/* Indicador de Sueño en la Tarjeta */}
-                    <div className="mb-6 flex items-center gap-2 bg-[#4F99CC]/10 px-4 py-1.5 rounded-full border border-[#4F99CC]/20">
-                      <span className="text-xs font-bold text-[#4F99CC]">{Math.round(sueno / 10)}h de sueño</span>
+                    <div className="mb-4 flex items-center gap-2 bg-[#4F99CC]/10 px-4 py-1.5 rounded-full border border-[#4F99CC]/20 shrink-0">
+                      <span className="text-xs font-bold text-[#4F99CC]">{sueno >= 10 ? '10+' : sueno}h de sueño</span>
                     </div>
 
-                    <div className="flex-1 flex items-center justify-center mb-8">
-                       <p className="text-xl font-['Tilt_Warp'] text-gray-800 leading-tight">
+                    {/* Vista previa de Imagen */}
+                    {imagen && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        onClick={() => setImagenExpandida(true)}
+                        className="mb-4 w-full rounded-2xl overflow-hidden shadow-sm border border-[#4F99CC]/20 cursor-pointer hover:opacity-90 transition-opacity shrink-0 flex justify-center"
+                      >
+                        <img src={imagen} alt="Adjunto" className="w-full h-auto object-cover max-h-32" />
+                      </motion.div>
+                    )}
+
+                    {/* Vista previa de Audio (Reproductor Custom) */}
+                    {audio && (
+                      <div className="mb-4 w-full flex items-center justify-center shrink-0">
+                        <div className="flex items-center gap-3 bg-[#4F99CC]/10 border border-[#4F99CC]/20 px-4 py-2 rounded-full w-full max-w-[280px]">
+                          <button 
+                            onClick={toggleReproduccion} 
+                            className="w-10 h-10 rounded-full bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] text-white flex items-center justify-center shrink-0 shadow-md hover:scale-105 transition-transform"
+                          >
+                            {reproduciendo ? '⏸' : '▶'}
+                          </button>
+                          
+                          <div className="flex-1 flex flex-col justify-center px-1">
+                            <div 
+                              className="h-2 bg-white/60 rounded-full overflow-hidden cursor-pointer w-full relative"
+                              onClick={manejarClickBarraProgreso}
+                            >
+                              <div className="absolute top-0 left-0 h-full bg-[#4F99CC] transition-all duration-100 pointer-events-none" style={{ width: `${progresoAudio}%` }}></div>
+                            </div>
+                            <div className="flex justify-between mt-1 text-[10px] font-bold text-[#4F99CC]">
+                              <span>{formatearTiempo(tiempoActual)}</span>
+                              <span>{duracionAudio > 0 ? formatearTiempo(duracionAudio) : ''}</span>
+                            </div>
+                          </div>
+                          
+                          <button 
+                            onClick={alternarVelocidad}
+                            className="text-xs font-bold bg-white text-[#4F99CC] px-2 py-1 rounded-full shadow-sm hover:bg-gray-50 border border-[#4F99CC]/20 shrink-0 min-w-[36px] text-center"
+                          >
+                            {velocidadAudio}x
+                          </button>
+
+                          <audio 
+                            ref={reproductorAudioRef} 
+                            src={audio} 
+                            onTimeUpdate={actualizarProgreso}
+                            onLoadedMetadata={manejarMetadatosAudio}
+                            onEnded={manejarFinAudio} 
+                            className="hidden" 
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Contenedor de Texto con Scroll Independiente */}
+                    <div className="flex-1 w-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-start py-2" style={{ transform: "translateZ(0)" }}>
+                       <p className="text-lg font-['Tilt_Warp'] text-gray-800 leading-tight text-center w-full break-words">
                         {texto || "Aquí se muestra cómo queda la entrada..."}
                        </p>
                     </div>
 
                     {/* Decoración inferior de la tarjeta */}
-                    <div className="w-20 h-1 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] rounded-full shrink-0"></div>
+                    <div className="w-20 h-1 mt-4 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] rounded-full shrink-0"></div>
                   </div>
                 </div>
-            </motion.div>
 
-              {/* Icono Flotante de Humor (Contenido en círculo con color dinámico) */}
-              <motion.div 
-                key={humor}
-                initial={{ scale: 0, rotate: -15 }}
-                animate={{ scale: 1, rotate: 0 }}
-                className="absolute -top-10 -left-10 w-28 h-28 bg-white rounded-full shadow-2xl border-4 flex items-center justify-center overflow-hidden z-20"
-                style={{ borderColor: humores.find(h => h.id === humor)?.color || '#4F99CC' }}
-              >
-                <img 
-                  src={humores.find(h => h.id === humor)?.imagen} 
-                  alt="Humor" 
-                  className="w-full h-full object-cover" 
-                />
+                {/* Icono Flotante de Humor (Movido dentro para seguir el movimiento de la tarjeta) */}
+                <motion.div 
+                  key={humor}
+                  initial={{ scale: 0, rotate: -15 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  className="absolute -top-10 -left-10 w-32 h-32 bg-white rounded-full shadow-2xl border-4 flex items-center justify-center overflow-hidden z-20"
+                  style={{ 
+                    borderColor: humores.find(h => h.id === humor)?.color || '#4F99CC',
+                    transform: "translateZ(60px)", // Pop-out effect
+                    transformStyle: "preserve-3d",
+                    backfaceVisibility: "hidden"
+                  }}
+                >
+                  <img 
+                    src={humores.find(h => h.id === humor)?.imagen} 
+                    alt="Humor" 
+                    className="w-full h-full object-cover" 
+                  />
+                </motion.div>
               </motion.div>
             </div>
           </div>
 
         </div>
       </main>
+
+      {/* MODAL DE IMAGEN EXPANDIDA */}
+      <AnimatePresence>
+        {imagenExpandida && imagen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setImagenExpandida(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-4xl w-full"
+            >
+              {/* Contenedor con borde degradado ImproveMe */}
+              <div 
+                className="p-2 rounded-[32px] shadow-2xl"
+                style={{ background: 'linear-gradient(135deg, #4F99CC 0%, #C6A55E 100%)' }}
+              >
+                <div className="bg-white rounded-[24px] overflow-hidden relative">
+                  {/* Botón de cerrar */}
+                  <button 
+                    onClick={() => setImagenExpandida(false)}
+                    className="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/80 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-colors z-10"
+                  >
+                    ✕
+                  </button>
+                  <img src={imagen} alt="Imagen expandida" className="w-full h-auto max-h-[85vh] object-contain" />
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
