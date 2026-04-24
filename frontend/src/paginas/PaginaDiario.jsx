@@ -72,33 +72,71 @@ export function PaginaDiario() {
     mouseY.set(0);
   };
 
-  // Cargar datos si ya existen para hoy
+  // Cargar datos si ya existen para hoy (priorizando borrador local si es más reciente o existe)
   useEffect(() => {
     async function cargarEntrada() {
-      if (usuario?.id) {
-        try {
-          const entrada = await obtenerEntradaHoy(usuario.id);
-          if (entrada) {
-            setHumor(entrada.puntuacion_animo || 3);
-            setSueno(entrada.horas_sueno ? parseFloat(entrada.horas_sueno) : 8);
-            setTexto(entrada.contenido_texto || '');
+      if (!usuario?.id) return;
 
-            // Cargar archivos multimedia si existen
-            if (entrada.archivos_multimedia) {
-              entrada.archivos_multimedia.forEach(archivo => {
-                const urlCompleta = `http://localhost:3000${archivo.url_archivo}`;
-                if (archivo.tipo_archivo === 'imagen') setImagen(urlCompleta);
-                if (archivo.tipo_archivo === 'audio') setAudio(urlCompleta);
-              });
-            }
-          }
-        } catch (error) {
-          console.error("Error al cargar entrada:", error);
+      const borradorKey = `diario_borrador_${usuario.id}_${new Date().toDateString()}`;
+      const borradorGuardado = localStorage.getItem(borradorKey);
+      let datosParaCargar = null;
+
+      try {
+        // 1. Intentar cargar de la API
+        const entradaAPI = await obtenerEntradaHoy(usuario.id);
+        if (entradaAPI) {
+          datosParaCargar = {
+            humor: entradaAPI.puntuacion_animo || 3,
+            sueno: entradaAPI.horas_sueno ? parseFloat(entradaAPI.horas_sueno) : 8,
+            texto: entradaAPI.contenido_texto || '',
+            archivos: entradaAPI.archivos_multimedia || []
+          };
         }
+
+        // 2. Si hay un borrador local, podríamos preguntar o simplemente fusionar.
+        // Para esta mejora, vamos a cargar el borrador si existe, ya que el usuario
+        // quiere que "no se pierda lo que ha escrito" entre pestañas.
+        if (borradorGuardado) {
+          const borrador = JSON.parse(borradorGuardado);
+          datosParaCargar = {
+            ...datosParaCargar,
+            ...borrador
+          };
+        }
+
+        // 3. Aplicar los datos al estado
+        if (datosParaCargar) {
+          setHumor(datosParaCargar.humor);
+          setSueno(datosParaCargar.sueno);
+          setTexto(datosParaCargar.texto);
+
+          if (datosParaCargar.archivos) {
+            datosParaCargar.archivos.forEach(archivo => {
+              const urlCompleta = `http://localhost:3000${archivo.url_archivo}`;
+              if (archivo.tipo_archivo === 'imagen') setImagen(urlCompleta);
+              if (archivo.tipo_archivo === 'audio') setAudio(urlCompleta);
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error al cargar entrada:", error);
       }
     }
     cargarEntrada();
   }, [usuario]);
+
+  // Guardar borrador automáticamente cuando cambian los campos clave
+  useEffect(() => {
+    if (!usuario?.id) return;
+
+    const borradorKey = `diario_borrador_${usuario.id}_${new Date().toDateString()}`;
+    const datosBorrador = { humor, sueno, texto };
+    
+    // Solo guardamos si hay algo que valga la pena guardar (para no ensuciar localStorage)
+    if (texto.trim() !== '' || humor !== 3 || sueno !== 8) {
+      localStorage.setItem(borradorKey, JSON.stringify(datosBorrador));
+    }
+  }, [humor, sueno, texto, usuario]);
 
   async function manejarGuardar() {
     if (!usuario?.id) return;
@@ -121,6 +159,10 @@ export function PaginaDiario() {
       if (!audio) formData.append('borrar_audio', 'true');
 
       await guardarEntradaDiaria(formData);
+
+      // Limpiar borrador al guardar con éxito en el servidor
+      const borradorKey = `diario_borrador_${usuario.id}_${new Date().toDateString()}`;
+      localStorage.removeItem(borradorKey);
 
       setMensajeStatus({ texto: '¡Entrada guardada con éxito!', tipo: 'exito' });
       setArchivoImagen(null);
