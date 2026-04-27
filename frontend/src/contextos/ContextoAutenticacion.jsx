@@ -133,6 +133,35 @@ export function ProveedorAutenticacion({ children }) {
         localStorage.removeItem('usuarioAutenticacion');
     }
 
+    async function actualizarUsuario(nuevosDatos) {
+        // Actualización optimista local
+        const usuarioActualizado = { ...usuario, ...nuevosDatos };
+        setUsuario(usuarioActualizado);
+        localStorage.setItem('usuarioAutenticacion', JSON.stringify(usuarioActualizado));
+
+        // Actualizamos en backend si tenemos token
+        if (token) {
+            try {
+                await servicioAPI.actualizarPerfil(nuevosDatos, token);
+            } catch (err) {
+                console.error("Error al guardar perfil en el backend:", err);
+            }
+        }
+    }
+
+    async function refrescarUsuario() {
+        if (!token) return;
+        try {
+            const response = await servicioAPI.obtenerPerfilUsuario(token);
+            if (response.usuario) {
+                setUsuario(response.usuario);
+                localStorage.setItem('usuarioAutenticacion', JSON.stringify(response.usuario));
+            }
+        } catch (err) {
+            console.error("Error al refrescar perfil:", err);
+        }
+    }
+
     // Valor que pasamos a todos los componentes
     const valor = {
         usuario,
@@ -143,6 +172,8 @@ export function ProveedorAutenticacion({ children }) {
         login,
         logout,
         limpiarAutenticacion,
+        actualizarUsuario,
+        refrescarUsuario,
         estaAutenticado: !!usuario && !!token,
     };
 

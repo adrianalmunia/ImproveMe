@@ -52,7 +52,7 @@ export function LayoutPrincipal({ children, vistaActual, setVistaActual }) {
         />
         <SidebarIcon Icon={BarChart2} label="Estadísticas" active={vistaActual === 'estadisticas'} onClick={() => setVistaActual('estadisticas')} />
         <SidebarIcon Icon={ListTodo} label="Hábitos" active={vistaActual === 'habitos'} onClick={() => setVistaActual('habitos')} />
-        <SidebarIcon Icon={Trophy} label="Ranked" active={vistaActual === 'logros'} onClick={() => setVistaActual('logros')} />
+        <SidebarIcon Icon={Trophy} label="Ranked" active={vistaActual === 'ranked'} onClick={() => setVistaActual('ranked')} />
         <SidebarIcon Icon={Calendar} label="Calendario" active={vistaActual === 'calendario'} onClick={() => setVistaActual('calendario')} />
         <SidebarIcon Icon={Flower2} label="Meditación" active={vistaActual === 'meditacion'} onClick={() => setVistaActual('meditacion')} />
         

@@ -107,6 +107,16 @@ export async function obtenerPerfilUsuario(token) {
     return realizarSolicitud('autenticacion/perfil', 'GET', null, token);
 }
 
+/**
+ * Actualiza el perfil del usuario autenticado (ej: puntos_experiencia)
+ * @param {object} datos - Datos a actualizar
+ * @param {string} token - Token JWT del usuario
+ * @returns {object} { usuario, mensaje }
+ */
+export async function actualizarPerfil(datos, token) {
+    return realizarSolicitud('autenticacion/perfil', 'PUT', datos, token);
+}
+
 // ============ FUNCIONES DE HÁBITOS ============
 // (Se irán añadiendo según se avance)
 
@@ -115,44 +125,25 @@ export async function obtenerPerfilUsuario(token) {
  * @param {string} token - Token JWT del usuario
  * @returns {object} { habitos, mensaje }
  */
-export async function obtenerHabitos(token) {
-    return realizarSolicitud('habitos', 'GET', null, token);
+// ============ FUNCIONES DE GAMIFICACIÓN (HÁBITOS, DIARIAS, TAREAS) ============
+
+/**
+ * Obtiene toda la información de gamificación del usuario
+ * @param {string} token - Token JWT del usuario
+ * @returns {object} { habitos, diarias, tareas }
+ */
+export async function obtenerGamificacion(token) {
+    return realizarSolicitud('tareas', 'GET', null, token);
 }
 
 /**
- * Crea un nuevo hábito
- * @param {object} datosHabito - { nombre, categoria, icono }
+ * Sincroniza toda la información de gamificación del usuario
+ * @param {object} datos - { habitos, diarias, tareas }
  * @param {string} token - Token JWT del usuario
- * @returns {object} { habito, mensaje }
+ * @returns {object} { habitos, diarias, tareas } (datos actualizados con nuevas IDs si las hay)
  */
-export async function crearHabito(datosHabito, token) {
-    return realizarSolicitud('habitos', 'POST', datosHabito, token);
-}
-
-/**
- * Actualiza un hábito existente
- * @param {number} idHabito - ID del hábito
- * @param {object} datosActualizacion - Cambios a realizar
- * @param {string} token - Token JWT del usuario
- * @returns {object} { habito, mensaje }
- */
-export async function actualizarHabito(idHabito, datosActualizacion, token) {
-    return realizarSolicitud(
-        `habitos/${idHabito}`,
-        'PUT',
-        datosActualizacion,
-        token
-    );
-}
-
-/**
- * Elimina un hábito
- * @param {number} idHabito - ID del hábito
- * @param {string} token - Token JWT del usuario
- * @returns {object} { mensaje }
- */
-export async function eliminarHabito(idHabito, token) {
-    return realizarSolicitud(`habitos/${idHabito}`, 'DELETE', null, token);
+export async function sincronizarGamificacion(datos, token) {
+    return realizarSolicitud('tareas/sincronizar', 'PUT', datos, token);
 }
 
 // ============ FUNCIONES DE DIARIO ============
@@ -160,22 +151,22 @@ export async function eliminarHabito(idHabito, token) {
 /**
  * Guarda o actualiza la entrada de diario de hoy (soporta FormData para archivos)
  */
-export async function guardarEntradaDiaria(datosEntrada) {
-    return realizarSolicitud('diario', 'POST', datosEntrada);
+export async function guardarEntradaDiaria(datosEntrada, token) {
+    return realizarSolicitud('diario', 'POST', datosEntrada, token);
 }
 
 /**
  * Obtiene la entrada de diario de hoy para un usuario
  */
-export async function obtenerEntradaHoy(usuarioId) {
-    return realizarSolicitud(`diario/hoy/${usuarioId}`, 'GET');
+export async function obtenerEntradaHoy(usuarioId, token) {
+    return realizarSolicitud(`diario/hoy/${usuarioId}`, 'GET', null, token);
 }
 
 /**
  * Obtiene las entradas de un mes específico para un usuario
  */
-export async function obtenerEntradasPorMes(usuarioId, mes, anio) {
-    return realizarSolicitud(`diario/mes/${usuarioId}?mes=${mes}&anio=${anio}`, 'GET');
+export async function obtenerEntradasPorMes(usuarioId, mes, anio, token) {
+    return realizarSolicitud(`diario/mes/${usuarioId}?mes=${mes}&anio=${anio}`, 'GET', null, token);
 }
 
 // ============ FUNCIONES DE MEDITACIÓN ============
@@ -184,35 +175,36 @@ export async function obtenerEntradasPorMes(usuarioId, mes, anio) {
  * Registra una sesión de meditación completada
  * @param {object} datosSesion - { usuario_id, duracion_segundos, segundos_completados, tecnica_respiracion, pista_musica }
  */
-export async function registrarSesionMeditacion(datosSesion) {
-    return realizarSolicitud('meditacion', 'POST', datosSesion);
+export async function registrarSesionMeditacion(datosSesion, token) {
+    return realizarSolicitud('meditacion', 'POST', datosSesion, token);
 }
 
 /**
  * Obtiene el historial de sesiones de meditación de un usuario
  * @param {number} usuarioId - ID del usuario
+ * @param {string} token - Token JWT
  * @param {number} limite - Número máximo de sesiones a devolver (default 30)
  */
-export async function obtenerHistorialMeditacion(usuarioId, limite = 30) {
-    return realizarSolicitud(`meditacion/historial/${usuarioId}?limite=${limite}`, 'GET');
+export async function obtenerHistorialMeditacion(usuarioId, token, limite = 30) {
+    return realizarSolicitud(`meditacion/historial/${usuarioId}?limite=${limite}`, 'GET', null, token);
 }
 
 /**
  * Obtiene estadísticas resumen de meditación de un usuario
  * @param {number} usuarioId - ID del usuario
+ * @param {string} token - Token JWT
  */
-export async function obtenerEstadisticasMeditacion(usuarioId) {
-    return realizarSolicitud(`meditacion/estadisticas/${usuarioId}`, 'GET');
+export async function obtenerEstadisticasMeditacion(usuarioId, token) {
+    return realizarSolicitud(`meditacion/estadisticas/${usuarioId}`, 'GET', null, token);
 }
 
 export default {
     registrarUsuario,
     iniciarSesion,
     obtenerPerfilUsuario,
-    obtenerHabitos,
-    crearHabito,
-    actualizarHabito,
-    eliminarHabito,
+    actualizarPerfil,
+    obtenerGamificacion,
+    sincronizarGamificacion,
     guardarEntradaDiaria,
     obtenerEntradaHoy,
     obtenerEntradasPorMes,

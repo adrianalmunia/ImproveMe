@@ -167,8 +167,31 @@ async function obtenerPerfilUsuario(idUsuario) {
     return usuario;
 }
 
+async function actualizarPerfilUsuario(idUsuario, datos) {
+    const usuarioActualizado = await prisma.usuarios.update({
+        where: { id: idUsuario },
+        data: {
+            puntos_experiencia: datos.puntos_experiencia !== undefined ? datos.puntos_experiencia : undefined
+        },
+        select: {
+            id: true,
+            nombre_usuario: true,
+            correo: true,
+            puntos_experiencia: true,
+            fecha_registro: true
+        }
+    });
+
+    if (!usuarioActualizado) {
+        throw new Error('No se pudo actualizar el usuario');
+    }
+
+    return usuarioActualizado;
+}
+
 module.exports = {
     registrarUsuario,
     iniciarSesion,
-    obtenerPerfilUsuario
+    obtenerPerfilUsuario,
+    actualizarPerfilUsuario
 };

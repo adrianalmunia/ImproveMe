@@ -8,6 +8,8 @@ import PaginaDiario from './paginas/PaginaDiario';
 import PaginaRegistros from './paginas/PaginaRegistros';
 import PaginaUsuario from './paginas/PaginaUsuario';
 import PaginaMeditacion from './paginas/PaginaMeditacion';
+import PaginaHabitos from './paginas/PaginaHabitos';
+import PaginaRanked from './paginas/PaginaRanked';
 import LayoutPrincipal from './componentes/LayoutPrincipal';
 import { motion } from 'framer-motion';
 
@@ -28,7 +30,9 @@ function ContenidoApp() {
         {vistaActual === 'registros' && <PaginaRegistros />}
         {vistaActual === 'perfil' && <PaginaUsuario />}
         {vistaActual === 'meditacion' && <PaginaMeditacion />}
-        {vistaActual !== 'diario' && vistaActual !== 'registros' && vistaActual !== 'perfil' && vistaActual !== 'meditacion' && (
+        {vistaActual === 'habitos' && <PaginaHabitos />}
+        {vistaActual === 'ranked' && <PaginaRanked />}
+        {vistaActual !== 'diario' && vistaActual !== 'registros' && vistaActual !== 'perfil' && vistaActual !== 'meditacion' && vistaActual !== 'habitos' && vistaActual !== 'ranked' && (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-xl text-gray-400 font-['Tilt_Warp']">Vista en construcción: {vistaActual}</p>
           </div>
@@ -41,7 +45,7 @@ function ContenidoApp() {
   // IMPORTANTE: Quitamos el 'if (estaCargando)' de aquí arriba para que 
   // el componente Autenticacion no se desmonte al registrarse.
   return (
-    <Autenticacion 
+    <Autenticacion
       onAccesoExitoso={(u) => {
         console.log("Acceso exitoso:", u);
       }}

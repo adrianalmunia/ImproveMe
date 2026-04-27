@@ -7,7 +7,8 @@
 const {
     registrarUsuario,
     iniciarSesion,
-    obtenerPerfilUsuario
+    obtenerPerfilUsuario,
+    actualizarPerfilUsuario
 } = require('../servicios/servicioAutenticacion');
 
 /**
@@ -89,8 +90,33 @@ async function controlarObtenerPerfil(req, res) {
     }
 }
 
+/**
+ * Controlador: Actualizar perfil del usuario autenticado
+ * PUT /api/autenticacion/perfil
+ */
+async function controlarActualizarPerfil(req, res) {
+    try {
+        const idUsuario = req.usuarioId;
+        const datos = req.body;
+
+        const usuarioActualizado = await actualizarPerfilUsuario(idUsuario, datos);
+
+        return res.status(200).json({
+            usuario: usuarioActualizado,
+            mensaje: 'Perfil actualizado correctamente'
+        });
+    } catch (error) {
+        console.error('Error al actualizar perfil:', error.message);
+        return res.status(400).json({
+            error: 'No se pudo actualizar',
+            mensaje: error.message
+        });
+    }
+}
+
 module.exports = {
     controlarRegistro,
     controlarLogin,
-    controlarObtenerPerfil
+    controlarObtenerPerfil,
+    controlarActualizarPerfil
 };

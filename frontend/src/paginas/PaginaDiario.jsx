@@ -19,7 +19,7 @@ import moodGenial from '../assets/estados_animo/genial.png';
 
 
 export function PaginaDiario() {
-  const { usuario } = useAutenticacion();
+  const { usuario, token, actualizarUsuario } = useAutenticacion();
   const [humor, setHumor] = useState(3); // 1-5
   const [sueno, setSueno] = useState(8); // Horas de sueño (0-16)
   const [texto, setTexto] = useState('');
@@ -34,6 +34,9 @@ export function PaginaDiario() {
   // Estados para nuevas funcionalidades
   const [estaGrabando, setEstaGrabando] = useState(false);
   const [imagenExpandida, setImagenExpandida] = useState(false);
+  
+  // Estado para animaciones de XP flotante
+  const [notificacionesXP, setNotificacionesXP] = useState([]);
 
   // Refs
   const inputImagenRef = useRef(null);
@@ -83,7 +86,7 @@ export function PaginaDiario() {
 
       try {
         // 1. Intentar cargar de la API
-        const entradaAPI = await obtenerEntradaHoy(usuario.id);
+        const entradaAPI = await obtenerEntradaHoy(usuario.id, token);
         if (entradaAPI) {
           datosParaCargar = {
             humor: entradaAPI.puntuacion_animo || 3,
@@ -138,8 +141,16 @@ export function PaginaDiario() {
     }
   }, [humor, sueno, texto, usuario]);
 
-  async function manejarGuardar() {
+  async function manejarGuardar(e) {
     if (!usuario?.id) return;
+
+    // Guardar coordenadas para la animación de XP
+    let clientX = window.innerWidth / 2;
+    let clientY = window.innerHeight / 2;
+    if (e && e.clientX) {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
 
     setEstaGuardando(true);
     setMensajeStatus({ texto: '', tipo: '' });
@@ -157,8 +168,8 @@ export function PaginaDiario() {
       // Enviar señales de borrado si el usuario eliminó el archivo en la UI
       if (!imagen) formData.append('borrar_imagen', 'true');
       if (!audio) formData.append('borrar_audio', 'true');
-
-      await guardarEntradaDiaria(formData);
+      
+      await guardarEntradaDiaria(formData, token);
 
       // Limpiar borrador al guardar con éxito en el servidor
       const borradorKey = `diario_borrador_${usuario.id}_${new Date().toDateString()}`;
@@ -169,6 +180,17 @@ export function PaginaDiario() {
       setArchivoAudio(null);
       // Limpiar mensaje tras 3 segundos
       setTimeout(() => setMensajeStatus({ texto: '', tipo: '' }), 3000);
+
+      // GANAR XP
+      const xpGanada = 50;
+      actualizarUsuario({ puntos_experiencia: (usuario.puntos_experiencia || 0) + xpGanada });
+      
+      const idNotif = Date.now();
+      setNotificacionesXP(prev => [...prev, { id: idNotif, x: clientX, y: clientY - 50, cantidad: xpGanada }]);
+      setTimeout(() => {
+        setNotificacionesXP(prev => prev.filter(n => n.id !== idNotif));
+      }, 1500);
+
     } catch (error) {
       setMensajeStatus({ texto: 'Error al guardar la entrada', tipo: 'error' });
     } finally {
@@ -642,6 +664,23 @@ export function PaginaDiario() {
             </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Animaciones de XP Flotante */}
+      <AnimatePresence>
+        {notificacionesXP.map(notif => (
+          <motion.div
+            key={notif.id}
+            initial={{ opacity: 0, y: notif.y, x: notif.x, scale: 0.5 }}
+            animate={{ opacity: 1, y: notif.y - 100, scale: 1.5 }}
+            exit={{ opacity: 0, scale: 0 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className={`fixed z-50 font-black text-3xl drop-shadow-[0_5px_15px_rgba(250,204,21,0.6)] text-yellow-400`}
+            style={{ pointerEvents: 'none' }}
+          >
+            +{notif.cantidad} XP
+          </motion.div>
+        ))}
       </AnimatePresence>
     </>
   );

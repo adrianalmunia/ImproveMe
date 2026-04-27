@@ -10,7 +10,8 @@ const { verificarAutenticacion } = require('../middleware/autenticacion');
 const {
     controlarRegistro,
     controlarLogin,
-    controlarObtenerPerfil
+    controlarObtenerPerfil,
+    controlarActualizarPerfil
 } = require('../controladores/controladorAutenticacion');
 
 // ============ RUTAS PÚBLICAS (no requieren autenticación) ============
@@ -35,5 +36,12 @@ router.post('/login', controlarLogin);
  * Requiere: Authorization: Bearer {token}
  */
 router.get('/perfil', verificarAutenticacion, controlarObtenerPerfil);
+
+/**
+ * PUT /api/autenticacion/perfil
+ * Actualiza el perfil del usuario autenticado (ej: puntos de experiencia)
+ * Requiere: Authorization: Bearer {token}
+ */
+router.put('/perfil', verificarAutenticacion, controlarActualizarPerfil);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 // ================================================================================
+// SERVIDOR PRINCIPAL - ImproveMe (Restarted)
 // SERVIDOR PRINCIPAL - ImproveMe
 // ================================================================================
 // Este archivo es el punto de entrada de la aplicación backend.
@@ -12,6 +13,7 @@ const prisma = require('./configuracion/baseDatos');
 const rutasAutenticacion = require('./rutas/rutasAutenticacion');
 const rutasDiario = require('./rutas/rutasDiario');
 const rutasMeditacion = require('./rutas/rutasMeditacion');
+const rutasTareas = require('./rutas/rutasTareas');
 
 // ============ CONFIGURACIÓN BÁSICA ============
 const app = express();
@@ -75,6 +77,9 @@ app.use('/api/diario', rutasDiario);
 
 // Rutas de meditación
 app.use('/api/meditacion', rutasMeditacion);
+
+// Rutas de tareas y gamificacion
+app.use('/api/tareas', rutasTareas);
 
 // ============ MANEJO DE ERRORES 404 ============
 // Si ninguna ruta anterior coincide, devolvemos 404
