@@ -178,6 +178,33 @@ export async function obtenerEntradasPorMes(usuarioId, mes, anio) {
     return realizarSolicitud(`diario/mes/${usuarioId}?mes=${mes}&anio=${anio}`, 'GET');
 }
 
+// ============ FUNCIONES DE MEDITACIÓN ============
+
+/**
+ * Registra una sesión de meditación completada
+ * @param {object} datosSesion - { usuario_id, duracion_segundos, segundos_completados, tecnica_respiracion, pista_musica }
+ */
+export async function registrarSesionMeditacion(datosSesion) {
+    return realizarSolicitud('meditacion', 'POST', datosSesion);
+}
+
+/**
+ * Obtiene el historial de sesiones de meditación de un usuario
+ * @param {number} usuarioId - ID del usuario
+ * @param {number} limite - Número máximo de sesiones a devolver (default 30)
+ */
+export async function obtenerHistorialMeditacion(usuarioId, limite = 30) {
+    return realizarSolicitud(`meditacion/historial/${usuarioId}?limite=${limite}`, 'GET');
+}
+
+/**
+ * Obtiene estadísticas resumen de meditación de un usuario
+ * @param {number} usuarioId - ID del usuario
+ */
+export async function obtenerEstadisticasMeditacion(usuarioId) {
+    return realizarSolicitud(`meditacion/estadisticas/${usuarioId}`, 'GET');
+}
+
 export default {
     registrarUsuario,
     iniciarSesion,
@@ -189,4 +216,7 @@ export default {
     guardarEntradaDiaria,
     obtenerEntradaHoy,
     obtenerEntradasPorMes,
+    registrarSesionMeditacion,
+    obtenerHistorialMeditacion,
+    obtenerEstadisticasMeditacion,
 };

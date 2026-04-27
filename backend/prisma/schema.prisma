@@ -21,9 +21,10 @@ model usuarios {
   puntos_experiencia Int?             @default(0) // Puntos acumulados para el sistema de rangos
   fecha_registro   DateTime?          @default(now()) @db.Timestamp(6)
   
-  // Relaciones: Un usuario tiene sus propios hábitos y entradas de diario
-  entradas_diario  entradas_diario[]
-  habitos          habitos[]
+  // Relaciones: Un usuario tiene sus propios hábitos, entradas de diario y sesiones de meditación
+  entradas_diario      entradas_diario[]
+  habitos              habitos[]
+  sesiones_meditacion  sesiones_meditacion[]
 }
 
 // Tabla para el seguimiento emocional y notas del día a día
@@ -85,4 +86,17 @@ model multimedia {
   tipo_archivo    String?          @db.VarChar(10) // Ejemplo: jpg, png, mp4
   url_archivo     String           // Dirección donde está guardado el archivo
   entrada_diario  entradas_diario? @relation(fields: [entrada_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+// Tabla para registrar las sesiones de meditación completadas por el usuario
+model sesiones_meditacion {
+  id                    Int      @id @default(autoincrement())
+  usuario_id            Int
+  duracion_segundos     Int      // Duración total configurada de la sesión (en segundos)
+  segundos_completados  Int      // Segundos realmente meditados antes de finalizar
+  tecnica_respiracion   String   @db.VarChar(50) // Ejemplo: 'equilibrio', 'cuadrada', 'relajacion'
+  pista_musica          String?  @db.VarChar(50) // Pista de música ambiental usada (null si no se usó)
+  fecha                 DateTime @default(now()) @db.Timestamp(6) // Momento exacto en que finalizó la sesión
+
+  usuario               usuarios @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }

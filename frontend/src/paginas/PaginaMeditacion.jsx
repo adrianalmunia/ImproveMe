@@ -1,21 +1,60 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, X, Flower2, Timer, CheckCircle2, ChevronUp, ChevronDown, Settings, Bell, Music, ChevronRight, CloudRain, Moon, Volume2 } from 'lucide-react';
+import { Play, Pause, X, Flower2, Timer, CheckCircle2, ChevronUp, ChevronDown, Settings, Bell, Music, ChevronRight, CloudRain, Moon, Volume2, Trees, Waves } from 'lucide-react';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import { registrarSesionMeditacion } from '../servicios/servicioAPI';
 
 // Audio imports
 import gongInicioFinal from '../assets/audio/gong_inicio_final.mp3';
 import gongMid from '../assets/audio/gong_mid.mp3';
 import musicaNoche from '../assets/audio/noche.wav';
 import musicaTormenta from '../assets/audio/tromenta.wav';
+import musicaBosque from '../assets/audio/bosque.wav';
+import musicaPlaya from '../assets/audio/playa.wav';
 
 const COLOR = '#10B981';
 const COLOR2 = '#C6A55E';
 const PRESETS = [1, 3, 5, 10, 15, 20, 30, 45, 60];
 
+const TECNICAS_RESPIRACION = [
+  { 
+    id: 'equilibrio', 
+    label: 'Equilibrio (4-2-4)', 
+    desc: 'Una técnica sencilla para centrar la mente y calmar el sistema nervioso.',
+    ciclo: [
+      { fase: 'Inhala', duracion: 4 },
+      { fase: 'Mantén', duracion: 2 },
+      { fase: 'Exhala', duracion: 4 },
+    ]
+  },
+  { 
+    id: 'cuadrada', 
+    label: 'Caja (4-4-4-4)', 
+    desc: 'Técnica utilizada para reducir el estrés y mejorar la concentración.',
+    ciclo: [
+      { fase: 'Inhala', duracion: 4 },
+      { fase: 'Mantén', duracion: 4 },
+      { fase: 'Exhala', duracion: 4 },
+      { fase: 'Vacío', duracion: 4 },
+    ]
+  },
+  { 
+    id: 'relajacion', 
+    label: 'Relajación (4-7-8)', 
+    desc: 'Ideal para combatir el insomnio o la ansiedad. Actúa como sedante natural.',
+    ciclo: [
+      { fase: 'Inhala', duracion: 4 },
+      { fase: 'Mantén', duracion: 7 },
+      { fase: 'Exhala', duracion: 8 },
+    ]
+  }
+];
+
 const PISTAS_MUSICA = [
   { id: 'noche', label: 'Noche Tranquila', src: musicaNoche, icon: Moon },
   { id: 'tormenta', label: 'Tormenta', src: musicaTormenta, icon: CloudRain },
+  { id: 'bosque', label: 'Bosque', src: musicaBosque, icon: Trees },
+  { id: 'playa', label: 'Playa', src: musicaPlaya, icon: Waves },
 ];
 
 export function PaginaMeditacion() {
@@ -35,6 +74,7 @@ export function PaginaMeditacion() {
     gongFinal: true,
     musica: false,
     pistaMusica: 'noche',
+    tecnicaRespiracion: 'equilibrio',
   });
   const [gongsLanzados, setGongsLanzados] = useState({ mitad: false });
   const [volumenMusica, setVolumenMusica] = useState(0.3);
@@ -44,6 +84,7 @@ export function PaginaMeditacion() {
   const gongAudioRef = useRef(null);
   const musicaAudioRef = useRef(null);
   const fadeIntervalRef = useRef(null);
+  const esRestauracion = useRef(true);
 
   // --- Funciones de Audio ---
   const reproducirGong = useCallback((tipo) => {
@@ -58,7 +99,6 @@ export function PaginaMeditacion() {
   }, []);
 
   const iniciarMusica = useCallback(() => {
-    if (!ajustes.musica) return;
     const pista = PISTAS_MUSICA.find(p => p.id === ajustes.pistaMusica);
     if (!pista) return;
     if (musicaAudioRef.current) {
@@ -67,9 +107,10 @@ export function PaginaMeditacion() {
     clearInterval(fadeIntervalRef.current);
     const audio = new Audio(pista.src);
     audio.loop = true;
-    audio.volume = 0; // Empezar en silencio
+    audio.volume = 0; 
     musicaAudioRef.current = audio;
-    audio.play().catch(() => {});
+
+    audio.play().catch(e => console.error("Error al reproducir audio:", e));
 
     // Fade in: de 0 al volumen objetivo en ~3 segundos
     const pasos = 30;
@@ -84,7 +125,7 @@ export function PaginaMeditacion() {
         audio.volume = Math.min(incremento * paso, 1);
       }
     }, 100);
-  }, [ajustes.musica, ajustes.pistaMusica, volumenMusica]);
+  }, [ajustes.pistaMusica, volumenMusica]);
 
   const pararMusica = useCallback(() => {
     const audio = musicaAudioRef.current;
@@ -116,17 +157,19 @@ export function PaginaMeditacion() {
     if (guardado) {
       const s = JSON.parse(guardado);
       setTiempoSeleccionado(s.tiempoSeleccionado || 5);
-      if (s.ajustes) setAjustes(s.ajustes);
+      if (s.ajustes) setAjustes(prev => ({ ...prev, ...s.ajustes }));
       if (s.volumenMusica !== undefined) setVolumenMusica(s.volumenMusica);
-      if (s.estaMeditando) {
-        const pasado = Math.floor((Date.now() - s.timestamp) / 1000);
-        const nuevos = s.segundosRestantes - (s.estaPausado ? 0 : pasado);
-        if (nuevos > 0) {
-          setSegundosRestantes(nuevos);
-          setEstaMeditando(true);
-          setEstaPausado(s.estaPausado);
-          setProgreso(((s.tiempoSeleccionado * 60 - nuevos) / (s.tiempoSeleccionado * 60)) * 100);
-        }
+      if (s.estaMeditando && s.segundosRestantes > 0) {
+        // Al restaurar, mantenemos los segundos pero forzamos pausa
+        esRestauracion.current = true;
+        setSegundosRestantes(s.segundosRestantes);
+        setEstaMeditando(true);
+        setEstaPausado(true);
+        setProgreso(((s.tiempoSeleccionado * 60 - s.segundosRestantes) / (s.tiempoSeleccionado * 60)) * 100);
+        // Desactivar la marca de restauración tras el primer render
+        requestAnimationFrame(() => { esRestauracion.current = false; });
+      } else {
+        esRestauracion.current = false;
       }
     }
   }, [usuario]);
@@ -147,13 +190,65 @@ export function PaginaMeditacion() {
 
   // --- Sesión ---
   const finalizarSesion = useCallback(() => {
+    const totalSegundos = tiempoSeleccionado * 60;
+    const completados = totalSegundos - segundosRestantes;
+
     setEstaMeditando(false);
     setSesionFinalizada(true);
     clearInterval(intervalRef.current);
     clearInterval(breathingRef.current);
     pararMusica();
     if (ajustes.gongFinal) reproducirGong('inicio_final');
-  }, [ajustes.gongFinal, reproducirGong, pararMusica]);
+
+    // Guardar en base de datos
+    if (usuario?.id) {
+      registrarSesionMeditacion({
+        usuario_id: usuario.id,
+        duracion_segundos: totalSegundos,
+        segundos_completados: completados,
+        tecnica_respiracion: ajustes.tecnicaRespiracion,
+        pista_musica: ajustes.musica ? ajustes.pistaMusica : null,
+      }).catch(err => console.error('Error al registrar sesión de meditación:', err));
+    }
+  }, [ajustes.gongFinal, ajustes.tecnicaRespiracion, ajustes.musica, ajustes.pistaMusica, reproducirGong, pararMusica, tiempoSeleccionado, segundosRestantes, usuario]);
+
+  // Limpieza al salir de la pantalla con desvanecimiento (fade out)
+  useEffect(() => {
+    return () => {
+      const audioActual = musicaAudioRef.current;
+      if (audioActual) {
+        clearInterval(fadeIntervalRef.current);
+        // Fade out rápido al salir
+        const vol = audioActual.volume;
+        const fadeOutInterval = setInterval(() => {
+          if (audioActual.volume > 0.05) {
+            audioActual.volume -= 0.05;
+          } else {
+            audioActual.pause();
+            clearInterval(fadeOutInterval);
+          }
+        }, 30);
+      }
+      musicaAudioRef.current = null;
+    };
+  }, []);
+
+  // Controlar Play/Pause con lógica de audio integrada y forzada
+  const manejarPlayPause = () => {
+    const iraReproducir = estaPausado;
+    setEstaPausado(!estaPausado);
+    
+    if (iraReproducir && ajustes.musica) {
+      // Forzamos la creación/reproducción del audio por interacción directa
+      if (!musicaAudioRef.current) {
+        iniciarMusica();
+      } else {
+        musicaAudioRef.current.play().catch(() => iniciarMusica());
+      }
+    } else if (musicaAudioRef.current) {
+      musicaAudioRef.current.pause();
+    }
+  };
 
   // Temporizador
   useEffect(() => {
@@ -172,16 +267,6 @@ export function PaginaMeditacion() {
     return () => clearInterval(intervalRef.current);
   }, [estaMeditando, estaPausado, segundosRestantes, tiempoSeleccionado, finalizarSesion]);
 
-  // Pausa/reanuda música
-  useEffect(() => {
-    if (!musicaAudioRef.current) return;
-    if (estaPausado) {
-      musicaAudioRef.current.pause();
-    } else if (estaMeditando) {
-      musicaAudioRef.current.play().catch(() => {});
-    }
-  }, [estaPausado, estaMeditando]);
-
   // Gong de mitad
   useEffect(() => {
     if (!estaMeditando || estaPausado || !ajustes.gongMitad) return;
@@ -195,16 +280,27 @@ export function PaginaMeditacion() {
   // Respiración
   useEffect(() => {
     if (estaMeditando && !estaPausado) {
+      const tecnica = TECNICAS_RESPIRACION.find(t => t.id === ajustes.tecnicaRespiracion) || TECNICAS_RESPIRACION[0];
+      const duracionTotal = tecnica.ciclo.reduce((acc, f) => acc + f.duracion, 0);
+      
       let c = 0;
+      setFaseRespiracion(tecnica.ciclo[0].fase);
+
       breathingRef.current = setInterval(() => {
-        c = (c + 1) % 10;
-        if (c < 4) setFaseRespiracion('Inhala');
-        else if (c < 6) setFaseRespiracion('Mantén');
-        else setFaseRespiracion('Exhala');
+        c = (c + 1) % duracionTotal;
+        
+        let acumulado = 0;
+        for (const paso of tecnica.ciclo) {
+          acumulado += paso.duracion;
+          if (c < acumulado) {
+            setFaseRespiracion(paso.fase);
+            break;
+          }
+        }
       }, 1000);
     }
     return () => clearInterval(breathingRef.current);
-  }, [estaMeditando, estaPausado]);
+  }, [estaMeditando, estaPausado, ajustes.tecnicaRespiracion]);
 
   const iniciar = () => {
     const total = tiempoSeleccionado * 60;
@@ -228,6 +324,12 @@ export function PaginaMeditacion() {
   };
 
   const fmt = s => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
+
+  // Cálculos de respiración extraídos del JSX para evitar errores de renderizado
+  const tecnicaActual = TECNICAS_RESPIRACION.find(t => t.id === ajustes.tecnicaRespiracion) || TECNICAS_RESPIRACION[0];
+  const pasoActual = tecnicaActual.ciclo.find(p => p.fase === faseRespiracion) || tecnicaActual.ciclo[0];
+  const duracionFase = pasoActual.duracion;
+  const esExpansion = faseRespiracion === 'Inhala' || faseRespiracion === 'Mantén';
 
   // SVG progress ring — circunferencia real para precisión
   const radioSVG = 115;
@@ -345,6 +447,20 @@ export function PaginaMeditacion() {
                         </div>
                       )}
                     </div>
+
+                    {/* Técnica de Respiración */}
+                    <div className="pt-3 border-t border-emerald-100 space-y-3">
+                      <span className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">Técnica de Respiración</span>
+                      <div className="flex flex-col gap-2">
+                        {TECNICAS_RESPIRACION.map(t => (
+                          <button key={t.id} onClick={() => setAjustes(a => ({ ...a, tecnicaRespiracion: t.id }))}
+                            className={`p-4 rounded-2xl transition-all text-left border ${ajustes.tecnicaRespiracion === t.id ? 'bg-emerald-500 text-white border-emerald-600 shadow-lg' : 'bg-white text-gray-600 border-gray-100 hover:bg-emerald-50'}`}>
+                            <p className="text-xs font-black uppercase tracking-widest mb-1">{t.label}</p>
+                            <p className={`text-[10px] leading-relaxed ${ajustes.tecnicaRespiracion === t.id ? 'text-white/80' : 'text-gray-400'}`}>{t.desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -370,7 +486,11 @@ export function PaginaMeditacion() {
                     stroke={COLOR} strokeWidth="10" strokeLinecap="round"
                     strokeDasharray={circunferencia}
                     strokeDashoffset={dashOffset}
-                    style={{ transition: 'stroke-dashoffset 1s linear', transform: 'rotate(-90deg)', transformOrigin: '130px 130px' }} />
+                    style={{ 
+                      transition: (esRestauracion.current || progreso === 0) ? 'none' : 'stroke-dashoffset 1s linear', 
+                      transform: 'rotate(-90deg)', 
+                      transformOrigin: '130px 130px' 
+                    }} />
                 </svg>
                 <div className="flex flex-col items-center justify-center z-10">
                   <span className="text-5xl font-['Tilt_Warp'] text-gray-800">{fmt(segundosRestantes)}</span>
@@ -385,13 +505,15 @@ export function PaginaMeditacion() {
               <div className="flex flex-col items-center gap-5">
                 <div className="relative flex items-center justify-center w-36 h-36">
                   <motion.div
-                    animate={{ scale: faseRespiracion === 'Exhala' ? 0.8 : 1.4, opacity: 0.15 }}
-                    transition={{ duration: faseRespiracion === 'Inhala' ? 4 : faseRespiracion === 'Exhala' ? 4 : 2, ease: 'easeInOut' }}
+                    key={`bg-${faseRespiracion}`}
+                    animate={{ scale: esExpansion ? 1.4 : 0.8, opacity: 0.15 }}
+                    transition={{ duration: duracionFase, ease: 'easeInOut' }}
                     className="absolute w-full h-full rounded-full"
                     style={{ backgroundColor: COLOR }} />
                   <motion.div
-                    animate={{ scale: faseRespiracion === 'Exhala' ? 0.7 : 1 }}
-                    transition={{ duration: faseRespiracion === 'Inhala' ? 4 : faseRespiracion === 'Exhala' ? 4 : 2, ease: 'easeInOut' }}
+                    key={`flower-${faseRespiracion}`}
+                    animate={{ scale: esExpansion ? 1 : 0.7 }}
+                    transition={{ duration: duracionFase, ease: 'easeInOut' }}
                     className="w-24 h-24 rounded-full flex items-center justify-center shadow-lg"
                     style={{ background: `linear-gradient(135deg, ${COLOR}, ${COLOR2})` }}>
                     <Flower2 size={32} className="text-white/80" />
@@ -399,10 +521,15 @@ export function PaginaMeditacion() {
                 </div>
                 <div className="text-center">
                   <motion.h3 key={faseRespiracion} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    className="text-3xl md:text-4xl font-['Tilt_Warp'] tracking-wide" style={{ color: COLOR }}>
+                    className="text-3xl md:text-4xl font-['Tilt_Warp'] tracking-wide min-w-[200px]" style={{ color: COLOR }}>
                     {faseRespiracion}
                   </motion.h3>
-                  <p className="text-emerald-400 text-sm font-medium mt-1">Respira profundamente</p>
+                  <p className="text-emerald-400 text-sm font-medium mt-1">
+                    {faseRespiracion === 'Inhala' && 'Llena tus pulmones'}
+                    {faseRespiracion === 'Mantén' && 'Sostén el aire'}
+                    {faseRespiracion === 'Exhala' && 'Suelta suavemente'}
+                    {faseRespiracion === 'Vacío' && 'Mantén el vacío'}
+                  </p>
                 </div>
               </div>
 
@@ -425,7 +552,7 @@ export function PaginaMeditacion() {
 
               {/* Controles */}
               <div className="flex items-center gap-5">
-                <button onClick={() => setEstaPausado(p => !p)}
+                <button onClick={manejarPlayPause}
                   className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center text-gray-600 hover:text-emerald-600 transition-colors">
                   {estaPausado ? <Play size={24} fill="currentColor" /> : <Pause size={24} fill="currentColor" />}
                 </button>

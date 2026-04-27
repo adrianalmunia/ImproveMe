@@ -11,6 +11,7 @@ const cors = require('cors');
 const prisma = require('./configuracion/baseDatos');
 const rutasAutenticacion = require('./rutas/rutasAutenticacion');
 const rutasDiario = require('./rutas/rutasDiario');
+const rutasMeditacion = require('./rutas/rutasMeditacion');
 
 // ============ CONFIGURACIÓN BÁSICA ============
 const app = express();
@@ -71,6 +72,9 @@ app.use('/api/autenticacion', rutasAutenticacion);
 
 // Rutas de diario
 app.use('/api/diario', rutasDiario);
+
+// Rutas de meditación
+app.use('/api/meditacion', rutasMeditacion);
 
 // ============ MANEJO DE ERRORES 404 ============
 // Si ninguna ruta anterior coincide, devolvemos 404
