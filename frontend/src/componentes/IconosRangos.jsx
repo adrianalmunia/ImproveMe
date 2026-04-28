@@ -176,7 +176,7 @@ export const IconoRubi = ({ size, className, tier = "III" }) => (
   </BaseIcon>
 );
 
-const RankIcons = {
+const IconosRangos = {
   Piedra: IconoPiedra,
   Bronce: IconoBronce,
   Plata: IconoPlata,
@@ -188,4 +188,4 @@ const RankIcons = {
   Rubi: IconoRubi
 };
 
-export default RankIcons;
+export default IconosRangos;

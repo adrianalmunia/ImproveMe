@@ -177,6 +177,21 @@ export function ProveedorAutenticacion({ children }) {
         }
     }
 
+    async function eliminar() {
+        if (!token) return;
+        try {
+            setError(null);
+            setEstaCargando(true);
+            await servicioAPI.eliminarCuenta(token);
+            logout(); // Limpiamos todo localmente
+        } catch (err) {
+            setError(err.message);
+            throw err;
+        } finally {
+            setEstaCargando(false);
+        }
+    }
+
     // Valor que pasamos a todos los componentes
     const valor = {
         usuario,
@@ -189,6 +204,7 @@ export function ProveedorAutenticacion({ children }) {
         limpiarAutenticacion,
         actualizarUsuario,
         refrescarUsuario,
+        eliminar,
         estaAutenticado: !!usuario && !!token,
     };
 

@@ -52,8 +52,8 @@ app.get('/probar', async (req, res) => {
         const listaUsuarios = await prisma.usuarios.findMany({
             select: {
                 id: true,
-                username: true,
-                email: true
+                nombre_usuario: true,
+                correo: true
             }
         });
 

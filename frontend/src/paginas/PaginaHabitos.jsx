@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 // import { useNavigate } from 'react-router-dom';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
@@ -26,22 +26,23 @@ const PaginaHabitos = ({ setVistaActual }) => {
   const nivelActual = Math.floor(xpActual / 100) + 1; // Cada 100 XP es un nivel (por simplificar)
   const xpParaSiguienteNivel = 100 - (xpActual % 100);
 
+  // IDs temporales (timestamps) para que el backend los trate como nuevos
   const habitosPorDefecto = [
-    { id: 1, nombre: 'Beber Agua', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000, frecuenciaSemanal: 7 },
-    { id: 2, nombre: 'Leer 10 min', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000, frecuenciaSemanal: 7 },
-    { id: 3, nombre: 'No fumar', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000, frecuenciaSemanal: 7 },
+    { id: Date.now() + 1, nombre: 'Beber Agua', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000, frecuenciaSemanal: 7 },
+    { id: Date.now() + 2, nombre: 'Leer 10 min', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000, frecuenciaSemanal: 7 },
+    { id: Date.now() + 3, nombre: 'No fumar', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000, frecuenciaSemanal: 7 },
   ];
 
   const diariasPorDefecto = [
-    { id: 1, nombre: 'Hacer la cama', completada: false, racha: 0, fechaCreacion: Date.now() - 86400000 },
-    { id: 2, nombre: 'Meditación', completada: false, racha: 0, fechaCreacion: Date.now() - 86400000 },
-    { id: 3, nombre: 'Estudiar Inglés', completada: false, racha: 0, fechaCreacion: Date.now() - 86400000 },
+    { id: Date.now() + 4, nombre: 'Hacer la cama', completada: false, racha: 0, fechaCreacion: Date.now() - 86400000 },
+    { id: Date.now() + 5, nombre: 'Meditación', completada: false, racha: 0, fechaCreacion: Date.now() - 86400000 },
+    { id: Date.now() + 6, nombre: 'Estudiar Inglés', completada: false, racha: 0, fechaCreacion: Date.now() - 86400000 },
   ];
 
   const tareasPorDefecto = [
-    { id: 1, nombre: 'Comprar comida perro', completada: false, prioridad: 'alta', fechaCreacion: Date.now() - 86400000 },
-    { id: 2, nombre: 'Llamar al médico', completada: false, prioridad: 'media', fechaCreacion: Date.now() - 86400000 },
-    { id: 3, nombre: 'Limpiar el teclado', completada: false, prioridad: 'baja', fechaCreacion: Date.now() - 86400000 },
+    { id: Date.now() + 7, nombre: 'Comprar comida perro', completada: false, prioridad: 'alta', fechaCreacion: Date.now() - 86400000 },
+    { id: Date.now() + 8, nombre: 'Llamar al médico', completada: false, prioridad: 'media', fechaCreacion: Date.now() - 86400000 },
+    { id: Date.now() + 9, nombre: 'Limpiar el teclado', completada: false, prioridad: 'baja', fechaCreacion: Date.now() - 86400000 },
   ];
 
   const [habitos, setHabitos] = useState([]);
@@ -49,6 +50,16 @@ const PaginaHabitos = ({ setVistaActual }) => {
   const [tareas, setTareas] = useState([]);
   const [estaCargandoDatos, setEstaCargandoDatos] = useState(true);
   const [primeraCarga, setPrimeraCarga] = useState(true);
+
+  // Refs para sincronización al desmontar el componente
+  const datosRef = useRef({ habitos: [], diarias: [], tareas: [] });
+  const tokenRef = useRef(token);
+  const necesitaSincronizar = useRef(false);
+  const timerRef = useRef(null);
+
+  // Mantener refs actualizados
+  useEffect(() => { tokenRef.current = token; }, [token]);
+  useEffect(() => { datosRef.current = { habitos, diarias, tareas }; }, [habitos, diarias, tareas]);
 
   // Cargar datos desde el backend
   useEffect(() => {
@@ -85,18 +96,36 @@ const PaginaHabitos = ({ setVistaActual }) => {
     return () => { montado = false; };
   }, [token]);
 
-  // Sincronizar con el backend de forma automática
+  // Sincronizar con el backend de forma automática (debounce 1s)
   useEffect(() => {
     if (primeraCarga || estaCargandoDatos) return;
     if (!token) return;
 
-    const timer = setTimeout(() => {
-      servicioAPI.sincronizarGamificacion({ habitos, diarias, tareas }, token)
+    necesitaSincronizar.current = true;
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      necesitaSincronizar.current = false;
+      servicioAPI.sincronizarGamificacion(datosRef.current, tokenRef.current)
         .catch(err => console.error("Error guardando progreso:", err));
     }, 1000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, [habitos, diarias, tareas, token, primeraCarga, estaCargandoDatos]);
+
+  // Sincronizar al desmontar el componente (cambio de pantalla)
+  useEffect(() => {
+    return () => {
+      if (necesitaSincronizar.current && tokenRef.current) {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        // Lanzamos la sincronización inmediata; el fetch continúa aunque el componente se desmonte
+        servicioAPI.sincronizarGamificacion(datosRef.current, tokenRef.current)
+          .catch(err => console.error("Error guardando progreso al salir:", err));
+      }
+    };
+  }, []);
 
   const [nuevoNombre, setNuevoNombre] = useState('');
   const [nuevaPrioridad, setNuevaPrioridad] = useState('media');

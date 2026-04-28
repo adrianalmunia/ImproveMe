@@ -20,8 +20,8 @@ const SidebarIcon = ({ Icon, label, active, onClick }) => (
   </div>
 );
 
-export function LayoutPrincipal({ children, vistaActual, setVistaActual }) {
-  console.log("Vista actual en Layout:", vistaActual);
+export function DiseñoPrincipal({ children, vistaActual, setVistaActual }) {
+  console.log("Vista actual en Diseño:", vistaActual);
 
   return (
     <div className="h-screen w-full bg-neutral-100 flex flex-row font-['Inter'] overflow-hidden">
@@ -69,4 +69,4 @@ export function LayoutPrincipal({ children, vistaActual, setVistaActual }) {
   );
 }
 
-export default LayoutPrincipal;
+export default DiseñoPrincipal;

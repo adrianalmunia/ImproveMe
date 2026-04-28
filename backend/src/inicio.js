@@ -33,23 +33,23 @@ app.get('/probar', async (req, res) => {
 
 // --- RUTA DE REGISTRO ---
 app.post('/api/registro', async (req, res) => {
-    const { username, email, password } = req.body;
+    const { nombre_usuario, correo, contrasena } = req.body;
 
     try {
         // 1. Encriptamos la contraseña (10 vueltas de seguridad)
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(contrasena, 10);
 
         // 2. Guardamos en la base de datos usando Prisma
         const nuevoUsuario = await prisma.usuarios.create({
             data: {
-                username,
-                email,
-                password_hash: hashedPassword, // Guardamos la versión segura
-                puntos_xp: 0
+                nombre_usuario,
+                correo,
+                contrasena_hash: hashedPassword, // Guardamos la versión segura
+                puntos_experiencia: 0
             }
         });
 
-        res.status(201).json({ mensaje: "Usuario creado con éxito", usuario: nuevoUsuario.username });
+        res.status(201).json({ mensaje: "Usuario creado con éxito", usuario: nuevoUsuario.nombre_usuario });
     } catch (error) {
         // Si el email ya existe, Prisma lanzará un error
         res.status(400).json({ error: "El usuario o email ya existe" });
@@ -58,12 +58,12 @@ app.post('/api/registro', async (req, res) => {
 
 // --- RUTA DE LOGIN ---
 app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { correo, contrasena } = req.body;
 
     try {
-        // 1. Buscamos al usuario por email
+        // 1. Buscamos al usuario por correo
         const usuario = await prisma.usuarios.findUnique({
-            where: { email: email }
+            where: { correo: correo }
         });
 
         // 2. Si no existe, damos error
@@ -72,7 +72,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         // 3. Comparamos la contraseña escrita con la encriptada en la DB
-        const passwordCorrecta = await bcrypt.compare(password, usuario.password_hash);
+        const passwordCorrecta = await bcrypt.compare(contrasena, usuario.contrasena_hash);
 
         if (!passwordCorrecta) {
             return res.status(401).json({ error: "Contraseña incorrecta" });
@@ -82,9 +82,9 @@ app.post('/api/login', async (req, res) => {
         res.json({
             mensaje: "Login exitoso",
             usuario: {
-                id: usuario.id_usuario,
-                username: usuario.username,
-                puntos: usuario.puntos_xp
+                id: usuario.id,
+                nombre_usuario: usuario.nombre_usuario,
+                puntos: usuario.puntos_experiencia
             }
         });
 
@@ -99,7 +99,7 @@ app.get('/api/habitos/:usuarioId', async (req, res) => {
 
     try {
         const misHabitos = await prisma.habitos.findMany({
-            where: { id_usuario: parseInt(usuarioId) }
+            where: { usuario_id: parseInt(usuarioId) }
         });
         res.json(misHabitos);
     } catch (error) {

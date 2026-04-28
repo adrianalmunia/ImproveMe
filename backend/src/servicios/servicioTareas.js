@@ -39,83 +39,155 @@ async function obtenerGamificacion(usuarioId) {
 }
 
 async function sincronizarGamificacion(usuarioId, datos) {
-    // Sincronización completa: Borramos las tareas antiguas e insertamos la foto exacta del frontend
+    const ahora = new Date();
+    const hoy = new Date(Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()));
+
+    // Protección contra datos nulos/undefined
+    const habitosRecibidos = datos.habitos || [];
+    const diariasRecibidas = datos.diarias || [];
+    const tareasRecibidas = datos.tareas || [];
+
     await prisma.$transaction(async (tx) => {
-        await tx.habitos.deleteMany({ where: { usuario_id: usuarioId } });
-        await tx.tareas_diarias.deleteMany({ where: { usuario_id: usuarioId } });
-        await tx.tareas_pendientes.deleteMany({ where: { usuario_id: usuarioId } });
+        // --- 1. PROCESAR HÁBITOS ---
+        const habitosExistentes = await tx.habitos.findMany({ where: { usuario_id: usuarioId } });
+        const idsExistentesHabitos = new Set(habitosExistentes.map(h => h.id));
 
-        const ahora = new Date();
-        const hoy = new Date(Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()));
-
-        if (datos.habitos && datos.habitos.length > 0) {
-            await tx.habitos.createMany({
-                data: datos.habitos.map(h => ({
-                    usuario_id: usuarioId,
-                    nombre: h.nombre,
-                    racha: h.racha,
-                    racha_anterior: h.rachaAnterior || 0,
-                    estado: h.estado,
-                    fecha_creacion: new Date(h.fechaCreacion || Date.now()),
-                    frecuencia_semanal: h.frecuenciaSemanal || 7
-                }))
-            });
-
-            // GUARDAR HISTÓRICO: Para cada hábito con estado, creamos/actualizamos registro
-            for (const h of datos.habitos) {
-                if (h.estado) {
-                    // Buscamos el hábito recién creado (por nombre y usuario ya que acabamos de recrearlos)
-                    const habitoRecienCreado = await tx.habitos.findFirst({
-                        where: { usuario_id: usuarioId, nombre: h.nombre }
-                    });
-                    
-                    if (habitoRecienCreado) {
-                        await tx.registros_habitos.upsert({
-                            where: { habito_id_fecha: { habito_id: habitoRecienCreado.id, fecha: hoy } },
-                            update: { estado: h.estado },
-                            create: { habito_id: habitoRecienCreado.id, fecha: hoy, estado: h.estado }
-                        });
-                    }
-                }
-            }
-        }
+        // IDs que el frontend reconoce como existentes en BD (no temporales)
+        const idsHabitosConservar = habitosRecibidos
+            .filter(h => typeof h.id === 'number' && h.id < 1000000000000 && idsExistentesHabitos.has(h.id))
+            .map(h => h.id);
         
-        if (datos.diarias && datos.diarias.length > 0) {
-            await tx.tareas_diarias.createMany({
-                data: datos.diarias.map(d => ({
-                    usuario_id: usuarioId,
-                    nombre: d.nombre,
-                    completada: d.completada,
-                    racha: d.racha,
-                    fecha_creacion: new Date(d.fechaCreacion || Date.now())
-                }))
-            });
+        // Eliminar los que el usuario quitó
+        await tx.habitos.deleteMany({
+            where: { usuario_id: usuarioId, id: { notIn: idsHabitosConservar } }
+        });
 
-            // GUARDAR HISTÓRICO DIARIAS
-            for (const d of datos.diarias) {
-                const diariaRecienCreada = await tx.tareas_diarias.findFirst({
-                    where: { usuario_id: usuarioId, nombre: d.nombre }
+        for (const h of habitosRecibidos) {
+            let habitoId;
+            const existeEnBD = typeof h.id === 'number' && h.id < 1000000000000 && idsExistentesHabitos.has(h.id);
+
+            if (existeEnBD) {
+                const actualizado = await tx.habitos.update({
+                    where: { id: h.id },
+                    data: {
+                        nombre: h.nombre,
+                        racha: h.racha || 0,
+                        racha_anterior: h.rachaAnterior || 0,
+                        estado: h.estado,
+                        frecuencia_semanal: h.frecuenciaSemanal || 7
+                    }
                 });
-                if (diariaRecienCreada) {
-                    await tx.registros_diarias.upsert({
-                        where: { diaria_id_fecha: { diaria_id: diariaRecienCreada.id, fecha: hoy } },
-                        update: { fue_completada: d.completada },
-                        create: { diaria_id: diariaRecienCreada.id, fecha: hoy, fue_completada: d.completada }
-                    });
-                }
+                habitoId = actualizado.id;
+            } else {
+                const nuevo = await tx.habitos.create({
+                    data: {
+                        usuario_id: usuarioId,
+                        nombre: h.nombre,
+                        racha: h.racha || 0,
+                        racha_anterior: h.rachaAnterior || 0,
+                        estado: h.estado,
+                        fecha_creacion: new Date(h.fechaCreacion || Date.now()),
+                        frecuencia_semanal: h.frecuenciaSemanal || 7
+                    }
+                });
+                habitoId = nuevo.id;
+            }
+
+            // Guardar Histórico de Hábito para hoy
+            if (h.estado) {
+                await tx.registros_habitos.upsert({
+                    where: { habito_id_fecha: { habito_id: habitoId, fecha: hoy } },
+                    update: { estado: h.estado },
+                    create: { habito_id: habitoId, fecha: hoy, estado: h.estado }
+                });
+            } else {
+                await tx.registros_habitos.deleteMany({
+                    where: { habito_id: habitoId, fecha: hoy }
+                });
             }
         }
 
-        if (datos.tareas && datos.tareas.length > 0) {
-            await tx.tareas_pendientes.createMany({
-                data: datos.tareas.map(t => ({
-                    usuario_id: usuarioId,
-                    nombre: t.nombre,
-                    completada: t.completada,
-                    prioridad: t.prioridad,
-                    fecha_creacion: new Date(t.fechaCreacion || Date.now())
-                }))
+        // --- 2. PROCESAR DIARIAS ---
+        const diariasExistentes = await tx.tareas_diarias.findMany({ where: { usuario_id: usuarioId } });
+        const idsExistentesDiarias = new Set(diariasExistentes.map(d => d.id));
+
+        const idsDiariasConservar = diariasRecibidas
+            .filter(d => typeof d.id === 'number' && d.id < 1000000000000 && idsExistentesDiarias.has(d.id))
+            .map(d => d.id);
+
+        await tx.tareas_diarias.deleteMany({
+            where: { usuario_id: usuarioId, id: { notIn: idsDiariasConservar } }
+        });
+
+        for (const d of diariasRecibidas) {
+            let diariaId;
+            const existeEnBD = typeof d.id === 'number' && d.id < 1000000000000 && idsExistentesDiarias.has(d.id);
+
+            if (existeEnBD) {
+                const actualizado = await tx.tareas_diarias.update({
+                    where: { id: d.id },
+                    data: {
+                        nombre: d.nombre,
+                        completada: d.completada || false,
+                        racha: d.racha || 0
+                    }
+                });
+                diariaId = actualizado.id;
+            } else {
+                const nuevo = await tx.tareas_diarias.create({
+                    data: {
+                        usuario_id: usuarioId,
+                        nombre: d.nombre,
+                        completada: d.completada || false,
+                        racha: d.racha || 0,
+                        fecha_creacion: new Date(d.fechaCreacion || Date.now())
+                    }
+                });
+                diariaId = nuevo.id;
+            }
+
+            // Guardar Histórico Diarias
+            await tx.registros_diarias.upsert({
+                where: { diaria_id_fecha: { diaria_id: diariaId, fecha: hoy } },
+                update: { fue_completada: d.completada || false },
+                create: { diaria_id: diariaId, fecha: hoy, fue_completada: d.completada || false }
             });
+        }
+
+        // --- 3. PROCESAR TAREAS PENDIENTES (To-Dos) ---
+        const tareasExistentes = await tx.tareas_pendientes.findMany({ where: { usuario_id: usuarioId } });
+        const idsExistentesTareas = new Set(tareasExistentes.map(t => t.id));
+
+        const idsTareasConservar = tareasRecibidas
+            .filter(t => typeof t.id === 'number' && t.id < 1000000000000 && idsExistentesTareas.has(t.id))
+            .map(t => t.id);
+        
+        await tx.tareas_pendientes.deleteMany({
+            where: { usuario_id: usuarioId, id: { notIn: idsTareasConservar } }
+        });
+
+        for (const t of tareasRecibidas) {
+            const existeEnBD = typeof t.id === 'number' && t.id < 1000000000000 && idsExistentesTareas.has(t.id);
+            if (existeEnBD) {
+                await tx.tareas_pendientes.update({
+                    where: { id: t.id },
+                    data: {
+                        nombre: t.nombre,
+                        completada: t.completada || false,
+                        prioridad: t.prioridad || 'media'
+                    }
+                });
+            } else {
+                await tx.tareas_pendientes.create({
+                    data: {
+                        usuario_id: usuarioId,
+                        nombre: t.nombre,
+                        completada: t.completada || false,
+                        prioridad: t.prioridad || 'media',
+                        fecha_creacion: new Date(t.fechaCreacion || Date.now())
+                    }
+                });
+            }
         }
     });
 

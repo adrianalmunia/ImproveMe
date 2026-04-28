@@ -466,13 +466,13 @@ const PaginaEstadisticas = () => {
         </div>
 
         {/* Meditación Dashboard */}
-        <div className="lg:col-span-1 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 h-[450px]">
+        <div className="lg:col-span-1 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 flex flex-col">
           <h2 className="text-xl font-black text-[#2C4159] mb-2 flex items-center gap-2">
             <Flower2 size={20} className="text-teal-500" />
             Paz Mental
           </h2>
-          <p className="text-[10px] font-bold text-gray-400 uppercase mb-6">Tu compromiso con el mindfulness</p>
-          <div className="h-[280px]">
+          <p className="text-[10px] font-bold text-gray-400 uppercase mb-4">Tu compromiso con el mindfulness</p>
+          <div className="h-[200px] mb-4">
             <Bar 
               data={dataMeditacion} 
               options={{

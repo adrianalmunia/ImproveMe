@@ -276,7 +276,7 @@ const PaginaCalendario = () => {
 
                     {/* Hábitos y Diarias */}
                     <div className="space-y-4">
-                      {infoDia.habitos?.length > 0 && (
+                      {infoDia.habitos?.some(h => h.estado === 'positivo') && (
                         <div>
                           <p className="text-[9px] font-black text-gray-400 uppercase mb-2 flex items-center gap-1">
                             <Flame size={12} className="text-orange-500" /> Hábitos cumplidos
@@ -291,7 +291,7 @@ const PaginaCalendario = () => {
                         </div>
                       )}
 
-                      {infoDia.diarias?.length > 0 && (
+                      {infoDia.diarias?.some(d => d.completada) && (
                         <div>
                           <p className="text-[9px] font-black text-gray-400 uppercase mb-2 flex items-center gap-1">
                             <CheckCircle2 size={12} className="text-yellow-500" /> Tareas completadas

@@ -1,5 +1,5 @@
 // ================================================================================
-// APP.JSX - COMPONENTE RAÍZ DE LA APLICACIÓN
+// APLICACION.JSX - COMPONENTE RAÍZ DE LA APLICACIÓN
 // ================================================================================
 import { useState } from 'react';
 import { ProveedorAutenticacion, useAutenticacion } from './contextos/ContextoAutenticacion';
@@ -9,31 +9,31 @@ import PaginaRegistros from './paginas/PaginaRegistros';
 import PaginaUsuario from './paginas/PaginaUsuario';
 import PaginaMeditacion from './paginas/PaginaMeditacion';
 import PaginaHabitos from './paginas/PaginaHabitos';
-import PaginaRanked from './paginas/PaginaRanked';
+import PaginaRangos from './paginas/PaginaRangos';
 import PaginaCalendario from './paginas/PaginaCalendario';
 import PaginaEstadisticas from './paginas/PaginaEstadisticas';
-import LayoutPrincipal from './componentes/LayoutPrincipal';
+import DiseñoPrincipal from './componentes/DiseñoPrincipal';
 import { motion } from 'framer-motion';
 
 /**
  * Componente principal de la aplicación que gestiona las rutas privadas
  */
-function ContenidoApp() {
+function ContenidoAplicacion() {
   const { usuario } = useAutenticacion();
   const [vistaActual, setVistaActual] = useState('diario');
 
-  console.log("ContenidoApp renderizando con usuario:", usuario?.nombre_usuario, "y vista:", vistaActual);
+  console.log("ContenidoAplicacion renderizando con usuario:", usuario?.nombre_usuario, "y vista:", vistaActual);
 
-  // Si el usuario está autenticado, mostramos el layout con la vista correspondiente
+  // Si el usuario está autenticado, mostramos el diseño con la vista correspondiente
   if (usuario) {
     return (
-      <LayoutPrincipal vistaActual={vistaActual} setVistaActual={setVistaActual}>
+      <DiseñoPrincipal vistaActual={vistaActual} setVistaActual={setVistaActual}>
         {vistaActual === 'diario' && <PaginaDiario />}
         {vistaActual === 'registros' && <PaginaRegistros />}
         {vistaActual === 'perfil' && <PaginaUsuario />}
         {vistaActual === 'meditacion' && <PaginaMeditacion />}
         {vistaActual === 'habitos' && <PaginaHabitos setVistaActual={setVistaActual} />}
-        {vistaActual === 'ranked' && <PaginaRanked />}
+        {vistaActual === 'ranked' && <PaginaRangos />}
         {vistaActual === 'calendario' && <PaginaCalendario />}
         {vistaActual === 'estadisticas' && <PaginaEstadisticas />}
         {!['diario', 'registros', 'perfil', 'meditacion', 'habitos', 'ranked', 'calendario', 'estadisticas'].includes(vistaActual) && (
@@ -41,13 +41,11 @@ function ContenidoApp() {
             <p className="text-xl text-gray-400 font-['Tilt_Warp']">Vista en construcción: {vistaActual}</p>
           </div>
         )}
-      </LayoutPrincipal>
+      </DiseñoPrincipal>
     );
   }
 
   // Si NO está autenticado, mostramos la pantalla de Login/Registro unificada.
-  // IMPORTANTE: Quitamos el 'if (estaCargando)' de aquí arriba para que 
-  // el componente Autenticacion no se desmonte al registrarse.
   return (
     <Autenticacion
       onAccesoExitoso={(u) => {
@@ -60,12 +58,12 @@ function ContenidoApp() {
 /**
  * Componente raíz que envuelve todo con el contexto
  */
-export function App() {
+export function Aplicacion() {
   return (
     <ProveedorAutenticacion>
-      <ContenidoApp />
+      <ContenidoAplicacion />
     </ProveedorAutenticacion>
   );
 }
 
-export default App;
+export default Aplicacion;

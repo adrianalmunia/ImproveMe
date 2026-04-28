@@ -5,19 +5,19 @@ import {
   Trophy,
   ChevronRight
 } from 'lucide-react';
-import RankIcons from '../componentes/RankIcons';
+import IconosRangos from '../componentes/IconosRangos';
 
 // Mapeo de iconos para poder usarlos dinámicamente
 const IconMap = {
-  Circle: RankIcons.Piedra,
-  Triangle: RankIcons.Bronce,
-  Square: RankIcons.Plata,
-  Pentagon: RankIcons.Oro,
-  Hexagon: RankIcons.Esmeralda,
-  Shield: RankIcons.Zafiro,
-  Gem: RankIcons.Diamante,
-  Star: RankIcons.Amatista,
-  Sparkles: RankIcons.Rubi
+  Circle: IconosRangos.Piedra,
+  Triangle: IconosRangos.Bronce,
+  Square: IconosRangos.Plata,
+  Pentagon: IconosRangos.Oro,
+  Hexagon: IconosRangos.Esmeralda,
+  Shield: IconosRangos.Zafiro,
+  Gem: IconosRangos.Diamante,
+  Star: IconosRangos.Amatista,
+  Sparkles: IconosRangos.Rubi
 };
 
 export const RANK_CATEGORIES = [
@@ -113,7 +113,7 @@ const RankIcon = ({ rankData, tier = 'III', size = 'md', className = '' }) => {
   );
 };
 
-const PaginaRanked = () => {
+const PaginaRangos = () => {
   const { usuario, refrescarUsuario } = useAutenticacion();
   const [xp, setXp] = useState(0);
   const [cargando, setCargando] = useState(true);
@@ -289,4 +289,4 @@ const PaginaRanked = () => {
   );
 };
 
-export default PaginaRanked;
+export default PaginaRangos;

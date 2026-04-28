@@ -212,11 +212,20 @@ export async function obtenerEstadisticasGenerales(usuarioId, token) {
     return realizarSolicitud(`estadisticas/${usuarioId}`, 'GET', null, token);
 }
 
+/**
+ * Elimina la cuenta del usuario autenticado permanentemente
+ * @param {string} token - Token JWT del usuario
+ */
+export async function eliminarCuenta(token) {
+    return realizarSolicitud('autenticacion/perfil', 'DELETE', null, token);
+}
+
 export default {
     registrarUsuario,
     iniciarSesion,
     obtenerPerfilUsuario,
     actualizarPerfil,
+    eliminarCuenta,
     obtenerGamificacion,
     sincronizarGamificacion,
     guardarEntradaDiaria,

@@ -10,7 +10,7 @@
 // - Si es válido, permite el acceso y agrega el usuarioId al objeto req
 // - Si no es válido, rechaza la solicitud con error 401
 
-const { validarToken } = require('../configuracion/jwt');
+const { validarToken } = require('../configuracion/autenticacion_jwt');
 
 /**
  * Middleware que verifica la autenticación del usuario

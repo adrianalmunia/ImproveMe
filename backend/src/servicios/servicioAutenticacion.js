@@ -12,7 +12,7 @@
 
 const bcrypt = require('bcrypt');
 const prisma = require('../configuracion/baseDatos');
-const { generarToken } = require('../configuracion/jwt');
+const { generarToken } = require('../configuracion/autenticacion_jwt');
 const { validarEmail, validarContraseña, validarNombreUsuario } = require('../utilidades/validadores');
 
 // Número de vueltas para el hash de Bcrypt (más alto = más seguro pero más lento)
@@ -189,9 +189,24 @@ async function actualizarPerfilUsuario(idUsuario, datos) {
     return usuarioActualizado;
 }
 
+async function eliminarUsuario(idUsuario) {
+    // Prisma manejará el borrado en cascada si está configurado en el schema
+    // En nuestro schema, las relaciones tienen onDelete: Cascade
+    const usuarioEliminado = await prisma.usuarios.delete({
+        where: { id: idUsuario }
+    });
+
+    if (!usuarioEliminado) {
+        throw new Error('No se pudo eliminar el usuario');
+    }
+
+    return { mensaje: 'Cuenta eliminada permanentemente' };
+}
+
 module.exports = {
     registrarUsuario,
     iniciarSesion,
     obtenerPerfilUsuario,
-    actualizarPerfilUsuario
+    actualizarPerfilUsuario,
+    eliminarUsuario
 };

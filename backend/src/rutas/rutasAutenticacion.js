@@ -11,7 +11,8 @@ const {
     controlarRegistro,
     controlarLogin,
     controlarObtenerPerfil,
-    controlarActualizarPerfil
+    controlarActualizarPerfil,
+    controlarEliminarPerfil
 } = require('../controladores/controladorAutenticacion');
 
 // ============ RUTAS PÚBLICAS (no requieren autenticación) ============
@@ -43,5 +44,12 @@ router.get('/perfil', verificarAutenticacion, controlarObtenerPerfil);
  * Requiere: Authorization: Bearer {token}
  */
 router.put('/perfil', verificarAutenticacion, controlarActualizarPerfil);
+
+/**
+ * DELETE /api/autenticacion/perfil
+ * Elimina la cuenta del usuario autenticado permanentemente
+ * Requiere: Authorization: Bearer {token}
+ */
+router.delete('/perfil', verificarAutenticacion, controlarEliminarPerfil);
 
 module.exports = router;

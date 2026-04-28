@@ -64,6 +64,7 @@ async function obtenerEstadisticasGenerales(usuarioId) {
         };
     });
 
+    // 4. Correlación Sueño vs Ánimo
     const suenoAnimo = entradasDiario.map(e => ({
         x: parseFloat(e.horas_sueno),
         y: e.puntuacion_animo
@@ -77,21 +78,6 @@ async function obtenerEstadisticasGenerales(usuarioId) {
             { racha_anterior: 'desc' }
         ]
     });
-
-    return {
-        animoEvolucion: entradasDiario.map(e => ({
-            fecha: e.fecha.toISOString().split('T')[0],
-            valor: e.puntuacion_animo,
-            sueno: parseFloat(e.horas_sueno)
-        })),
-        cumplimientoHabitos: statsHabitos,
-        correlacionHabitoAnimo: correlacion,
-        correlacionSuenoAnimo: suenoAnimo,
-        mejorHabitoHistorico: mejorHabitoHistorico ? {
-            nombre: mejorHabitoHistorico.nombre,
-            racha: Math.max(mejorHabitoHistorico.racha, mejorHabitoHistorico.racha_anterior)
-        } : null
-    };
 
     // 6. Estadísticas de Meditación
     const [sesionesChart, todasLasSesiones] = await Promise.all([
@@ -150,8 +136,9 @@ async function obtenerEstadisticasGenerales(usuarioId) {
         }
     }
 
-    console.log(`[Stats] Usuario ${usuarioId}: ${todasLasSesiones.length} sesiones, Racha: ${rachaMed}, Hoy: ${medDatosPorDia[hoyStr] || 0} min`);
+    console.log(`[Stats] Usuario ${usuarioId}: ${todasLasSesiones.length} sesiones, Racha: ${rachaMed}, Total: ${minutosTotalesMeditacion} min, Hoy: ${medDatosPorDia[hoyStr] || 0} min`);
 
+    // Respuesta unificada con TODOS los datos
     return {
         animoEvolucion: entradasDiario.map(e => {
             const f = e.fecha;

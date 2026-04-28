@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import logoImproveMe from '../assets/logo_improveme.png';
 
-export function PaginaLogin({ onLoginExitoso = () => { }, onIrARegistro = () => { } }) {
+export function PaginaInicioSesion({ onLoginExitoso = () => { }, onIrARegistro = () => { } }) {
     const { login, estaCargando, error } = useAutenticacion();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');

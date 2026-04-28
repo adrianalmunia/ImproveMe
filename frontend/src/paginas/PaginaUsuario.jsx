@@ -7,7 +7,7 @@ import { User, Mail, Lock, LogOut, Save, ShieldCheck, Eye, EyeOff, AlertTriangle
 import { ReproductorAudio } from '../componentes/ReproductorAudio';
 
 export function PaginaUsuario() {
-  const { usuario, logout } = useAutenticacion();
+  const { usuario, logout, eliminar } = useAutenticacion();
   const [nombre, setNombre] = useState(usuario?.nombre_usuario || '');
   const [email, setEmail] = useState(usuario?.correo || '');
   const [password, setPassword] = useState('');
@@ -47,6 +47,19 @@ export function PaginaUsuario() {
     setPassword('');
     setNewPassword('');
     setTimeout(() => setMensaje({ texto: '', tipo: '' }), 3000);
+  };
+
+  const manejarBorrarCuenta = async () => {
+    if (fraseConfirmacion !== FRASE_ELIMINAR) return;
+    
+    try {
+      await eliminar();
+      // logout() se llama dentro de eliminar() en el contexto, 
+      // lo cual redirigirá automáticamente al login.
+    } catch (error) {
+      setMensaje({ texto: error.message || 'Error al eliminar cuenta', tipo: 'error' });
+      setTimeout(() => setMensaje({ texto: '', tipo: '' }), 5000);
+    }
   };
 
   // Cargar multimedia real
@@ -274,7 +287,13 @@ export function PaginaUsuario() {
               <p className="text-sm font-bold text-gray-700 mb-4">Escribe <span className="text-red-500 underline">"{FRASE_ELIMINAR}"</span>:</p>
               <div className="flex gap-4">
                 <input type="text" value={fraseConfirmacion} onChange={(e) => setFraseConfirmacion(e.target.value)} className="flex-1 px-5 py-3 bg-red-50 rounded-2xl outline-none font-bold text-red-600" />
-                <button disabled={fraseConfirmacion !== FRASE_ELIMINAR} className={`px-6 py-3 rounded-2xl font-black ${fraseConfirmacion === FRASE_ELIMINAR ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-400'}`}>Borrar</button>
+                <button 
+                  disabled={fraseConfirmacion !== FRASE_ELIMINAR} 
+                  onClick={manejarBorrarCuenta}
+                  className={`px-6 py-3 rounded-2xl font-black ${fraseConfirmacion === FRASE_ELIMINAR ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-gray-200 text-gray-400'}`}
+                >
+                  Borrar
+                </button>
                 <button onClick={() => setMostrarConfirmarBorrado(false)} className="px-6 py-3 bg-gray-100 rounded-2xl font-bold text-gray-500">Cancelar</button>
               </div>
             </div>

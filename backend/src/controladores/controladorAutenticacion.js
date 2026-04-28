@@ -8,7 +8,8 @@ const {
     registrarUsuario,
     iniciarSesion,
     obtenerPerfilUsuario,
-    actualizarPerfilUsuario
+    actualizarPerfilUsuario,
+    eliminarUsuario
 } = require('../servicios/servicioAutenticacion');
 
 /**
@@ -114,9 +115,29 @@ async function controlarActualizarPerfil(req, res) {
     }
 }
 
+/**
+ * Controlador: Eliminar perfil del usuario autenticado
+ * DELETE /api/autenticacion/perfil
+ */
+async function controlarEliminarPerfil(req, res) {
+    try {
+        const idUsuario = req.usuarioId;
+        const resultado = await eliminarUsuario(idUsuario);
+
+        return res.status(200).json(resultado);
+    } catch (error) {
+        console.error('Error al eliminar perfil:', error.message);
+        return res.status(400).json({
+            error: 'No se pudo eliminar la cuenta',
+            mensaje: error.message
+        });
+    }
+}
+
 module.exports = {
     controlarRegistro,
     controlarLogin,
     controlarObtenerPerfil,
-    controlarActualizarPerfil
+    controlarActualizarPerfil,
+    controlarEliminarPerfil
 };
