@@ -198,6 +198,20 @@ export async function obtenerEstadisticasMeditacion(usuarioId, token) {
     return realizarSolicitud(`meditacion/estadisticas/${usuarioId}`, 'GET', null, token);
 }
 
+/**
+ * Obtiene el resumen de actividad para el calendario
+ */
+export async function obtenerResumenCalendario(usuarioId, mes, anio, token) {
+    return realizarSolicitud(`calendario/${usuarioId}?mes=${mes}&anio=${anio}`, 'GET', null, token);
+}
+
+/**
+ * Obtiene las estadísticas generales del usuario
+ */
+export async function obtenerEstadisticasGenerales(usuarioId, token) {
+    return realizarSolicitud(`estadisticas/${usuarioId}`, 'GET', null, token);
+}
+
 export default {
     registrarUsuario,
     iniciarSesion,
@@ -211,4 +225,6 @@ export default {
     registrarSesionMeditacion,
     obtenerHistorialMeditacion,
     obtenerEstadisticasMeditacion,
+    obtenerResumenCalendario,
+    obtenerEstadisticasGenerales,
 };

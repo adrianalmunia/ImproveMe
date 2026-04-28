@@ -19,6 +19,7 @@ model usuarios {
   correo             String    @unique @db.VarChar(100)
   contrasena_hash    String // La contraseña se guarda encriptada por seguridad
   puntos_experiencia Int?      @default(0) // Puntos acumulados para el sistema de rangos
+  racha_meditacion   Int?      @default(0) // Racha actual de meditación
   fecha_registro     DateTime? @default(now()) @db.Timestamp(6)
 
   // Relaciones: Un usuario tiene sus propios hábitos, entradas de diario y sesiones de meditación

@@ -22,13 +22,13 @@ const SidebarIcon = ({ Icon, label, active, onClick }) => (
 
 export function LayoutPrincipal({ children, vistaActual, setVistaActual }) {
   console.log("Vista actual en Layout:", vistaActual);
-  
+
   return (
     <div className="h-screen w-full bg-neutral-100 flex flex-row font-['Inter'] overflow-hidden">
-      
+
       {/* --- SIDEBAR LATERAL --- */}
       <aside className="w-24 h-screen bg-white shadow-[4px_0_24px_rgba(0,0,0,0.05)] border-r border-gray-100 flex flex-col items-center py-4 z-[100] shrink-0 overflow-y-auto custom-scrollbar">
-        <div 
+        <div
           className="mb-8 w-16 h-16 rounded-full p-[2px] shadow-lg cursor-pointer hover:scale-105 transition-transform shrink-0"
           style={{ background: 'linear-gradient(135deg, #4F99CC 0%, #C6A55E 100%)' }}
           onClick={() => setVistaActual('diario')}
@@ -37,25 +37,25 @@ export function LayoutPrincipal({ children, vistaActual, setVistaActual }) {
             <img src={logoImproveMe} alt="Logo" className="w-full h-full object-contain" />
           </div>
         </div>
-        
-        <SidebarIcon 
-          Icon={PenLine} 
+
+        <SidebarIcon
+          Icon={PenLine}
           label="Entrada Diaria"
-          active={vistaActual === 'diario'} 
-          onClick={() => setVistaActual('diario')} 
+          active={vistaActual === 'diario'}
+          onClick={() => setVistaActual('diario')}
         />
-        <SidebarIcon 
-          Icon={Library} 
+        <SidebarIcon
+          Icon={Library}
           label="Registros"
-          active={vistaActual === 'registros'} 
-          onClick={() => setVistaActual('registros')} 
+          active={vistaActual === 'registros'}
+          onClick={() => setVistaActual('registros')}
         />
         <SidebarIcon Icon={BarChart2} label="Estadísticas" active={vistaActual === 'estadisticas'} onClick={() => setVistaActual('estadisticas')} />
         <SidebarIcon Icon={ListTodo} label="Hábitos" active={vistaActual === 'habitos'} onClick={() => setVistaActual('habitos')} />
         <SidebarIcon Icon={Trophy} label="Ranked" active={vistaActual === 'ranked'} onClick={() => setVistaActual('ranked')} />
         <SidebarIcon Icon={Calendar} label="Calendario" active={vistaActual === 'calendario'} onClick={() => setVistaActual('calendario')} />
         <SidebarIcon Icon={Flower2} label="Meditación" active={vistaActual === 'meditacion'} onClick={() => setVistaActual('meditacion')} />
-        
+
         <div className="mt-auto">
           <SidebarIcon Icon={User} label="Usuario" active={vistaActual === 'perfil'} onClick={() => setVistaActual('perfil')} />
         </div>

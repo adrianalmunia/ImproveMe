@@ -99,13 +99,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
                 className="w-full h-full object-cover" 
               />
             </div>
-          ) : !entrada.archivos_multimedia?.some(a => a.tipo_archivo === 'audio') && (
-             <div className="w-full h-16 mt-2 flex items-center justify-center relative z-10 shrink-0">
-               <div className="w-12 h-12 bg-[#4F99CC]/5 rounded-full flex items-center justify-center">
-                  <span className="text-2xl grayscale opacity-20">📖</span>
-               </div>
-             </div>
-          )}
+          ) : null}
 
           {/* Mostrar reproductor de audio si existe */}
           {entrada.archivos_multimedia?.find(a => a.tipo_archivo === 'audio') && (
@@ -117,7 +111,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
           )}
 
           <div className="flex-1 w-full flex items-center justify-center mt-2 px-2 overflow-hidden" style={{ transform: "translateZ(0)" }}>
-            <p className="text-xs font-['Tilt_Warp'] text-gray-700 leading-relaxed text-center w-full break-words line-clamp-3">
+            <p className="text-xs font-['Tilt_Warp'] text-gray-700 leading-relaxed text-center w-full break-words line-clamp-6">
               {extracto}
             </p>
           </div>

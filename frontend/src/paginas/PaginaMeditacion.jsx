@@ -58,7 +58,7 @@ const PISTAS_MUSICA = [
 ];
 
 export function PaginaMeditacion() {
-  const { usuario } = useAutenticacion();
+  const { usuario, token } = useAutenticacion();
   const [estaMeditando, setEstaMeditando] = useState(false);
   const [tiempoSeleccionado, setTiempoSeleccionado] = useState(5);
   const [segundosRestantes, setSegundosRestantes] = useState(0);
@@ -208,7 +208,7 @@ export function PaginaMeditacion() {
         segundos_completados: completados,
         tecnica_respiracion: ajustes.tecnicaRespiracion,
         pista_musica: ajustes.musica ? ajustes.pistaMusica : null,
-      }).catch(err => console.error('Error al registrar sesión de meditación:', err));
+      }, token).catch(err => console.error('Error al registrar sesión de meditación:', err));
     }
   }, [ajustes.gongFinal, ajustes.tecnicaRespiracion, ajustes.musica, ajustes.pistaMusica, reproducirGong, pararMusica, tiempoSeleccionado, segundosRestantes, usuario]);
 

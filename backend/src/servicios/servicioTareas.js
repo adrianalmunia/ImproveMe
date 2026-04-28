@@ -45,6 +45,9 @@ async function sincronizarGamificacion(usuarioId, datos) {
         await tx.tareas_diarias.deleteMany({ where: { usuario_id: usuarioId } });
         await tx.tareas_pendientes.deleteMany({ where: { usuario_id: usuarioId } });
 
+        const ahora = new Date();
+        const hoy = new Date(Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()));
+
         if (datos.habitos && datos.habitos.length > 0) {
             await tx.habitos.createMany({
                 data: datos.habitos.map(h => ({
@@ -57,6 +60,24 @@ async function sincronizarGamificacion(usuarioId, datos) {
                     frecuencia_semanal: h.frecuenciaSemanal || 7
                 }))
             });
+
+            // GUARDAR HISTÓRICO: Para cada hábito con estado, creamos/actualizamos registro
+            for (const h of datos.habitos) {
+                if (h.estado) {
+                    // Buscamos el hábito recién creado (por nombre y usuario ya que acabamos de recrearlos)
+                    const habitoRecienCreado = await tx.habitos.findFirst({
+                        where: { usuario_id: usuarioId, nombre: h.nombre }
+                    });
+                    
+                    if (habitoRecienCreado) {
+                        await tx.registros_habitos.upsert({
+                            where: { habito_id_fecha: { habito_id: habitoRecienCreado.id, fecha: hoy } },
+                            update: { estado: h.estado },
+                            create: { habito_id: habitoRecienCreado.id, fecha: hoy, estado: h.estado }
+                        });
+                    }
+                }
+            }
         }
         
         if (datos.diarias && datos.diarias.length > 0) {
@@ -69,6 +90,20 @@ async function sincronizarGamificacion(usuarioId, datos) {
                     fecha_creacion: new Date(d.fechaCreacion || Date.now())
                 }))
             });
+
+            // GUARDAR HISTÓRICO DIARIAS
+            for (const d of datos.diarias) {
+                const diariaRecienCreada = await tx.tareas_diarias.findFirst({
+                    where: { usuario_id: usuarioId, nombre: d.nombre }
+                });
+                if (diariaRecienCreada) {
+                    await tx.registros_diarias.upsert({
+                        where: { diaria_id_fecha: { diaria_id: diariaRecienCreada.id, fecha: hoy } },
+                        update: { fue_completada: d.completada },
+                        create: { diaria_id: diariaRecienCreada.id, fecha: hoy, fue_completada: d.completada }
+                    });
+                }
+            }
         }
 
         if (datos.tareas && datos.tareas.length > 0) {

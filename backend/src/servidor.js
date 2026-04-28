@@ -14,6 +14,8 @@ const rutasAutenticacion = require('./rutas/rutasAutenticacion');
 const rutasDiario = require('./rutas/rutasDiario');
 const rutasMeditacion = require('./rutas/rutasMeditacion');
 const rutasTareas = require('./rutas/rutasTareas');
+const rutasCalendario = require('./rutas/rutasCalendario');
+const rutasEstadisticas = require('./rutas/rutasEstadisticas');
 
 // ============ CONFIGURACIÓN BÁSICA ============
 const app = express();
@@ -80,6 +82,12 @@ app.use('/api/meditacion', rutasMeditacion);
 
 // Rutas de tareas y gamificacion
 app.use('/api/tareas', rutasTareas);
+
+// Rutas de calendario y resumen
+app.use('/api/calendario', rutasCalendario);
+
+// Rutas de estadísticas
+app.use('/api/estadisticas', rutasEstadisticas);
 
 // ============ MANEJO DE ERRORES 404 ============
 // Si ninguna ruta anterior coincide, devolvemos 404

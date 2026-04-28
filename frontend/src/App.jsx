@@ -10,6 +10,8 @@ import PaginaUsuario from './paginas/PaginaUsuario';
 import PaginaMeditacion from './paginas/PaginaMeditacion';
 import PaginaHabitos from './paginas/PaginaHabitos';
 import PaginaRanked from './paginas/PaginaRanked';
+import PaginaCalendario from './paginas/PaginaCalendario';
+import PaginaEstadisticas from './paginas/PaginaEstadisticas';
 import LayoutPrincipal from './componentes/LayoutPrincipal';
 import { motion } from 'framer-motion';
 
@@ -32,7 +34,9 @@ function ContenidoApp() {
         {vistaActual === 'meditacion' && <PaginaMeditacion />}
         {vistaActual === 'habitos' && <PaginaHabitos setVistaActual={setVistaActual} />}
         {vistaActual === 'ranked' && <PaginaRanked />}
-        {vistaActual !== 'diario' && vistaActual !== 'registros' && vistaActual !== 'perfil' && vistaActual !== 'meditacion' && vistaActual !== 'habitos' && vistaActual !== 'ranked' && (
+        {vistaActual === 'calendario' && <PaginaCalendario />}
+        {vistaActual === 'estadisticas' && <PaginaEstadisticas />}
+        {!['diario', 'registros', 'perfil', 'meditacion', 'habitos', 'ranked', 'calendario', 'estadisticas'].includes(vistaActual) && (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-xl text-gray-400 font-['Tilt_Warp']">Vista en construcción: {vistaActual}</p>
           </div>
