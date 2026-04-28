@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+// import { useNavigate } from 'react-router-dom';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import * as servicioAPI from '../servicios/servicioAPI';
 import {
@@ -16,8 +17,9 @@ import {
   Trash2
 } from 'lucide-react';
 
-const PaginaHabitos = () => {
+const PaginaHabitos = ({ setVistaActual }) => {
   const { usuario, token, actualizarUsuario, refrescarUsuario } = useAutenticacion();
+  // const navigate = useNavigate();
 
   // Puntos de XP guardados en el usuario (o por defecto)
   const xpActual = usuario?.puntos_experiencia || 0;
@@ -25,9 +27,9 @@ const PaginaHabitos = () => {
   const xpParaSiguienteNivel = 100 - (xpActual % 100);
 
   const habitosPorDefecto = [
-    { id: 1, nombre: 'Beber Agua', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000 },
-    { id: 2, nombre: 'Leer 10 min', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000 },
-    { id: 3, nombre: 'No fumar', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000 },
+    { id: 1, nombre: 'Beber Agua', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000, frecuenciaSemanal: 7 },
+    { id: 2, nombre: 'Leer 10 min', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000, frecuenciaSemanal: 7 },
+    { id: 3, nombre: 'No fumar', racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() - 86400000, frecuenciaSemanal: 7 },
   ];
 
   const diariasPorDefecto = [
@@ -98,6 +100,7 @@ const PaginaHabitos = () => {
 
   const [nuevoNombre, setNuevoNombre] = useState('');
   const [nuevaPrioridad, setNuevaPrioridad] = useState('media');
+  const [frecuenciaSeleccionada, setFrecuenciaSeleccionada] = useState(7);
   const [seccionActiva, setSeccionActiva] = useState(null);
 
   // Estado para animaciones de XP flotante
@@ -107,7 +110,9 @@ const PaginaHabitos = () => {
   const ganarXP = (cantidad, e) => {
     // 1. Actualizar XP global
     if (usuario) {
-      actualizarUsuario({ puntos_experiencia: xpActual + cantidad });
+      actualizarUsuario(prev => ({ 
+        puntos_experiencia: (prev.puntos_experiencia || 0) + cantidad 
+      }));
     }
 
     // 2. Crear notificación flotante en la posición del click
@@ -126,7 +131,7 @@ const PaginaHabitos = () => {
     if (!nuevoNombre.trim()) return;
 
     if (tipo === 'habito') {
-      setHabitos([...habitos, { id: Date.now(), nombre: nuevoNombre, racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now() }]);
+      setHabitos([...habitos, { id: Date.now(), nombre: nuevoNombre, racha: 0, rachaAnterior: 0, estado: null, tipo: 'habito', fechaCreacion: Date.now(), frecuenciaSemanal: frecuenciaSeleccionada }]);
     } else if (tipo === 'diaria') {
       setDiarias([...diarias, { id: Date.now(), nombre: nuevoNombre, completada: false, racha: 0, fechaCreacion: Date.now() }]);
     } else if (tipo === 'tarea') {
@@ -135,6 +140,7 @@ const PaginaHabitos = () => {
 
     setNuevoNombre('');
     setNuevaPrioridad('media');
+    setFrecuenciaSeleccionada(7);
     setSeccionActiva(null);
   };
 
@@ -202,8 +208,42 @@ const PaginaHabitos = () => {
               <Zap size={24} fill="currentColor" />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">Racha Actual</p>
-              <p className="text-2xl font-black text-[#2C4159]">7 Días</p>
+              <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">Mejor Racha</p>
+              {(() => {
+                const todos = [...habitos, ...diarias];
+                const rachaMax = Math.max(0, ...todos.map(i => i.racha || 0));
+                
+                if (rachaMax === 0) {
+                  return <p className="text-2xl font-black text-[#2C4159] leading-tight">0 Días</p>;
+                }
+
+                const mejores = todos.filter(i => i.racha === rachaMax);
+                const nombresStr = mejores.length > 2 
+                  ? `${mejores[0].nombre} y ${mejores.length - 1} más` 
+                  : mejores.map(i => i.nombre).join(', ');
+
+                return (
+                  <div className="relative group cursor-help">
+                    <p className="text-2xl font-black text-[#2C4159] leading-tight">{rachaMax} Días</p>
+                    <p className="text-[10px] font-bold text-[#4F99CC] truncate max-w-[120px]">
+                      {nombresStr}
+                    </p>
+                    
+                    {/* Tooltip Custom Visual */}
+                    <div className="absolute left-0 top-full mt-1 hidden group-hover:block z-[100]">
+                      <div className="bg-[#2C4159] text-white text-[10px] px-3 py-2 rounded-xl shadow-xl border border-white/10 backdrop-blur-sm min-w-[150px]">
+                        <p className="font-bold border-b border-white/10 pb-1 mb-1 opacity-60 uppercase text-[8px]">En racha:</p>
+                        {mejores.map((i, idx) => (
+                          <div key={idx} className="flex items-center gap-2 py-0.5">
+                            <div className="w-1 h-1 rounded-full bg-orange-400" />
+                            <span>{i.nombre}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden">
@@ -257,6 +297,20 @@ const PaginaHabitos = () => {
                   onChange={(e) => setNuevoNombre(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && agregarItem('habito')}
                 />
+                <div className="flex justify-between items-center mb-3">
+                   <p className="text-[10px] font-bold text-gray-400 uppercase">Días/Semana:</p>
+                   <div className="flex gap-1">
+                     {[1, 2, 3, 4, 5, 6, 7].map(d => (
+                       <button
+                         key={d}
+                         onClick={() => setFrecuenciaSeleccionada(d)}
+                         className={`w-6 h-6 rounded-md text-[10px] font-bold transition-colors ${frecuenciaSeleccionada === d ? 'bg-[#4F99CC] text-white' : 'bg-gray-100 text-gray-400'}`}
+                       >
+                         {d}
+                       </button>
+                     ))}
+                   </div>
+                </div>
                 <div className="flex justify-end gap-2">
                   <button onClick={() => setSeccionActiva(null)} className="text-xs font-bold text-gray-400 px-2 py-1">Cancelar</button>
                   <button onClick={() => agregarItem('habito')} className="text-xs font-bold bg-[#4F99CC] text-white px-3 py-1 rounded-lg">Añadir</button>
@@ -284,9 +338,17 @@ const PaginaHabitos = () => {
                   </div>
                   <div>
                     <p className={`font-bold text-[#2C4159] leading-tight ${h.estado ? 'text-gray-500 line-through' : ''}`}>{h.nombre}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                        <Flame size={12} className={h.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{h.racha} días</p>
+                    <div className="flex items-center gap-3 mt-0.5">
+                         <div className="flex items-center gap-1">
+                           <Flame size={12} className={h.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
+                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{h.racha} días</p>
+                         </div>
+                         {h.frecuenciaSemanal < 7 && (
+                           <div className="flex items-center gap-1">
+                             <Calendar size={12} className="text-[#4F99CC]" />
+                             <p className="text-[10px] text-[#4F99CC] font-bold uppercase tracking-wider">{h.frecuenciaSemanal} d/sem</p>
+                           </div>
+                         )}
                     </div>
                   </div>
                 </div>
@@ -373,7 +435,7 @@ const PaginaHabitos = () => {
                 <button
                   onClick={(e) => {
                     const completando = !d.completada;
-                    setDiarias(diarias.map(item => item.id === d.id ? { ...item, completada: completando } : item));
+                    setDiarias(diarias.map(item => item.id === d.id ? { ...item, completada: completando, racha: completando ? (item.racha || 0) + 1 : Math.max(0, (item.racha || 0) - 1) } : item));
                     if (completando) {
                       ganarXP(20, e);
                     } else {
@@ -455,10 +517,14 @@ const PaginaHabitos = () => {
                 <button
                   onClick={(e) => {
                     const completando = !t.completada;
-                    setTareas(tareas.map(item => item.id === t.id ? { ...item, completada: completando } : item));
                     if (completando) {
                       ganarXP(30, e);
+                      // Borrar tarea al completarla
+                      setTimeout(() => {
+                        setTareas(prev => prev.filter(item => item.id !== t.id));
+                      }, 500);
                     } else {
+                      setTareas(tareas.map(item => item.id === t.id ? { ...item, completada: false } : item));
                       ganarXP(-30, e);
                     }
                   }}
@@ -516,7 +582,10 @@ const PaginaHabitos = () => {
               <p className="text-gray-400 text-sm font-medium leading-tight mt-1">Acumula XP para competir en la tabla de clasificación semanal.</p>
             </div>
           </div>
-          <button className="w-full py-3 bg-[#2C4159] text-white rounded-2xl font-black text-sm hover:bg-[#1A2836] transition-colors shadow-md">
+          <button 
+            onClick={() => setVistaActual('ranked')}
+            className="w-full py-3 bg-[#2C4159] text-white rounded-2xl font-black text-sm hover:bg-[#1A2836] transition-colors shadow-md"
+          >
             VER CLASIFICACIÓN
           </button>
         </div>

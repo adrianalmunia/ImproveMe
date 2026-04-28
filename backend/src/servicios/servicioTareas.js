@@ -13,7 +13,8 @@ async function obtenerGamificacion(usuarioId) {
         rachaAnterior: h.racha_anterior,
         estado: h.estado,
         tipo: 'habito',
-        fechaCreacion: h.fecha_creacion ? h.fecha_creacion.getTime() : Date.now()
+        fechaCreacion: h.fecha_creacion ? h.fecha_creacion.getTime() : Date.now(),
+        frecuenciaSemanal: h.frecuencia_semanal || 7
     }));
 
     const diarias = diariasDB.map(d => ({
@@ -52,7 +53,8 @@ async function sincronizarGamificacion(usuarioId, datos) {
                     racha: h.racha,
                     racha_anterior: h.rachaAnterior || 0,
                     estado: h.estado,
-                    fecha_creacion: new Date(h.fechaCreacion || Date.now())
+                    fecha_creacion: new Date(h.fechaCreacion || Date.now()),
+                    frecuencia_semanal: h.frecuenciaSemanal || 7
                 }))
             });
         }

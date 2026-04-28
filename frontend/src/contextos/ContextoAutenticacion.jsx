@@ -133,16 +133,31 @@ export function ProveedorAutenticacion({ children }) {
         localStorage.removeItem('usuarioAutenticacion');
     }
 
-    async function actualizarUsuario(nuevosDatos) {
-        // Actualización optimista local
-        const usuarioActualizado = { ...usuario, ...nuevosDatos };
-        setUsuario(usuarioActualizado);
-        localStorage.setItem('usuarioAutenticacion', JSON.stringify(usuarioActualizado));
+    async function actualizarUsuario(datosOFuncion) {
+        let datosARevisar = datosOFuncion;
+        
+        // Actualización local
+        setUsuario(prev => {
+            const nuevosDatos = typeof datosOFuncion === 'function' ? datosOFuncion(prev) : datosOFuncion;
+            datosARevisar = nuevosDatos; // Guardamos para el backend
+            const usuarioActualizado = { ...prev, ...nuevosDatos };
+            localStorage.setItem('usuarioAutenticacion', JSON.stringify(usuarioActualizado));
+            return usuarioActualizado;
+        });
 
-        // Actualizamos en backend si tenemos token
+        // Actualizamos en backend
         if (token) {
             try {
-                await servicioAPI.actualizarPerfil(nuevosDatos, token);
+                // Nota: si datosOFuncion era una función, necesitamos los datos ya resueltos
+                // pero como setUsuario es asíncrono, usamos la variable local datosARevisar
+                // que se actualizó dentro del callback (técnicamente el callback se ejecuta 
+                // por React después, pero en este caso queremos los datos nuevos)
+                
+                // MEJOR: Calculamos los datos fuera si es posible o esperamos al siguiente render.
+                // Para simplificar, si es una función, la ejecutamos una vez aquí con el usuario actual
+                const datosFinales = typeof datosOFuncion === 'function' ? datosOFuncion(usuario) : datosOFuncion;
+                
+                await servicioAPI.actualizarPerfil(datosFinales, token);
             } catch (err) {
                 console.error("Error al guardar perfil en el backend:", err);
             }

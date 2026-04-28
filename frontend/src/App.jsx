@@ -30,7 +30,7 @@ function ContenidoApp() {
         {vistaActual === 'registros' && <PaginaRegistros />}
         {vistaActual === 'perfil' && <PaginaUsuario />}
         {vistaActual === 'meditacion' && <PaginaMeditacion />}
-        {vistaActual === 'habitos' && <PaginaHabitos />}
+        {vistaActual === 'habitos' && <PaginaHabitos setVistaActual={setVistaActual} />}
         {vistaActual === 'ranked' && <PaginaRanked />}
         {vistaActual !== 'diario' && vistaActual !== 'registros' && vistaActual !== 'perfil' && vistaActual !== 'meditacion' && vistaActual !== 'habitos' && vistaActual !== 'ranked' && (
           <div className="flex-1 flex items-center justify-center">
