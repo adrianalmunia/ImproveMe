@@ -1,31 +1,61 @@
 const prisma = require('../configuracion/baseDatos');
 
 async function obtenerGamificacion(usuarioId) {
-    const habitosDB = await prisma.habitos.findMany({ where: { usuario_id: usuarioId } });
-    const diariasDB = await prisma.tareas_diarias.findMany({ where: { usuario_id: usuarioId } });
+    // Calcular el día de hoy (a las 00:00 UTC) para comparar con registros históricos
+    const ahora = new Date();
+    const hoy = new Date(Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()));
+
+    const habitosDB = await prisma.habitos.findMany({
+        where: { usuario_id: usuarioId },
+        include: {
+            registros_cumplimiento: {
+                where: { fecha: hoy },
+                take: 1
+            }
+        }
+    });
+    const diariasDB = await prisma.tareas_diarias.findMany({
+        where: { usuario_id: usuarioId },
+        include: {
+            registros_cumplimiento: {
+                where: { fecha: hoy },
+                take: 1
+            }
+        }
+    });
     const tareasDB = await prisma.tareas_pendientes.findMany({ where: { usuario_id: usuarioId } });
-    
-    // Mapear nombres a los que espera el frontend
-    const habitos = habitosDB.map(h => ({
-        id: h.id,
-        nombre: h.nombre,
-        racha: h.racha,
-        rachaAnterior: h.racha_anterior,
-        estado: h.estado,
-        tipo: 'habito',
-        fechaCreacion: h.fecha_creacion ? h.fecha_creacion.getTime() : Date.now(),
-        frecuenciaSemanal: h.frecuencia_semanal || 7
-    }));
 
-    const diarias = diariasDB.map(d => ({
-        id: d.id,
-        nombre: d.nombre,
-        completada: d.completada,
-        racha: d.racha,
-        tipo: 'diaria',
-        fechaCreacion: d.fecha_creacion ? d.fecha_creacion.getTime() : Date.now()
-    }));
+    // Para hábitos: el estado de HOY se lee del registro diario, no de la tabla principal.
+    // Si no hay registro para hoy → el hábito se muestra como no marcado (null).
+    const habitos = habitosDB.map(h => {
+        const registroHoy = h.registros_cumplimiento[0] || null;
+        return {
+            id: h.id,
+            nombre: h.nombre,
+            racha: h.racha,
+            rachaAnterior: h.racha_anterior,
+            estado: registroHoy ? registroHoy.estado : null,
+            tipo: 'habito',
+            fechaCreacion: h.fecha_creacion ? h.fecha_creacion.getTime() : Date.now(),
+            frecuenciaSemanal: h.frecuencia_semanal || 7
+        };
+    });
 
+    // Para diarias: la completitud de HOY se lee del registro diario.
+    // Si no hay registro para hoy → la diaria se muestra como no completada.
+    const diarias = diariasDB.map(d => {
+        const registroHoy = d.registros_cumplimiento[0] || null;
+        return {
+            id: d.id,
+            nombre: d.nombre,
+            completada: registroHoy ? registroHoy.fue_completada : false,
+            racha: d.racha,
+            tipo: 'diaria',
+            fechaCreacion: d.fecha_creacion ? d.fecha_creacion.getTime() : Date.now()
+        };
+    });
+
+    // Las tareas pendientes (To-Dos) NO se reinician: se mantienen hasta que se borren.
     const tareas = tareasDB.map(t => ({
         id: t.id,
         nombre: t.nombre,
@@ -56,7 +86,7 @@ async function sincronizarGamificacion(usuarioId, datos) {
         const idsHabitosConservar = habitosRecibidos
             .filter(h => typeof h.id === 'number' && h.id < 1000000000000 && idsExistentesHabitos.has(h.id))
             .map(h => h.id);
-        
+
         // Eliminar los que el usuario quitó
         await tx.habitos.deleteMany({
             where: { usuario_id: usuarioId, id: { notIn: idsHabitosConservar } }
@@ -161,7 +191,7 @@ async function sincronizarGamificacion(usuarioId, datos) {
         const idsTareasConservar = tareasRecibidas
             .filter(t => typeof t.id === 'number' && t.id < 1000000000000 && idsExistentesTareas.has(t.id))
             .map(t => t.id);
-        
+
         await tx.tareas_pendientes.deleteMany({
             where: { usuario_id: usuarioId, id: { notIn: idsTareasConservar } }
         });

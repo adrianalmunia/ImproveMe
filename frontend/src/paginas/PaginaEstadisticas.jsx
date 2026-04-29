@@ -206,7 +206,8 @@ const PaginaEstadisticas = () => {
     labels: stats?.cumplimientoHabitos.map(h => h.nombre),
     datasets: [
       {
-        data: stats?.cumplimientoHabitos.map(h => h.porcentaje),
+        label: 'Días completados (últimos 30d)',
+        data: stats?.cumplimientoHabitos.map(h => h.total),
         backgroundColor: [
           '#4F99CC', '#C6A55E', '#2C4159', '#F97316', '#10B981', '#6366F1'
         ],
@@ -335,69 +336,142 @@ const PaginaEstadisticas = () => {
         </div>
 
         {/* Resumen Semanal vs Mensual */}
-        <div className="lg:col-span-1 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between">
-          <div>
-            <h2 className="text-xl font-black text-[#2C4159] mb-6 flex items-center gap-2">
-              <Calendar size={20} className="text-[#4F99CC]" />
-              Resumen Temporal
-            </h2>
-            <div className="space-y-6">
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Esta Semana</p>
-                  <p className="text-3xl font-black text-[#4F99CC]">
-                    {(stats?.animoEvolucion.slice(-7).reduce((acc, curr) => acc + curr.valor, 0) / (Math.min(stats?.animoEvolucion.length, 7) || 1)).toFixed(1)}
+        <div className="lg:col-span-1 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 flex flex-col h-[450px]">
+          <h2 className="text-xl font-black text-[#2C4159] mb-6 flex items-center gap-2 shrink-0">
+            <Calendar size={20} className="text-[#4F99CC]" />
+            Resumen Temporal
+          </h2>
+          
+          {/* Info Superior */}
+          <div className="space-y-4 shrink-0">
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Esta Semana</p>
+                <p className="text-3xl font-black text-[#4F99CC]">
+                  {(stats?.animoEvolucion.slice(-7).reduce((acc, curr) => acc + curr.valor, 0) / (Math.min(stats?.animoEvolucion.length, 7) || 1)).toFixed(1)}
+                </p>
+              </div>
+              <div className="text-right">
+                {stats?.comparacionSemanal !== null && stats?.comparacionSemanal !== undefined ? (
+                  <p className={`text-[10px] font-black uppercase tracking-widest ${stats.comparacionSemanal >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {stats.comparacionSemanal >= 0 ? '+' : ''}{stats.comparacionSemanal}% vs anterior
                   </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-black text-green-500 uppercase tracking-widest">+12% vs mes</p>
-                </div>
+                ) : (
+                  <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Sin datos previos</p>
+                )}
               </div>
-              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: '85%' }}
-                  className="h-full bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]" 
-                />
-              </div>
-              
-              <div className="pt-4 border-t border-gray-50">
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Más consistentes ahora</p>
-                <div className="space-y-3">
-                  {stats?.cumplimientoHabitos.filter(h => h.porcentaje === stats.cumplimientoHabitos[0]?.porcentaje).slice(0, 2).map(h => (
-                    <div key={h.nombre} className="flex items-center gap-3">
-                       <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500">
-                          <Flame size={16} />
-                       </div>
-                       <div>
-                          <p className="text-[12px] font-black text-[#2C4159]">{h.nombre}</p>
-                          <p className="text-[9px] font-bold text-gray-400">{h.porcentaje}%</p>
-                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            </div>
+            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(100, Math.max(10, ((stats?.animoEvolucion.slice(-7).reduce((acc, curr) => acc + curr.valor, 0) / (Math.min(stats?.animoEvolucion.length, 7) || 1)) / 5) * 100))}%` }}
+                className="h-full bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]" 
+              />
+            </div>
+          </div>
 
-              {stats?.mejorHabitoHistorico && (
-                <div className="pt-4 border-t border-gray-50 mt-2">
-                  <p className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#C6A55E] to-[#4F99CC] uppercase tracking-widest mb-2">Tu récord histórico</p>
-                  <div className="bg-gradient-to-br from-neutral-50 to-white p-3 rounded-2xl border border-[#C6A55E]/20 shadow-sm flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center text-[#C6A55E]">
-                      <Award size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-[#2C4159] leading-tight">{stats.mejorHabitoHistorico.nombre}</p>
-                      <p className="text-[10px] font-bold text-[#C6A55E] uppercase">Racha: {stats.mejorHabitoHistorico.racha} días</p>
-                    </div>
+          {/* Sección Deslizable de Rachas */}
+          <div className="flex-1 flex flex-col min-h-0 pt-6 mt-4 border-t border-gray-50">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 shrink-0">Rachas más consistentes</p>
+            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
+              {(stats?.rachasActuales || []).filter(r => r.racha > 0).length > 0 ? (
+                (stats?.rachasActuales || []).filter(r => r.racha > 0).map(r => (
+                  <div key={r.nombre} className="flex items-center gap-3">
+                     <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500">
+                        <Flame size={16} />
+                     </div>
+                     <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-black text-[#2C4159] truncate">{r.nombre}</p>
+                        <p className="text-[9px] font-bold text-orange-500">{r.racha} {r.racha === 1 ? 'día' : 'días'} seguidos</p>
+                     </div>
                   </div>
-                </div>
+                ))
+              ) : (
+                <p className="text-[10px] text-gray-300 font-bold">Aún no hay rachas activas</p>
               )}
+            </div>
+          </div>
+
+          {/* Bloque Fijo Inferior */}
+          {stats?.mejorHabitoHistorico && (
+            <div className="pt-4 border-t border-gray-50 mt-auto shrink-0">
+              <p className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#C6A55E] to-[#4F99CC] uppercase tracking-widest mb-2">Tu récord histórico</p>
+              <div className="bg-gradient-to-br from-neutral-50 to-white p-3 rounded-2xl border border-[#C6A55E]/20 shadow-sm flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center text-[#C6A55E]">
+                  <Award size={20} />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-[#2C4159] leading-tight">{stats.mejorHabitoHistorico.nombre}</p>
+                  <p className="text-[10px] font-bold text-[#C6A55E] uppercase">Racha: {stats.mejorHabitoHistorico.racha} días</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Cumplimiento de Hábitos (Consistencia) */}
+        <div className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 h-[450px]">
+          <h2 className="text-xl font-black text-[#2C4159] mb-2 flex items-center gap-2">
+            <Target size={20} className="text-[#C6A55E]" />
+            Consistencia
+          </h2>
+          <p className="text-[10px] font-bold text-gray-400 uppercase mb-4">Días completados en los últimos 30</p>
+          <div className="h-[310px]">
+            <Bar 
+              data={dataHabitos} 
+              options={{
+                ...chartOptions,
+                indexAxis: 'y',
+                scales: {
+                  ...chartOptions.scales,
+                  x: {
+                    ...chartOptions.scales.x,
+                    ticks: { ...chartOptions.scales.x.ticks, stepSize: 1 },
+                    title: { display: true, text: 'Días', font: { size: 10, weight: 'bold' }, color: '#94a3b8' }
+                  }
+                },
+                plugins: { ...chartOptions.plugins, tooltip: { ...chartOptions.plugins.tooltip, displayColors: true } }
+              }} 
+            />
+          </div>
+        </div>
+
+        {/* Meditación Dashboard (Paz Mental) */}
+        <div className="lg:col-span-1 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 flex flex-col h-[450px]">
+          <h2 className="text-xl font-black text-[#2C4159] mb-2 flex items-center gap-2">
+            <Flower2 size={20} className="text-teal-500" />
+            Paz Mental
+          </h2>
+          <p className="text-[10px] font-bold text-gray-400 uppercase mb-4">Tu compromiso con el mindfulness</p>
+          <div className="h-[230px] mb-4">
+            <Bar 
+              data={dataMeditacion} 
+              options={{
+                ...chartOptions,
+                plugins: { ...chartOptions.plugins, tooltip: { ...chartOptions.plugins.tooltip, displayColors: true } }
+              }} 
+            />
+          </div>
+          <div className="mt-auto">
+            <div className="bg-teal-50/50 rounded-3xl border border-teal-100 p-5 flex flex-col items-center justify-center gap-1">
+              <span className="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] text-center">Meditación hoy</span>
+              <div className="flex items-center gap-2">
+                <Flower2 size={16} className="text-teal-500" />
+                <span className="text-3xl font-black text-teal-900 leading-none">
+                  {(() => {
+                    const ahora = new Date();
+                    const hoyStr = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
+                    return stats?.meditacion?.evolucion?.find(e => e.fecha === hoyStr)?.minutos || 0;
+                  })()}
+                  <span className="text-xs ml-1 text-teal-700/60 font-bold uppercase">min</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Evolución Ánimo */}
-        <div className="lg:col-span-2 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 h-[400px]">
+        {/* Evolución Ánimo (Bienestar Emocional) */}
+        <div className="lg:col-span-2 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 h-[450px]">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-black text-[#2C4159] flex items-center gap-2">
               <TrendingUp size={20} className="text-[#4F99CC]" />
@@ -409,30 +483,12 @@ const PaginaEstadisticas = () => {
               </span>
             </div>
           </div>
-          <div className="h-[280px]">
+          <div className="h-[330px]">
             <Line data={dataAnimo} options={chartOptions} />
           </div>
         </div>
 
-        {/* Cumplimiento de Hábitos */}
-        <div className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 h-[400px]">
-          <h2 className="text-xl font-black text-[#2C4159] mb-6 flex items-center gap-2">
-            <Target size={20} className="text-[#C6A55E]" />
-            Consistencia
-          </h2>
-          <div className="h-[280px]">
-            <Bar 
-              data={dataHabitos} 
-              options={{
-                ...chartOptions,
-                indexAxis: 'y',
-                plugins: { ...chartOptions.plugins, tooltip: { ...chartOptions.plugins.tooltip, displayColors: true } }
-              }} 
-            />
-          </div>
-        </div>
-
-        {/* Correlación Radar */}
+        {/* Correlación Radar (Impacto Vital) */}
         <div className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 h-[450px]">
           <h2 className="text-xl font-black text-[#2C4159] mb-2 flex items-center gap-2">
             <Zap size={20} className="text-yellow-500" />
@@ -462,40 +518,6 @@ const PaginaEstadisticas = () => {
             <span className="flex items-center gap-1 text-[10px] font-bold text-[#C6A55E]">
               <div className="w-2 h-2 rounded-full bg-[#C6A55E]" /> Días SIN hábito
             </span>
-          </div>
-        </div>
-
-        {/* Meditación Dashboard */}
-        <div className="lg:col-span-1 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 flex flex-col">
-          <h2 className="text-xl font-black text-[#2C4159] mb-2 flex items-center gap-2">
-            <Flower2 size={20} className="text-teal-500" />
-            Paz Mental
-          </h2>
-          <p className="text-[10px] font-bold text-gray-400 uppercase mb-4">Tu compromiso con el mindfulness</p>
-          <div className="h-[200px] mb-4">
-            <Bar 
-              data={dataMeditacion} 
-              options={{
-                ...chartOptions,
-                plugins: { ...chartOptions.plugins, tooltip: { ...chartOptions.plugins.tooltip, displayColors: true } }
-              }} 
-            />
-          </div>
-          <div className="mt-auto">
-            <div className="bg-teal-50/50 rounded-3xl border border-teal-100 p-5 flex flex-col items-center justify-center gap-1">
-              <span className="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] text-center">Meditación hoy</span>
-              <div className="flex items-center gap-2">
-                <Flower2 size={16} className="text-teal-500" />
-                <span className="text-3xl font-black text-teal-900 leading-none">
-                  {(() => {
-                    const ahora = new Date();
-                    const hoyStr = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
-                    return stats?.meditacion?.evolucion?.find(e => e.fecha === hoyStr)?.minutos || 0;
-                  })()}
-                  <span className="text-xs ml-1 text-teal-700/60 font-bold uppercase">min</span>
-                </span>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -534,29 +556,6 @@ const PaginaEstadisticas = () => {
               }} 
             />
           </div>
-        </div>
-
-        {/* Sección de Insights / Recomendaciones */}
-        <div className="lg:col-span-3 bg-gradient-to-r from-[#2C4159] to-[#1A2836] rounded-[40px] p-10 text-white relative overflow-hidden flex flex-col md:flex-row items-center gap-10">
-          <div className="flex-1 z-10">
-            <span className="bg-[#4F99CC] px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 inline-block">
-              Insight de la semana
-            </span>
-            <h3 className="text-3xl font-black mb-4 leading-tight">
-              Tus niveles de ánimo suben un <span className="text-[#C6A55E]">15%</span> cuando completas tus hábitos por la mañana.
-            </h3>
-            <p className="text-gray-300 text-sm leading-relaxed mb-6 max-w-xl">
-              Según tus últimos 30 días, la consistencia en el hábito de "{stats?.cumplimientoHabitos[0]?.nombre || 'Meditación'}" es el factor que más influye positivamente en tu bienestar general.
-            </p>
-            <button className="bg-white text-[#2C4159] px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#4F99CC] hover:text-white transition-all shadow-xl">
-              Ver plan de optimización
-            </button>
-          </div>
-          <div className="w-48 h-48 rounded-full bg-gradient-to-tr from-[#4F99CC] to-[#C6A55E] flex items-center justify-center p-4 relative shrink-0">
-             <Award size={80} className="text-white drop-shadow-lg" />
-             <div className="absolute inset-0 border-4 border-white/10 rounded-full animate-ping" />
-          </div>
-          <Activity className="absolute -right-10 -bottom-10 w-64 h-64 text-white/5" />
         </div>
 
       </div>

@@ -30,13 +30,51 @@ async function obtenerEstadisticasGenerales(usuarioId) {
 
     const statsHabitos = habitos.map(h => {
         const completados = h.registros_cumplimiento.filter(r => r.estado === 'positivo').length;
-        const totalDias = 30; // Simplificado
+        const totalDias = 30;
         return {
             nombre: h.nombre,
             porcentaje: Math.round((completados / totalDias) * 100),
             total: completados
         };
     });
+
+    // 2b. Rachas actuales de hábitos y diarias (para "Más consistentes ahora")
+    const diarias = await prisma.tareas_diarias.findMany({
+        where: { usuario_id: usuarioId }
+    });
+
+    const rachasActuales = [
+        ...habitos.map(h => ({ nombre: h.nombre, racha: h.racha || 0, tipo: 'habito' })),
+        ...diarias.map(d => ({ nombre: d.nombre, racha: d.racha || 0, tipo: 'diaria' }))
+    ].sort((a, b) => b.racha - a.racha);
+
+    // 2c. Comparación semana actual vs semana anterior (porcentaje real)
+    const inicioSemana = new Date(hoy);
+    inicioSemana.setDate(hoy.getDate() - hoy.getDay() + 1); // Lunes de esta semana
+    inicioSemana.setHours(0, 0, 0, 0);
+    const inicioSemanaAnterior = new Date(inicioSemana);
+    inicioSemanaAnterior.setDate(inicioSemana.getDate() - 7);
+
+    const entradasEstaSemana = entradasDiario.filter(e => {
+        const fecha = new Date(e.fecha);
+        return fecha >= inicioSemana;
+    });
+    const entradasSemanaAnterior = entradasDiario.filter(e => {
+        const fecha = new Date(e.fecha);
+        return fecha >= inicioSemanaAnterior && fecha < inicioSemana;
+    });
+
+    const avgEstaSemana = entradasEstaSemana.length > 0
+        ? entradasEstaSemana.reduce((acc, e) => acc + e.puntuacion_animo, 0) / entradasEstaSemana.length
+        : null;
+    const avgSemanaAnterior = entradasSemanaAnterior.length > 0
+        ? entradasSemanaAnterior.reduce((acc, e) => acc + e.puntuacion_animo, 0) / entradasSemanaAnterior.length
+        : null;
+
+    let comparacionSemanal = null;
+    if (avgEstaSemana !== null && avgSemanaAnterior !== null && avgSemanaAnterior > 0) {
+        comparacionSemanal = Math.round(((avgEstaSemana - avgSemanaAnterior) / avgSemanaAnterior) * 100);
+    }
 
     // 3. Correlación Hábitos vs Ánimo
     // Promedio de ánimo en días con hábitos completados vs días sin ellos
@@ -155,6 +193,8 @@ async function obtenerEstadisticasGenerales(usuarioId) {
             nombre: mejorHabitoHistorico.nombre,
             racha: Math.max(mejorHabitoHistorico.racha, mejorHabitoHistorico.racha_anterior)
         } : null,
+        rachasActuales,
+        comparacionSemanal,
         meditacion: {
             totalMinutos: minutosTotalesMeditacion,
             rachaActual: rachaMed,
