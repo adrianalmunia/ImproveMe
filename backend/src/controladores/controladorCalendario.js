@@ -6,11 +6,11 @@ const { obtenerResumenCalendario } = require('../servicios/servicioCalendario');
  */
 async function controlarObtenerCalendario(req, res) {
     try {
-        const usuarioId = parseInt(req.params.usuarioId);
+        const usuarioId = req.usuarioId;
         const { mes, anio } = req.query;
 
-        if (!usuarioId || !mes || !anio) {
-            return res.status(400).json({ error: 'Faltan parámetros (usuarioId, mes, anio)' });
+        if (!mes || !anio) {
+            return res.status(400).json({ error: 'Faltan parámetros (mes, anio)' });
         }
 
         const resumen = await obtenerResumenCalendario(usuarioId, parseInt(mes), parseInt(anio));

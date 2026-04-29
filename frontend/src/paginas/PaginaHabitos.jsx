@@ -385,10 +385,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
                     <button
                       onClick={(e) => {
                         if (h.estado === 'positivo') {
+                            // Deshacer positivo: volver a neutro y bajar racha
                             setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: Math.max(0, item.racha - 1) } : item));
                             ganarXP(-10, e);
                         } else {
-                            setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'positivo', racha: item.racha + 1 } : item));
+                            // Marcar positivo: si estaba en negativo, restauramos rachaAnterior antes de sumar
+                            const rachaBase = h.estado === 'negativo' ? h.rachaAnterior : h.racha;
+                            setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'positivo', racha: rachaBase + 1 } : item));
                             ganarXP(10, e);
                         }
                       }}
@@ -399,10 +402,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
                     <button
                       onClick={(e) => {
                         if (h.estado === 'negativo') {
+                            // Deshacer negativo: restaurar la racha que teníamos
                             setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: item.rachaAnterior || 0 } : item));
                             ganarXP(10, e);
                         } else {
-                            setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'negativo', rachaAnterior: item.racha, racha: 0 } : item));
+                            // Marcar negativo: guardar racha actual solo si venimos de neutro
+                            const nuevaRachaAnterior = h.estado === 'positivo' ? Math.max(0, h.racha - 1) : h.racha;
+                            setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'negativo', rachaAnterior: nuevaRachaAnterior, racha: 0 } : item));
                             ganarXP(-10, e);
                         }
                       }}

@@ -169,7 +169,7 @@ export function PaginaDiario() {
       if (!imagen) formData.append('borrar_imagen', 'true');
       if (!audio) formData.append('borrar_audio', 'true');
       
-      await guardarEntradaDiaria(formData, token);
+      const respuesta = await guardarEntradaDiaria(formData, token);
 
       // Limpiar borrador al guardar con éxito en el servidor
       const borradorKey = `diario_borrador_${usuario.id}_${new Date().toDateString()}`;
@@ -181,15 +181,17 @@ export function PaginaDiario() {
       // Limpiar mensaje tras 3 segundos
       setTimeout(() => setMensajeStatus({ texto: '', tipo: '' }), 3000);
 
-      // GANAR XP
-      const xpGanada = 50;
-      actualizarUsuario({ puntos_experiencia: (usuario.puntos_experiencia || 0) + xpGanada });
-      
-      const idNotif = Date.now();
-      setNotificacionesXP(prev => [...prev, { id: idNotif, x: clientX, y: clientY - 50, cantidad: xpGanada }]);
-      setTimeout(() => {
-        setNotificacionesXP(prev => prev.filter(n => n.id !== idNotif));
-      }, 1500);
+      // GANAR XP (Sincronizado con el backend)
+      if (respuesta && respuesta.xpGanada > 0) {
+        const xpGanada = respuesta.xpGanada;
+        actualizarUsuario({ puntos_experiencia: respuesta.nuevoTotalXP });
+        
+        const idNotif = Date.now();
+        setNotificacionesXP(prev => [...prev, { id: idNotif, x: clientX, y: clientY - 50, cantidad: xpGanada }]);
+        setTimeout(() => {
+          setNotificacionesXP(prev => prev.filter(n => n.id !== idNotif));
+        }, 1500);
+      }
 
     } catch (error) {
       setMensajeStatus({ texto: 'Error al guardar la entrada', tipo: 'error' });
@@ -666,17 +668,16 @@ export function PaginaDiario() {
         )}
       </AnimatePresence>
 
-      {/* Animaciones de XP Flotante */}
+      {/* Animaciones de XP Flotante (Igual que en Hábitos) */}
       <AnimatePresence>
         {notificacionesXP.map(notif => (
           <motion.div
             key={notif.id}
-            initial={{ opacity: 0, y: notif.y, x: notif.x, scale: 0.5 }}
-            animate={{ opacity: 1, y: notif.y - 100, scale: 1.5 }}
-            exit={{ opacity: 0, scale: 0 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
-            className={`fixed z-50 font-black text-3xl drop-shadow-[0_5px_15px_rgba(250,204,21,0.6)] text-yellow-400`}
-            style={{ pointerEvents: 'none' }}
+            initial={{ opacity: 1, y: notif.y - 20, x: notif.x - 20, scale: 0.5 }}
+            animate={{ opacity: 0, y: notif.y - 100, scale: 1.2 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="fixed z-[9999] font-black text-xl drop-shadow-md pointer-events-none text-yellow-500"
           >
             +{notif.cantidad} XP
           </motion.div>

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-export function ReproductorAudio({ src }) {
+export function ReproductorAudio({ src, light = false }) {
   const reproductorAudioRef = useRef(null);
   const [reproduciendo, setReproduciendo] = useState(false);
   const [progresoAudio, setProgresoAudio] = useState(0);
@@ -80,7 +80,11 @@ export function ReproductorAudio({ src }) {
   };
 
   return (
-    <div className="flex items-center gap-3 bg-[#4F99CC]/10 border border-[#4F99CC]/20 px-4 py-2 rounded-full w-full max-w-[280px]">
+    <div className={`flex items-center gap-3 px-4 py-2 rounded-full w-full max-w-[280px] backdrop-blur-sm transition-all ${
+      light 
+      ? 'bg-white/80 border border-white/50 shadow-xl' 
+      : 'bg-[#4F99CC]/10 border border-[#4F99CC]/20'
+    }`}>
       <button
         onClick={toggleReproduccion}
         className="w-10 h-10 rounded-full bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] text-white flex items-center justify-center shrink-0 shadow-md hover:scale-105 transition-transform"

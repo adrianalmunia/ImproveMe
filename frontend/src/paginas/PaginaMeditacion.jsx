@@ -315,12 +315,21 @@ export function PaginaMeditacion() {
   };
 
   const salir = () => {
-    setEstaMeditando(false);
-    setSesionFinalizada(false);
-    setProgreso(0);
-    pararMusica();
-    clearInterval(intervalRef.current);
-    clearInterval(breathingRef.current);
+    // Si ha meditado más de 10 segundos, guardamos la sesión antes de salir
+    const totalSegundos = tiempoSeleccionado * 60;
+    const completados = totalSegundos - segundosRestantes;
+    
+    if (completados >= 10 && estaMeditando) {
+      console.log("Guardando sesión parcial antes de salir...");
+      finalizarSesion();
+    } else {
+      setEstaMeditando(false);
+      setSesionFinalizada(false);
+      setProgreso(0);
+      pararMusica();
+      clearInterval(intervalRef.current);
+      clearInterval(breathingRef.current);
+    }
   };
 
   const fmt = s => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;

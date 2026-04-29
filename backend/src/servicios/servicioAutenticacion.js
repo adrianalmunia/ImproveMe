@@ -168,11 +168,67 @@ async function obtenerPerfilUsuario(idUsuario) {
 }
 
 async function actualizarPerfilUsuario(idUsuario, datos) {
+    const dataAActualizar = {};
+
+    // 0. VERIFICAR CONTRASEÑA ACTUAL SI SE CAMBIAN DATOS SENSIBLES
+    const requiereVerificacion = datos.nombre_usuario || datos.correo || datos.contrasena;
+    
+    if (requiereVerificacion) {
+        if (!datos.contrasena_actual) {
+            throw new Error('Se requiere la contraseña actual para confirmar los cambios');
+        }
+
+        const usuarioActual = await prisma.usuarios.findUnique({
+            where: { id: idUsuario },
+            select: { contrasena_hash: true, nombre_usuario: true, correo: true }
+        });
+
+        const passwordCorrecta = await bcrypt.compare(datos.contrasena_actual, usuarioActual.contrasena_hash);
+        if (!passwordCorrecta) {
+            throw new Error('La contraseña actual es incorrecta');
+        }
+
+        // 1. VALIDACIONES Y PREPARACIÓN DE DATOS
+        if (datos.nombre_usuario !== undefined && datos.nombre_usuario !== usuarioActual.nombre_usuario) {
+            if (!validarNombreUsuario(datos.nombre_usuario)) {
+                throw new Error('El nombre de usuario debe tener 3-20 caracteres (solo letras, números y _)');
+            }
+            const existe = await prisma.usuarios.findUnique({ where: { nombre_usuario: datos.nombre_usuario } });
+            if (existe) throw new Error('El nombre de usuario ya está en uso');
+            dataAActualizar.nombre_usuario = datos.nombre_usuario;
+        }
+
+        if (datos.correo !== undefined && datos.correo !== usuarioActual.correo) {
+            if (!validarEmail(datos.correo)) {
+                throw new Error('El email no tiene formato válido');
+            }
+            const existe = await prisma.usuarios.findUnique({ where: { correo: datos.correo } });
+            if (existe) throw new Error('El correo electrónico ya está en uso');
+            dataAActualizar.correo = datos.correo;
+        }
+
+        if (datos.contrasena !== undefined && datos.contrasena !== '') {
+            const validacionPassword = validarContraseña(datos.contrasena);
+            if (!validacionPassword.esValida) {
+                throw new Error(validacionPassword.errores.join('; '));
+            }
+            dataAActualizar.contrasena_hash = await bcrypt.hash(datos.contrasena, VUELTAS_BCRYPT);
+        }
+    }
+
+    if (datos.puntos_experiencia !== undefined) {
+        dataAActualizar.puntos_experiencia = datos.puntos_experiencia;
+    }
+
+    // Si no hay nada que actualizar, retornamos el usuario actual
+    if (Object.keys(dataAActualizar).length === 0) {
+        return await obtenerPerfilUsuario(idUsuario);
+    }
+
+    // 2. EJECUTAR ACTUALIZACIÓN
     const usuarioActualizado = await prisma.usuarios.update({
         where: { id: idUsuario },
-        data: {
-            puntos_experiencia: datos.puntos_experiencia !== undefined ? datos.puntos_experiencia : undefined
-        },
+        data: dataAActualizar,
         select: {
             id: true,
             nombre_usuario: true,

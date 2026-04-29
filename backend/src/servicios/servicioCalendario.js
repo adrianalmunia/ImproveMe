@@ -57,10 +57,18 @@ async function obtenerResumenCalendario(usuarioId, mes, anio) {
     // Organizar datos por fecha (YYYY-MM-DD)
     const resumen = {};
 
-    // Helper para formatear fecha como clave UTC (YYYY-MM-DD)
+    // Helper para formatear fecha como clave (YYYY-MM-DD)
+    // Importante: El calendario frontend usa la fecha local, por lo que aquí 
+    // debemos ser cuidadosos para que coincida con la percepción del usuario.
     const aClaveFecha = (f) => {
         const d = new Date(f);
-        return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+        // Usamos el formato ISO y tomamos solo la parte de la fecha (YYYY-MM-DD)
+        // Pero ojo, .toISOString() siempre es UTC. 
+        // Para que coincida con el frontend (que usa local), usaremos:
+        const anio = d.getFullYear();
+        const mes = String(d.getMonth() + 1).padStart(2, '0');
+        const dia = String(d.getDate()).padStart(2, '0');
+        return `${anio}-${mes}-${dia}`;
     };
 
     const hoyClave = aClaveFecha(new Date());
@@ -111,20 +119,6 @@ async function obtenerResumenCalendario(usuarioId, mes, anio) {
             completada: r.fue_completada
         });
     });
-
-    // FALLBACK PARA HOY: Si es hoy y hay datos en las tablas principales, los añadimos si no hay históricos
-    if (!resumen[hoyClave]) resumen[hoyClave] = { diario: null, meditación: [], habitos: [], diarias: [] };
-    
-    if (resumen[hoyClave].habitos.length === 0) {
-        habitosHoy.forEach(h => {
-            resumen[hoyClave].habitos.push({ id: `h-${h.id}`, nombre: h.nombre, estado: h.estado });
-        });
-    }
-    if (resumen[hoyClave].diarias.length === 0) {
-        diariasHoy.forEach(d => {
-            resumen[hoyClave].diarias.push({ id: `d-${d.id}`, nombre: d.nombre, completada: d.completada });
-        });
-    }
 
     return resumen;
 }

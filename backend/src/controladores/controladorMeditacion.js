@@ -10,10 +10,11 @@ const prisma = require('../configuracion/baseDatos');
  * Recibe: usuario_id, duracion_segundos, segundos_completados, tecnica_respiracion, pista_musica
  */
 async function registrarSesion(req, res) {
-    const { usuario_id, duracion_segundos, segundos_completados, tecnica_respiracion, pista_musica } = req.body;
+    const { duracion_segundos, segundos_completados, tecnica_respiracion, pista_musica } = req.body;
+    const usuario_id = req.usuarioId;
 
-    if (!usuario_id || !duracion_segundos || !tecnica_respiracion) {
-        return res.status(400).json({ error: "Faltan campos obligatorios (usuario_id, duracion_segundos, tecnica_respiracion)" });
+    if (!duracion_segundos || !tecnica_respiracion) {
+        return res.status(400).json({ error: "Faltan campos obligatorios (duracion_segundos, tecnica_respiracion)" });
     }
 
     try {
@@ -39,7 +40,7 @@ async function registrarSesion(req, res) {
  * Query params opcionales: limite (default 30)
  */
 async function obtenerHistorial(req, res) {
-    const { usuarioId } = req.params;
+    const usuarioId = req.usuarioId;
     const limite = parseInt(req.query.limite) || 30;
 
     try {

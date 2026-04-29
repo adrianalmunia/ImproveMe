@@ -13,6 +13,20 @@ async function guardarEntradaDiaria(req, res) {
         const ahora = new Date();
         const hoy = new Date(Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()));
 
+        // Verificar si ya existe una entrada para hoy antes de hacer el upsert
+        const entradaExistente = await prisma.entradas_diario.findUnique({
+            where: {
+                usuario_id_fecha: {
+                    usuario_id: parseInt(usuario_id),
+                    fecha: hoy
+                }
+            }
+        });
+
+        const esNuevaEntrada = !entradaExistente;
+        let xpGanada = 0;
+        let usuarioActualizado = null;
+
         // 1. Guardar o actualizar la entrada principal
         const entrada = await prisma.entradas_diario.upsert({
             where: {
@@ -35,8 +49,22 @@ async function guardarEntradaDiaria(req, res) {
             }
         });
 
-        // 2. Procesar archivos multimedia si existen o si se solicitó borrar
+        // 2. Si es nueva entrada, otorgar XP
+        if (esNuevaEntrada) {
+            xpGanada = 50;
+            usuarioActualizado = await prisma.usuarios.update({
+                where: { id: parseInt(usuario_id) },
+                data: {
+                    puntos_experiencia: {
+                        increment: xpGanada
+                    }
+                }
+            });
+        }
+
+        // 3. Procesar archivos multimedia... (el resto del código sigue igual)
         const { borrar_imagen, borrar_audio } = req.body;
+        // ... (continúa el procesamiento de multimedia)
 
         // Manejo de Imagen
         if (req.files?.imagen) {
@@ -80,7 +108,12 @@ async function guardarEntradaDiaria(req, res) {
             });
         }
 
-        res.status(200).json({ mensaje: "Entrada guardada correctamente", entrada });
+        res.status(200).json({ 
+            mensaje: "Entrada guardada correctamente", 
+            entrada,
+            xpGanada,
+            nuevoTotalXP: usuarioActualizado ? usuarioActualizado.puntos_experiencia : null
+        });
     } catch (error) {
         console.error("Error al guardar entrada:", error);
         res.status(500).json({ error: "No se pudo guardar la entrada diaria" });
