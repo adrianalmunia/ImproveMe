@@ -172,7 +172,7 @@ async function actualizarPerfilUsuario(idUsuario, datos) {
 
     // 0. VERIFICAR CONTRASEÑA ACTUAL SI SE CAMBIAN DATOS SENSIBLES
     const requiereVerificacion = datos.nombre_usuario || datos.correo || datos.contrasena;
-    
+
     if (requiereVerificacion) {
         if (!datos.contrasena_actual) {
             throw new Error('Se requiere la contraseña actual para confirmar los cambios');
@@ -259,10 +259,65 @@ async function eliminarUsuario(idUsuario) {
     return { mensaje: 'Cuenta eliminada permanentemente' };
 }
 
+/**
+ * Recopila toda la información de un usuario para su exportación
+ * @param {number} idUsuario - ID del usuario
+ * @returns {object} Objeto con todos los datos del usuario
+ */
+async function exportarDatosUsuario(idUsuario) {
+    // 1. Obtener datos básicos del perfil
+    const perfil = await prisma.usuarios.findUnique({
+        where: { id: idUsuario },
+        select: {
+            nombre_usuario: true,
+            correo: true,
+            puntos_experiencia: true,
+            fecha_registro: true
+        }
+    });
+
+    if (!perfil) throw new Error('Usuario no encontrado');
+
+    // 2. Obtener todas las entradas de diario (con sus archivos multimedia)
+    const entradasDiario = await prisma.entradas_diario.findMany({
+        where: { usuario_id: idUsuario },
+        include: { archivos_multimedia: true },
+        orderBy: { fecha: 'desc' }
+    });
+
+    // 3. Obtener todas las sesiones de meditación
+    const sesionesMeditacion = await prisma.sesiones_meditacion.findMany({
+        where: { usuario_id: idUsuario },
+        orderBy: { fecha: 'desc' }
+    });
+
+    // 4. Obtener todos los hábitos
+    const habitos = await prisma.habitos.findMany({
+        where: { usuario_id: idUsuario }
+    });
+
+    // 5. Obtener todas las tareas y diarias
+    const tareas = await prisma.tareas_diarias.findMany({
+        where: { usuario_id: idUsuario }
+    });
+
+    // Retornamos el paquete completo
+    return {
+        usuario: perfil,
+        fecha_exportacion: new Date().toISOString(),
+        diario: entradasDiario,
+        meditacion: sesionesMeditacion,
+        habitos: habitos,
+        tareas: tareas,
+        info: "Datos exportados desde ImproveMe - Tu mejor versión empieza hoy."
+    };
+}
+
 module.exports = {
     registrarUsuario,
     iniciarSesion,
     obtenerPerfilUsuario,
     actualizarPerfilUsuario,
-    eliminarUsuario
+    eliminarUsuario,
+    exportarDatosUsuario
 };

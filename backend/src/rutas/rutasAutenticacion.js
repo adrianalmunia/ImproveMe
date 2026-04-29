@@ -12,7 +12,8 @@ const {
     controlarLogin,
     controlarObtenerPerfil,
     controlarActualizarPerfil,
-    controlarEliminarPerfil
+    controlarEliminarPerfil,
+    controlarExportarDatos
 } = require('../controladores/controladorAutenticacion');
 
 // ============ RUTAS PÚBLICAS (no requieren autenticación) ============
@@ -51,5 +52,8 @@ router.put('/perfil', verificarAutenticacion, controlarActualizarPerfil);
  * Requiere: Authorization: Bearer {token}
  */
 router.delete('/perfil', verificarAutenticacion, controlarEliminarPerfil);
+
+// Obtener todos los datos para exportar
+router.get('/exportar', verificarAutenticacion, controlarExportarDatos);
 
 module.exports = router;

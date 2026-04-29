@@ -220,12 +220,20 @@ export async function eliminarCuenta(token) {
     return realizarSolicitud('autenticacion/perfil', 'DELETE', null, token);
 }
 
+/**
+ * Obtiene todos los datos del usuario para su exportación
+ */
+export async function exportarDatos(token) {
+    return realizarSolicitud('autenticacion/exportar', 'GET', null, token);
+}
+
 export default {
     registrarUsuario,
     iniciarSesion,
     obtenerPerfilUsuario,
     actualizarPerfil,
     eliminarCuenta,
+    exportarDatos,
     obtenerGamificacion,
     sincronizarGamificacion,
     guardarEntradaDiaria,

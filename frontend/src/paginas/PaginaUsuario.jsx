@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
-import { obtenerEntradasPorMes } from '../servicios/servicioAPI';
+import { obtenerEntradasPorMes, exportarDatos } from '../servicios/servicioAPI';
 import logoCompleto from '../assets/logo_completo.png';
-import { User, Mail, Lock, LogOut, Save, ShieldCheck, Eye, EyeOff, AlertTriangle, Trash2, Image as ImageIcon, Mic, ChevronRight, X, Calendar, Sun, Moon, FileText, Info } from 'lucide-react';
+import { User, Mail, Lock, LogOut, Save, ShieldCheck, Eye, EyeOff, AlertTriangle, Trash2, Image as ImageIcon, Mic, ChevronRight, X, Calendar, Sun, Moon, FileText, Info, Download } from 'lucide-react';
 import { ReproductorAudio } from '../componentes/ReproductorAudio';
 
 export function PaginaUsuario() {
@@ -31,6 +31,7 @@ export function PaginaUsuario() {
   const [estaCargandoGaleria, setEstaCargandoGaleria] = useState(false);
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [mostrarAcerca, setMostrarAcerca] = useState(false);
+  const [mostrarOpcionesExportar, setMostrarOpcionesExportar] = useState(false);
 
   const [mesFiltro, setMesFiltro] = useState(new Date().getMonth() + 1);
   const [anioFiltro, setAnioFiltro] = useState(new Date().getFullYear());
@@ -117,6 +118,69 @@ export function PaginaUsuario() {
       await eliminar();
     } catch (error) {
       mostrarNotificacion(error.message || 'Error al eliminar cuenta', 'error');
+    }
+  };
+
+  const manejarExportarDatos = async (formato) => {
+    try {
+      setMensaje({ texto: `Generando archivo ${formato.toUpperCase()}...`, tipo: 'exito' });
+      const datos = await exportarDatos(token);
+      
+      let blob;
+      let extension;
+      
+      if (formato === 'json') {
+        blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+        extension = 'json';
+      } else {
+        // Generar CSV para Excel
+        const csvRows = [];
+        
+        // Cabecera Diario
+        csvRows.push('--- SECCION: DIARIO ---');
+        csvRows.push('Fecha,Animo,Sueño,Texto');
+        datos.diario.forEach(e => {
+          const textoLimpio = e.contenido_texto?.replace(/"/g, '""').replace(/\n/g, ' ') || '';
+          csvRows.push(`${new Date(e.fecha).toLocaleDateString()},${e.puntuacion_animo},${e.horas_sueno},"${textoLimpio}"`);
+        });
+        
+        csvRows.push(''); // Espacio
+        
+        // Cabecera Meditación
+        csvRows.push('--- SECCION: MEDITACION ---');
+        csvRows.push('Fecha,Duracion(seg),Completado(seg),Tecnica,Musica');
+        datos.meditacion.forEach(m => {
+          csvRows.push(`${new Date(m.fecha).toLocaleDateString()},${m.duracion_segundos},${m.segundos_completados},"${m.tecnica_respiracion || ''}","${m.pista_musica || ''}"`);
+        });
+
+        csvRows.push(''); // Espacio
+
+        // Cabecera Hábitos
+        csvRows.push('--- SECCION: HABITOS ---');
+        csvRows.push('Nombre,Icono,Frecuencia');
+        datos.habitos.forEach(h => {
+          csvRows.push(`"${h.nombre}","${h.icono}","${h.frecuencia}"`);
+        });
+
+        const csvContent = "\ufeff" + csvRows.join('\n'); // \ufeff para soporte acentos en Excel
+        blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        extension = 'csv';
+      }
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ImproveMe_Datos_${usuario.nombre_usuario}_${new Date().toISOString().split('T')[0]}.${extension}`;
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      setMostrarOpcionesExportar(false);
+      mostrarNotificacion('¡Datos exportados con éxito!');
+    } catch (error) {
+      mostrarNotificacion('Error al exportar: ' + error.message, 'error');
     }
   };
 
@@ -364,18 +428,22 @@ export function PaginaUsuario() {
             <ChevronRight size={20} className="opacity-30" />
           </motion.button>
 
-          <div className="p-6 bg-white border border-gray-100 text-gray-800 rounded-[32px] shadow-xl flex items-center justify-between">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            onClick={() => setMostrarOpcionesExportar(true)}
+            className="p-6 bg-white border border-gray-100 text-gray-800 rounded-[32px] shadow-xl flex items-center justify-between group w-full"
+          >
             <div className="flex items-center gap-4 text-left">
-              <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-[#C6A55E]">
-                <ShieldCheck size={24} />
+              <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-[#C6A55E] group-hover:bg-orange-50 transition-colors">
+                <Download size={24} />
               </div>
               <div>
-                <h4 className="font-['Tilt_Warp'] text-lg">Privacidad</h4>
-                <p className="text-gray-400 text-[10px]">Seguridad</p>
+                <h4 className="font-['Tilt_Warp'] text-lg">Exportar Datos</h4>
+                <p className="text-gray-400 text-[10px]">Toda tu información</p>
               </div>
             </div>
-            <ChevronRight size={20} className="opacity-30" />
-          </div>
+            <ChevronRight size={20} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+          </motion.button>
         </div>
 
         {/* ZONA DE PELIGRO */}
@@ -565,8 +633,53 @@ export function PaginaUsuario() {
       </AnimatePresence>
 
       <AnimatePresence>
+        {mostrarOpcionesExportar && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[400] bg-black/60 backdrop-blur-md flex items-center justify-center p-6">
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="w-full max-w-sm bg-white rounded-[40px] p-10 shadow-2xl text-center">
+              <div className="w-20 h-20 bg-orange-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#C6A55E]">
+                <Download size={40} />
+              </div>
+              <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 mb-2">Exportar Datos</h3>
+              <p className="text-gray-500 text-sm mb-8">Selecciona el formato en el que quieres descargar tu información.</p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => manejarExportarDatos('json')}
+                  className="w-full py-4 bg-gray-50 border border-gray-100 text-gray-700 rounded-2xl font-bold flex items-center justify-between px-6 hover:bg-blue-50 hover:border-blue-100 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center text-[10px]">JSON</div>
+                    <span>Formato Técnico</span>
+                  </div>
+                  <ChevronRight size={18} className="opacity-0 group-hover:opacity-100" />
+                </button>
+
+                <button
+                  onClick={() => manejarExportarDatos('excel')}
+                  className="w-full py-4 bg-gray-50 border border-gray-100 text-gray-700 rounded-2xl font-bold flex items-center justify-between px-6 hover:bg-green-50 hover:border-green-100 transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center text-[10px]">CSV</div>
+                    <span>Excel / Hoja de Cálculo</span>
+                  </div>
+                  <ChevronRight size={18} className="opacity-0 group-hover:opacity-100" />
+                </button>
+
+                <button
+                  onClick={() => setMostrarOpcionesExportar(false)}
+                  className="mt-4 text-gray-400 font-bold hover:text-gray-600 transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {mensaje.texto && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className={`fixed bottom-12 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white font-bold shadow-2xl z-[300] ${mensaje.tipo === 'exito' ? 'bg-green-500' : 'bg-red-500'}`}>{mensaje.texto}</motion.div>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className={`fixed bottom-12 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white font-bold shadow-2xl z-[500] ${mensaje.tipo === 'exito' ? 'bg-green-500' : 'bg-red-500'}`}>{mensaje.texto}</motion.div>
         )}
       </AnimatePresence>
     </main>

@@ -9,7 +9,8 @@ const {
     iniciarSesion,
     obtenerPerfilUsuario,
     actualizarPerfilUsuario,
-    eliminarUsuario
+    eliminarUsuario,
+    exportarDatosUsuario
 } = require('../servicios/servicioAutenticacion');
 
 /**
@@ -134,10 +135,30 @@ async function controlarEliminarPerfil(req, res) {
     }
 }
 
+/**
+ * Controlador: Exportar todos los datos del usuario
+ * GET /api/autenticacion/exportar
+ */
+async function controlarExportarDatos(req, res) {
+    try {
+        const idUsuario = req.usuarioId;
+        const datos = await exportarDatosUsuario(idUsuario);
+
+        return res.status(200).json(datos);
+    } catch (error) {
+        console.error('Error al exportar datos:', error.message);
+        return res.status(500).json({
+            error: 'No se pudieron exportar los datos',
+            mensaje: error.message
+        });
+    }
+}
+
 module.exports = {
     controlarRegistro,
     controlarLogin,
     controlarObtenerPerfil,
     controlarActualizarPerfil,
-    controlarEliminarPerfil
+    controlarEliminarPerfil,
+    controlarExportarDatos
 };
