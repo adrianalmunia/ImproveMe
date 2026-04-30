@@ -18,6 +18,9 @@ async function registrarSesion(req, res) {
     }
 
     try {
+        console.log(`[Meditación] Registrando sesión para usuario ${usuario_id}:`, req.body);
+        
+        // 1. Crear el registro de la sesión
         const sesion = await prisma.sesiones_meditacion.create({
             data: {
                 usuario_id: parseInt(usuario_id),
@@ -28,10 +31,69 @@ async function registrarSesion(req, res) {
             }
         });
 
-        res.status(201).json({ mensaje: "Sesión de meditación registrada", sesion });
+        // 2. Dar recompensa de XP (ejemplo: 50 XP por sesión completada)
+        // Solo damos XP si ha meditado al menos el 80% del tiempo configurado
+        const porcentajeCompletado = (sesion.segundos_completados / sesion.duracion_segundos) * 100;
+        let xpGanada = 0;
+        
+        if (porcentajeCompletado >= 80) {
+            xpGanada = 50;
+            await prisma.usuarios.update({
+                where: { id: parseInt(usuario_id) },
+                data: { puntos_experiencia: { increment: xpGanada } }
+            });
+            console.log(`[Meditación] Usuario ${usuario_id} ganó ${xpGanada} XP`);
+        }
+
+        // 3. Calcular y actualizar racha de meditación en la tabla usuarios
+        const todasLasSesiones = await prisma.sesiones_meditacion.findMany({
+            where: { usuario_id: parseInt(usuario_id) },
+            select: { fecha: true },
+            orderBy: { fecha: 'desc' }
+        });
+
+        const fechasUnicas = [...new Set(todasLasSesiones.map(s => {
+            const f = s.fecha;
+            return `${f.getUTCFullYear()}-${String(f.getUTCMonth() + 1).padStart(2, '0')}-${String(f.getUTCDate()).padStart(2, '0')}`;
+        }))].sort().reverse();
+
+        let nuevaRacha = 0;
+        const ahora = new Date();
+        const hoyStr = `${ahora.getUTCFullYear()}-${String(ahora.getUTCMonth() + 1).padStart(2, '0')}-${String(ahora.getUTCDate()).padStart(2, '0')}`;
+        const ayer = new Date(ahora);
+        ayer.setUTCDate(ahora.getUTCDate() - 1);
+        const ayerStr = `${ayer.getUTCFullYear()}-${String(ayer.getUTCMonth() + 1).padStart(2, '0')}-${String(ayer.getUTCDate()).padStart(2, '0')}`;
+
+        if (fechasUnicas.length > 0) {
+            if (fechasUnicas[0] === hoyStr || fechasUnicas[0] === ayerStr) {
+                nuevaRacha = 1;
+                for (let i = 0; i < fechasUnicas.length - 1; i++) {
+                    const actual = new Date(fechasUnicas[i]);
+                    const siguiente = new Date(fechasUnicas[i + 1]);
+                    const diff = Math.round((actual - siguiente) / (1000 * 60 * 60 * 24));
+                    if (diff === 1) nuevaRacha++;
+                    else break;
+                }
+            }
+        }
+
+        await prisma.usuarios.update({
+            where: { id: parseInt(usuario_id) },
+            data: { racha_meditacion: nuevaRacha }
+        });
+
+        console.log(`[Meditación] Racha actualizada para usuario ${usuario_id}: ${nuevaRacha} días`);
+
+        console.log(`[Meditación] Sesión guardada con ID: ${sesion.id}`);
+        res.status(201).json({ 
+            mensaje: "Sesión de meditación registrada", 
+            sesion,
+            xp_ganada: xpGanada,
+            nueva_racha: nuevaRacha
+        });
     } catch (error) {
         console.error("Error al registrar sesión de meditación:", error);
-        res.status(500).json({ error: "No se pudo registrar la sesión de meditación" });
+        res.status(500).json({ error: "No se pudo registrar la sesión de meditación", detalle: error.message });
     }
 }
 

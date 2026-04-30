@@ -9,98 +9,112 @@ import IconosRangos from '../componentes/IconosRangos';
 
 // Mapeo de iconos para poder usarlos dinámicamente
 const IconMap = {
-  Piedra: IconosRangos.Piedra,
+  SinRango: IconosRangos.SinRango,
   Bronce: IconosRangos.Bronce,
   Plata: IconosRangos.Plata,
   Oro: IconosRangos.Oro,
   Esmeralda: IconosRangos.Esmeralda,
+  Diamante: IconosRangos.Diamante,
   Zafiro: IconosRangos.Zafiro,
   Amatista: IconosRangos.Amatista,
   Rubi: IconosRangos.Rubi
 };
 
 export const RANK_CATEGORIES = [
-  { id: 'piedra', name: 'Piedra', iconName: 'Piedra', color: 'text-stone-500', bg: 'bg-stone-500', glow: 'shadow-stone-500/50', gradient: 'from-stone-400 to-stone-600', desc: 'El comienzo de tu viaje. Forja tu voluntad.' },
+  { id: 'sin-rango', name: 'Sin Rango', iconName: 'SinRango', color: 'text-gray-400', bg: 'bg-gray-400', glow: 'shadow-gray-400/50', gradient: 'from-gray-300 to-gray-500', desc: 'Tu camino aún no ha comenzado. Da el primer paso.' },
   { id: 'bronce', name: 'Bronce', iconName: 'Bronce', color: 'text-amber-700', bg: 'bg-amber-700', glow: 'shadow-amber-700/50', gradient: 'from-amber-600 to-amber-800', desc: 'La consistencia empieza a dar sus frutos.' },
   { id: 'plata', name: 'Plata', iconName: 'Plata', color: 'text-slate-400', bg: 'bg-slate-400', glow: 'shadow-slate-400/50', gradient: 'from-slate-300 to-slate-500', desc: 'Un reflejo de tu disciplina diaria.' },
   { id: 'oro', name: 'Oro', iconName: 'Oro', color: 'text-yellow-500', bg: 'bg-yellow-500', glow: 'shadow-yellow-500/50', gradient: 'from-yellow-400 to-yellow-600', desc: 'Brillas con luz propia entre los mejores.' },
   { id: 'esmeralda', name: 'Esmeralda', iconName: 'Esmeralda', color: 'text-emerald-500', bg: 'bg-emerald-500', glow: 'shadow-emerald-500/50', gradient: 'from-emerald-400 to-emerald-600', desc: 'Tu crecimiento es imparable y natural.' },
-  { id: 'zafiro', name: 'Zafiro', iconName: 'Zafiro', color: 'text-blue-500', bg: 'bg-blue-500', glow: 'shadow-blue-500/50', gradient: 'from-blue-400 to-blue-600', desc: 'Sabiduría y profundidad en cada acción.' },
+  { id: 'diamante', name: 'Diamante', iconName: 'Diamante', color: 'text-blue-400', bg: 'bg-blue-400', glow: 'shadow-blue-400/50', gradient: 'from-blue-300 to-blue-500', desc: 'Dureza y claridad inquebrantables.' },
+  { id: 'zafiro', name: 'Zafiro', iconName: 'Zafiro', color: 'text-blue-600', bg: 'bg-blue-600', glow: 'shadow-blue-600/50', gradient: 'from-blue-500 to-blue-700', desc: 'Sabiduría y profundidad en cada acción.' },
   { id: 'amatista', name: 'Amatista', iconName: 'Amatista', color: 'text-purple-500', bg: 'bg-purple-500', glow: 'shadow-purple-500/50', gradient: 'from-purple-400 to-purple-600', desc: 'Dominio absoluto de tu mente y cuerpo.' },
   { id: 'rubi', name: 'Rubí', iconName: 'Rubi', color: 'text-red-500', bg: 'bg-red-500', glow: 'shadow-red-500/50', gradient: 'from-red-400 to-red-600', desc: 'La leyenda máxima. Has alcanzado la cima.' }
 ];
 
-const XP_PER_TIER = 500;
-const TIERS = ['I', 'II', 'III'];
+export const RANK_TIERS = [
+  { xp: 0, name: 'Sin Rango', tier: '', categoryId: 'sin-rango', desc: 'Tu camino aún no ha comenzado. Da el primer paso.' },
+  { xp: 1, name: 'Bronce III', tier: 'III', categoryId: 'bronce', desc: 'Has despertado. La chispa del cambio se ha encendido.' },
+  { xp: 400, name: 'Bronce II', tier: 'II', categoryId: 'bronce', desc: 'La inercia se rompe. Tu voluntad empieza a endurecerse.' },
+  { xp: 1000, name: 'Bronce I', tier: 'I', categoryId: 'bronce', desc: 'Dominas lo básico. Estás listo para desafíos mayores.' },
+  { xp: 2000, name: 'Plata III', tier: 'III', categoryId: 'plata', desc: 'Tu brillo es tenue pero constante. Sigue puliendo.' },
+  { xp: 3500, name: 'Plata II', tier: 'II', categoryId: 'plata', desc: 'La disciplina ya no es un esfuerzo, es parte de ti.' },
+  { xp: 5500, name: 'Plata I', tier: 'I', categoryId: 'plata', desc: 'Eres un ejemplo de constancia. La excelencia se acerca.' },
+  { xp: 8000, name: 'Oro III', tier: 'III', categoryId: 'oro', desc: 'Brillas con luz propia. El éxito te reconoce.' },
+  { xp: 11000, name: 'Oro II', tier: 'II', categoryId: 'oro', desc: 'Tu valor es innegable. Has forjado un carácter dorado.' },
+  { xp: 15000, name: 'Oro I', tier: 'I', categoryId: 'oro', desc: 'Casi una leyenda. Tu presencia inspira a otros.' },
+  { xp: 20000, name: 'Esmeralda III', tier: 'III', categoryId: 'esmeralda', desc: 'Crecimiento puro. Tu potencial florece sin límites.' },
+  { xp: 26000, name: 'Esmeralda II', tier: 'II', categoryId: 'esmeralda', desc: 'Vitalidad extrema. Eres una fuerza de la naturaleza.' },
+  { xp: 33000, name: 'Esmeralda I', tier: 'I', categoryId: 'esmeralda', desc: 'Maestro de la adaptación. Nada detiene tu avance.' },
+  { xp: 41000, name: 'Diamante III', tier: 'III', categoryId: 'diamante', desc: 'Presión y tiempo. Te has vuelto inquebrantable.' },
+  { xp: 50000, name: 'Diamante II', tier: 'II', categoryId: 'diamante', desc: 'Claridad absoluta. Ves el camino donde otros ven dudas.' },
+  { xp: 60000, name: 'Diamante I', tier: 'I', categoryId: 'diamante', desc: 'Dureza máxima. Eres el estándar de la perfección.' },
+  { xp: 72000, name: 'Zafiro III', tier: 'III', categoryId: 'zafiro', desc: 'Sabiduría profunda. Actúas con calma y precisión.' },
+  { xp: 85000, name: 'Zafiro II', tier: 'II', categoryId: 'zafiro', desc: 'Tus acciones fluyen como el agua, imparables.' },
+  { xp: 100000, name: 'Zafiro I', tier: 'I', categoryId: 'zafiro', desc: 'Mente cristalina. Has alcanzado la paz en el esfuerzo.' },
+  { xp: 120000, name: 'Amatista III', tier: 'III', categoryId: 'amatista', desc: 'Energía pura. Tu espíritu vibra con intensidad.' },
+  { xp: 145000, name: 'Amatista II', tier: 'II', categoryId: 'amatista', desc: 'Intuición superior. Sabes qué hacer antes de pensarlo.' },
+  { xp: 175000, name: 'Amatista I', tier: 'I', categoryId: 'amatista', desc: 'Trascendencia. Has superado tus propios límites.' },
+  { xp: 210000, name: 'Rubí III', tier: 'III', categoryId: 'rubi', desc: 'Pasión ardiente. Tu fuego interno lo consume todo.' },
+  { xp: 260000, name: 'Rubí II', tier: 'II', categoryId: 'rubi', desc: 'Poder absoluto. Cada paso que das deja huella.' },
+  { xp: 350000, name: 'Rubí I', tier: 'I', categoryId: 'rubi', desc: 'La cima del mundo. Eres la definición de ImproveMe.' }
+];
 
 function calcularRangoInfo(xp) {
-  const totalTiers = RANK_CATEGORIES.length * TIERS.length;
-  let currentTierTotalIndex = Math.floor(xp / XP_PER_TIER);
-  
-  if (currentTierTotalIndex >= totalTiers) {
-    currentTierTotalIndex = totalTiers - 1;
+  let currentTierIndex = 0;
+  for (let i = 0; i < RANK_TIERS.length; i++) {
+    if (xp >= RANK_TIERS[i].xp) {
+      currentTierIndex = i;
+    } else {
+      break;
+    }
   }
-
-  const categoryIndex = Math.floor(currentTierTotalIndex / TIERS.length);
-  const tierNumberIndex = currentTierTotalIndex % TIERS.length;
   
-  const currentCategory = RANK_CATEGORIES[categoryIndex];
+  const currentTier = RANK_TIERS[currentTierIndex];
+  const nextTier = RANK_TIERS[currentTierIndex + 1] || null;
+  const prevTier = currentTierIndex > 0 ? RANK_TIERS[currentTierIndex - 1] : null;
   
-  const xpForCurrentTierStart = currentTierTotalIndex * XP_PER_TIER;
-  const xpForNextTierStart = (currentTierTotalIndex + 1) * XP_PER_TIER;
+  const category = RANK_CATEGORIES.find(c => c.id === currentTier.categoryId);
+  const categoryIndex = RANK_CATEGORIES.findIndex(c => c.id === currentTier.categoryId);
   
-  const progressInTier = xp - xpForCurrentTierStart;
-  const progressPercentage = currentTierTotalIndex === totalTiers - 1 ? 100 : (progressInTier / XP_PER_TIER) * 100;
-  const xpRemaining = currentTierTotalIndex === totalTiers - 1 ? 0 : xpForNextTierStart - xp;
-
-  // Rango Anterior
-  let prevRank = null;
-  if (currentTierTotalIndex > 0) {
-    const prevCatIdx = Math.floor((currentTierTotalIndex - 1) / TIERS.length);
-    const prevTierNum = (currentTierTotalIndex - 1) % TIERS.length;
-    prevRank = {
-      ...RANK_CATEGORIES[prevCatIdx],
-      tier: TIERS[prevTierNum],
-      fullName: `${RANK_CATEGORIES[prevCatIdx].name} ${TIERS[prevTierNum]}`
-    };
-  }
-
-  // Siguiente Rango
-  let nextRank = null;
-  if (currentTierTotalIndex < totalTiers - 1) {
-    const nextCatIdx = Math.floor((currentTierTotalIndex + 1) / TIERS.length);
-    const nextTierNum = (currentTierTotalIndex + 1) % TIERS.length;
-    nextRank = {
-      ...RANK_CATEGORIES[nextCatIdx],
-      tier: TIERS[nextTierNum],
-      fullName: `${RANK_CATEGORIES[nextCatIdx].name} ${TIERS[nextTierNum]}`
-    };
-  }
+  const xpInCurrentTier = xp - currentTier.xp;
+  const xpTotalForThisTier = nextTier ? nextTier.xp - currentTier.xp : 10000;
+  const progressPercentage = nextTier ? (xpInCurrentTier / xpTotalForThisTier) * 100 : 100;
+  const xpRemaining = nextTier ? nextTier.xp - xp : 0;
 
   return {
-    category: currentCategory,
+    fullName: currentTier.name,
+    category: category,
     categoryIndex,
-    tier: TIERS[tierNumberIndex],
-    fullName: `${currentCategory.name} ${TIERS[tierNumberIndex]}`,
+    tier: currentTier.tier,
+    xpInCurrentTier,
+    xpTotalForThisTier,
     progressPercentage,
-    xpInCurrentTier: progressInTier,
     xpRemaining,
-    prevRank,
-    nextRank,
-    isMaxRank: currentTierTotalIndex === totalTiers - 1
+    prevRank: prevTier ? {
+      ...RANK_CATEGORIES.find(c => c.id === prevTier.categoryId),
+      fullName: prevTier.name,
+      tier: prevTier.tier
+    } : null,
+    nextRank: nextTier ? { 
+      ...RANK_CATEGORIES.find(c => c.id === nextTier.categoryId),
+      fullName: nextTier.name, 
+      tier: nextTier.tier
+    } : null,
+    isMaxRank: !nextTier
   };
 }
 
-const RankIcon = ({ rankData, tier = 'III', size = 'md', className = '' }) => {
+const RankIcon = ({ rankData, tier = 'III', size = 'md', className = '', showGlow = true }) => {
   if (!rankData) return null;
   
   const IconComponent = IconMap[rankData.iconName || rankData.icon] || Trophy;
   
   const pixelSizes = {
-    sm: 60,
-    md: 100,
-    lg: 200,
-    track: 36
+    sm: 100,
+    md: 150,
+    lg: 320,
+    track: 72
   };
 
   return (
@@ -108,6 +122,7 @@ const RankIcon = ({ rankData, tier = 'III', size = 'md', className = '' }) => {
       <IconComponent 
         size={pixelSizes[size]} 
         tier={tier}
+        showGlow={showGlow}
       />
     </div>
   );
@@ -176,20 +191,15 @@ const PaginaRangos = () => {
             Explorar todas <ChevronRight size={12} />
           </span>
         </div>
-        <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 relative z-10">
+        <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8 max-w-2xl mx-auto relative z-10">
           {RANK_CATEGORIES.map((cat, idx) => {
             const isUnlocked = idx <= rankInfo.categoryIndex;
             const isCurrent = idx === rankInfo.categoryIndex;
             
             return (
-              <React.Fragment key={cat.id}>
-                <div className={`transition-all duration-700 ${isUnlocked ? 'opacity-100' : 'opacity-20'}`}>
-                  <RankIcon rankData={cat} size="track" className={isCurrent ? 'ring-2 ring-[#4F99CC] ring-offset-4 ring-offset-white rounded-full' : ''} />
-                </div>
-                {idx < RANK_CATEGORIES.length - 1 && (
-                  <div className="w-4 h-[1px] bg-gray-100" />
-                )}
-              </React.Fragment>
+              <div key={cat.id} className={`transition-all duration-700 ${isUnlocked ? 'opacity-100' : 'opacity-20'} transform ${isCurrent ? 'scale-110' : 'scale-100'}`}>
+                <RankIcon rankData={cat} size="track" className={isCurrent ? 'ring-4 ring-[#4F99CC] ring-offset-4 ring-offset-white rounded-full' : ''} />
+              </div>
             );
           })}
         </div>
@@ -197,9 +207,9 @@ const PaginaRangos = () => {
 
       {/* Visualización Principal del Rango */}
       <div className="relative bg-white rounded-[48px] p-8 md:p-16 shadow-xl border border-gray-100 overflow-hidden">
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-[140px] opacity-[0.05] ${rankInfo.category.bg} pointer-events-none`} />
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full blur-[160px] opacity-[0.08] ${rankInfo.category.bg} pointer-events-none`} />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-24">
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-40">
           {/* Rango Anterior */}
           <div className="hidden md:flex flex-col items-center gap-4 opacity-20">
             {rankInfo.prevRank ? (
@@ -269,7 +279,7 @@ const PaginaRangos = () => {
             <p className="text-sm font-black text-gray-700">
               <span className={rankInfo.category.color}>{rankInfo.xpInCurrentTier}</span>
               <span className="text-gray-300 mx-1">/</span>
-              <span>{XP_PER_TIER} XP</span>
+              <span>{rankInfo.xpTotalForThisTier} XP</span>
             </p>
           </div>
           
@@ -326,24 +336,24 @@ const PaginaRangos = () => {
               
               <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {RANK_CATEGORIES.map((cat, idx) => {
-                    const xpRequerida = idx * (XP_PER_TIER * TIERS.length);
-                    const isUnlocked = xp >= xpRequerida;
+                  {RANK_TIERS.map((tierData, idx) => {
+                    const cat = RANK_CATEGORIES.find(c => c.id === tierData.categoryId);
+                    const isUnlocked = xp >= tierData.xp;
                     
                     return (
                       <div 
-                        key={cat.id} 
+                        key={`${tierData.name}-${idx}`} 
                         className={`p-6 rounded-[32px] border-2 transition-all flex items-center gap-6 ${isUnlocked ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50 border-dashed border-gray-200 opacity-60'}`}
                       >
-                        <div className={`shrink-0 ${isUnlocked ? '' : 'grayscale'}`}>
-                          <RankIcon rankData={cat} size="sm" />
+                        <div className="shrink-0">
+                          <RankIcon rankData={cat} tier={tierData.tier} size="sm" showGlow={false} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-center mb-1">
-                            <h4 className={`text-xl font-black uppercase tracking-tight ${cat.color}`}>{cat.name}</h4>
-                            <span className="text-[10px] font-black text-gray-400">MIN. {xpRequerida} XP</span>
+                            <h4 className={`text-xl font-black uppercase tracking-tight ${cat.color}`}>{tierData.name}</h4>
+                            <span className="text-[10px] font-black text-gray-400">MIN. {tierData.xp} XP</span>
                           </div>
-                          <p className="text-xs text-gray-500 leading-relaxed italic">"{cat.desc}"</p>
+                          <p className="text-xs text-gray-500 leading-relaxed italic">"{tierData.desc}"</p>
                         </div>
                       </div>
                     );

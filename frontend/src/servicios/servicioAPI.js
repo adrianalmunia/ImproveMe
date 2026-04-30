@@ -21,11 +21,12 @@ const OPCIONES_DEFECTO = {
  * @param {string} token - Token JWT (para rutas protegidas)
  * @returns {object} Respuesta del servidor
  */
-async function realizarSolicitud(ruta, metodo = 'GET', datos = null, token = null) {
+async function realizarSolicitud(ruta, metodo = 'GET', datos = null, token = null, keepalive = false) {
     try {
         const opciones = {
             ...OPCIONES_DEFECTO,
             method: metodo,
+            keepalive: keepalive,
         };
 
         // Si hay un token, lo añadimos al header de autorización
@@ -142,8 +143,8 @@ export async function obtenerGamificacion(token) {
  * @param {string} token - Token JWT del usuario
  * @returns {object} { habitos, diarias, tareas } (datos actualizados con nuevas IDs si las hay)
  */
-export async function sincronizarGamificacion(datos, token) {
-    return realizarSolicitud('tareas/sincronizar', 'PUT', datos, token);
+export async function sincronizarGamificacion(datos, token, keepalive = false) {
+    return realizarSolicitud('tareas/sincronizar', 'PUT', datos, token, keepalive);
 }
 
 // ============ FUNCIONES DE DIARIO ============

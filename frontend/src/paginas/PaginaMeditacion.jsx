@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, X, Flower2, Timer, CheckCircle2, ChevronUp, ChevronDown, Settings, Bell, Music, ChevronRight, CloudRain, Moon, Volume2, Trees, Waves } from 'lucide-react';
+import { Play, Pause, X, Flower2, Timer, CheckCircle2, ChevronUp, ChevronDown, Settings, Bell, Music, ChevronRight, CloudRain, Moon, Volume2, Trees, Waves, Flame } from 'lucide-react';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { registrarSesionMeditacion } from '../servicios/servicioAPI';
 
@@ -78,6 +78,7 @@ export function PaginaMeditacion() {
   });
   const [gongsLanzados, setGongsLanzados] = useState({ mitad: false });
   const [volumenMusica, setVolumenMusica] = useState(0.3);
+  const [xpGanada, setXpGanada] = useState(0);
 
   const intervalRef = useRef(null);
   const breathingRef = useRef(null);
@@ -208,9 +209,19 @@ export function PaginaMeditacion() {
         segundos_completados: completados,
         tecnica_respiracion: ajustes.tecnicaRespiracion,
         pista_musica: ajustes.musica ? ajustes.pistaMusica : null,
-      }, token).catch(err => console.error('Error al registrar sesión de meditación:', err));
+      }, token)
+      .then(res => {
+        console.log('Sesión registrada con éxito:', res);
+        if (res.xp_ganada > 0) {
+          setXpGanada(res.xp_ganada);
+        }
+      })
+      .catch(err => {
+        console.error('Error al registrar sesión de meditación:', err);
+        alert('No se pudo guardar la sesión en el servidor, pero tu progreso se ha guardado localmente.');
+      });
     }
-  }, [ajustes.gongFinal, ajustes.tecnicaRespiracion, ajustes.musica, ajustes.pistaMusica, reproducirGong, pararMusica, tiempoSeleccionado, segundosRestantes, usuario]);
+  }, [ajustes.gongFinal, ajustes.tecnicaRespiracion, ajustes.musica, ajustes.pistaMusica, reproducirGong, pararMusica, tiempoSeleccionado, segundosRestantes, usuario, token]);
 
   // Limpieza al salir de la pantalla con desvanecimiento (fade out)
   useEffect(() => {
@@ -581,7 +592,22 @@ export function PaginaMeditacion() {
                 <CheckCircle2 size={52} className="text-emerald-500" />
               </div>
               <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 mb-3">¡Sesión Completada!</h2>
-              <p className="text-gray-400 text-sm mb-8">Has dedicado {tiempoSeleccionado} minutos a tu bienestar. Tu mente te lo agradecerá.</p>
+              <p className="text-gray-400 text-sm mb-6">Has dedicado {tiempoSeleccionado} minutos a tu bienestar. Tu mente te lo agradecerá.</p>
+              
+              {xpGanada > 0 && (
+                <motion.div 
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.5, type: 'spring' }}
+                  className="bg-orange-50 border border-orange-100 px-6 py-3 rounded-2xl flex items-center gap-3 mb-8 shadow-sm"
+                >
+                  <Flame className="text-orange-500 fill-orange-500" size={24} />
+                  <div className="text-left">
+                    <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest leading-none">Recompensa</p>
+                    <p className="text-xl font-black text-orange-600 leading-tight">+{xpGanada} XP</p>
+                  </div>
+                </motion.div>
+              )}
               <button onClick={salir}
                 className="w-full py-5 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl text-sm"
                 style={{ background: `linear-gradient(135deg, ${COLOR} 0%, ${COLOR2} 100%)` }}>

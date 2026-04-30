@@ -139,8 +139,8 @@ async function obtenerEstadisticasGenerales(usuarioId) {
         };
     }
 
-    // 6. Estadísticas de Meditación
-    const [sesionesChart, todasLasSesiones] = await Promise.all([
+    // 6. Estadísticas de Meditación y Datos de Usuario
+    const [sesionesChart, todasLasSesiones, usuario] = await Promise.all([
         prisma.sesiones_meditacion.findMany({
             where: {
                 usuario_id: usuarioId,
@@ -152,6 +152,10 @@ async function obtenerEstadisticasGenerales(usuarioId) {
             where: { usuario_id: usuarioId },
             orderBy: { fecha: 'desc' },
             select: { fecha: true, segundos_completados: true }
+        }),
+        prisma.usuarios.findUnique({
+            where: { id: usuarioId },
+            select: { racha_meditacion: true }
         })
     ]);
 
@@ -159,44 +163,43 @@ async function obtenerEstadisticasGenerales(usuarioId) {
 
     const medDatosPorDia = {};
     sesionesChart.forEach(s => {
-        // Normalizar fecha a YYYY-MM-DD
+        // Normalizar fecha a YYYY-MM-DD usando UTC para consistencia con el calendario
         const f = s.fecha;
-        const fechaLocal = `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`;
+        const fechaUTC = `${f.getUTCFullYear()}-${String(f.getUTCMonth() + 1).padStart(2, '0')}-${String(f.getUTCDate()).padStart(2, '0')}`;
         const mins = Math.round(s.segundos_completados / 60);
-        medDatosPorDia[fechaLocal] = (medDatosPorDia[fechaLocal] || 0) + mins;
+        medDatosPorDia[fechaUTC] = (medDatosPorDia[fechaUTC] || 0) + mins;
     });
 
-    // 7. Cálculo de racha de meditación real (basado en todos los registros históricos)
+    // 7. Cálculo de racha de meditación real (para validación y log)
     const fechasUnicas = [...new Set(todasLasSesiones.map(s => {
         const f = s.fecha;
-        return `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}`;
+        return `${f.getUTCFullYear()}-${String(f.getUTCMonth() + 1).padStart(2, '0')}-${String(f.getUTCDate()).padStart(2, '0')}`;
     }))].sort().reverse();
     
-    let rachaMed = 0;
+    let rachaMedCalc = 0;
     const ahora = new Date();
-    const hoyStr = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
-    const ayer = new Date();
-    ayer.setDate(ahora.getDate() - 1);
-    const ayerStr = `${ayer.getFullYear()}-${String(ayer.getMonth() + 1).padStart(2, '0')}-${String(ayer.getDate()).padStart(2, '0')}`;
+    const hoyStr = `${ahora.getUTCFullYear()}-${String(ahora.getUTCMonth() + 1).padStart(2, '0')}-${String(ahora.getUTCDate()).padStart(2, '0')}`;
+    const ayer = new Date(ahora);
+    ayer.setUTCDate(ahora.getUTCDate() - 1);
+    const ayerStr = `${ayer.getUTCFullYear()}-${String(ayer.getUTCMonth() + 1).padStart(2, '0')}-${String(ayer.getUTCDate()).padStart(2, '0')}`;
 
     if (fechasUnicas.length > 0) {
         if (fechasUnicas[0] === hoyStr || fechasUnicas[0] === ayerStr) {
-            rachaMed = 1;
+            rachaMedCalc = 1;
             for (let i = 0; i < fechasUnicas.length - 1; i++) {
                 const actual = new Date(fechasUnicas[i]);
                 const siguiente = new Date(fechasUnicas[i + 1]);
                 const diff = Math.round((actual - siguiente) / (1000 * 60 * 60 * 24));
-                
-                if (diff === 1) {
-                    rachaMed++;
-                } else {
-                    break;
-                }
+                if (diff === 1) rachaMedCalc++;
+                else break;
             }
         }
     }
 
-    console.log(`[Stats] Usuario ${usuarioId}: ${todasLasSesiones.length} sesiones, Racha: ${rachaMed}, Total: ${minutosTotalesMeditacion} min, Hoy: ${medDatosPorDia[hoyStr] || 0} min`);
+    // Usamos el valor de la BD si existe, si no el calculado
+    const rachaFinal = (usuario && usuario.racha_meditacion !== null) ? usuario.racha_meditacion : rachaMedCalc;
+
+    console.log(`[Stats] Usuario ${usuarioId}: Racha DB: ${usuario?.racha_meditacion}, Racha Calc: ${rachaMedCalc}`);
 
     // Respuesta unificada con TODOS los datos
     return {
@@ -216,7 +219,7 @@ async function obtenerEstadisticasGenerales(usuarioId) {
         comparacionSemanal,
         meditacion: {
             totalMinutos: minutosTotalesMeditacion,
-            rachaActual: rachaMed,
+            rachaActual: rachaFinal,
             evolucion: Object.keys(medDatosPorDia).map(fecha => ({
                 fecha,
                 minutos: medDatosPorDia[fecha]

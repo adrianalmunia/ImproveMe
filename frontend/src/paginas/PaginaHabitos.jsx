@@ -104,11 +104,22 @@ const PaginaHabitos = ({ setVistaActual }) => {
     necesitaSincronizar.current = true;
 
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      necesitaSincronizar.current = false;
-      servicioAPI.sincronizarGamificacion(datosRef.current, tokenRef.current)
-        .catch(err => console.error("Error guardando progreso:", err));
-    }, 1000);
+    timerRef.current = setTimeout(async () => {
+      try {
+        necesitaSincronizar.current = false;
+        const nuevosDatos = await servicioAPI.sincronizarGamificacion(datosRef.current, tokenRef.current);
+        
+        // Es vital actualizar el estado con los datos que vienen del servidor
+        // porque contienen los IDs reales de la base de datos (reemplazando los temporales)
+        if (nuevosDatos) {
+          setHabitos(nuevosDatos.habitos);
+          setDiarias(nuevosDatos.diarias);
+          setTareas(nuevosDatos.tareas);
+        }
+      } catch (err) {
+        console.error("Error guardando progreso:", err);
+      }
+    }, 500);
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -120,8 +131,9 @@ const PaginaHabitos = ({ setVistaActual }) => {
     return () => {
       if (necesitaSincronizar.current && tokenRef.current) {
         if (timerRef.current) clearTimeout(timerRef.current);
-        // Lanzamos la sincronización inmediata; el fetch continúa aunque el componente se desmonte
-        servicioAPI.sincronizarGamificacion(datosRef.current, tokenRef.current)
+        console.log("Sincronización forzada al salir de pantalla...");
+        // Lanzamos la sincronización inmediata con keepalive
+        servicioAPI.sincronizarGamificacion(datosRef.current, tokenRef.current, true)
           .catch(err => console.error("Error guardando progreso al salir:", err));
       }
     };
