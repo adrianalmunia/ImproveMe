@@ -108,14 +108,36 @@ async function obtenerEstadisticasGenerales(usuarioId) {
         y: e.puntuacion_animo
     }));
 
-    // 5. Mejor hábito histórico (basado en racha)
-    const mejorHabitoHistorico = await prisma.habitos.findFirst({
-        where: { usuario_id: usuarioId },
-        orderBy: [
-            { racha: 'desc' },
-            { racha_anterior: 'desc' }
-        ]
-    });
+    // 5. Mejor racha histórica (puede ser hábito o tarea diaria)
+    const [mejorHabitoHistorico, mejorDiariaHistorica] = await Promise.all([
+        prisma.habitos.findFirst({
+            where: { usuario_id: usuarioId },
+            orderBy: [
+                { racha: 'desc' },
+                { racha_anterior: 'desc' }
+            ]
+        }),
+        prisma.tareas_diarias.findFirst({
+            where: { usuario_id: usuarioId },
+            orderBy: { racha: 'desc' }
+        })
+    ]);
+
+    let mejorRachaHistorica = null;
+    const rachaHabito = mejorHabitoHistorico ? Math.max(mejorHabitoHistorico.racha, mejorHabitoHistorico.racha_anterior) : 0;
+    const rachaDiaria = mejorDiariaHistorica ? mejorDiariaHistorica.racha : 0;
+
+    if (rachaHabito >= rachaDiaria && mejorHabitoHistorico) {
+        mejorRachaHistorica = {
+            nombre: mejorHabitoHistorico.nombre,
+            racha: rachaHabito
+        };
+    } else if (mejorDiariaHistorica) {
+        mejorRachaHistorica = {
+            nombre: mejorDiariaHistorica.nombre,
+            racha: rachaDiaria
+        };
+    }
 
     // 6. Estadísticas de Meditación
     const [sesionesChart, todasLasSesiones] = await Promise.all([
@@ -189,10 +211,7 @@ async function obtenerEstadisticasGenerales(usuarioId) {
         cumplimientoHabitos: statsHabitos,
         correlacionHabitoAnimo: correlacion,
         correlacionSuenoAnimo: suenoAnimo,
-        mejorHabitoHistorico: mejorHabitoHistorico ? {
-            nombre: mejorHabitoHistorico.nombre,
-            racha: Math.max(mejorHabitoHistorico.racha, mejorHabitoHistorico.racha_anterior)
-        } : null,
+        mejorHabitoHistorico: mejorRachaHistorica,
         rachasActuales,
         comparacionSemanal,
         meditacion: {

@@ -62,12 +62,10 @@ async function obtenerResumenCalendario(usuarioId, mes, anio) {
     // debemos ser cuidadosos para que coincida con la percepción del usuario.
     const aClaveFecha = (f) => {
         const d = new Date(f);
-        // Usamos el formato ISO y tomamos solo la parte de la fecha (YYYY-MM-DD)
-        // Pero ojo, .toISOString() siempre es UTC. 
-        // Para que coincida con el frontend (que usa local), usaremos:
-        const anio = d.getFullYear();
-        const mes = String(d.getMonth() + 1).padStart(2, '0');
-        const dia = String(d.getDate()).padStart(2, '0');
+        // Usamos métodos UTC para asegurar consistencia con el almacenamiento en BD
+        const anio = d.getUTCFullYear();
+        const mes = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const dia = String(d.getUTCDate()).padStart(2, '0');
         return `${anio}-${mes}-${dia}`;
     };
 

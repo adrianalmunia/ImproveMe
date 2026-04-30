@@ -161,8 +161,8 @@ export function PaginaRegistros() {
   }, [usuario, fechaFiltro]);
 
   const cambiarMes = (incremento) => {
-    const nuevaFecha = new Date(fechaFiltro);
-    nuevaFecha.setMonth(nuevaFecha.getMonth() + incremento);
+    // Seteamos el día 1 antes de cambiar de mes para evitar saltos por meses de distinta duración (ej: de 31 de marzo a 28 de febrero)
+    const nuevaFecha = new Date(fechaFiltro.getFullYear(), fechaFiltro.getMonth() + incremento, 1);
     setFechaFiltro(nuevaFecha);
   };
 

@@ -152,9 +152,9 @@ async function obtenerEntradasPorMes(req, res) {
     }
 
     try {
-        // Crear fechas de inicio y fin del mes
-        const fechaInicio = new Date(anio, mes - 1, 1);
-        const fechaFin = new Date(anio, mes, 1);
+        // Crear fechas de inicio y fin del mes en UTC para coincidir con el almacenamiento
+        const fechaInicio = new Date(Date.UTC(anio, mes - 1, 1));
+        const fechaFin = new Date(Date.UTC(anio, mes, 1));
 
         const entradas = await prisma.entradas_diario.findMany({
             where: {

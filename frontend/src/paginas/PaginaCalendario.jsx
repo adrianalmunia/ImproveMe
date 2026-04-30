@@ -101,8 +101,9 @@ const PaginaCalendario = () => {
   }, [fechaActual, usuario, token]);
 
   const cambiarMes = (direccion) => {
-    const nuevaFecha = new Date(fechaActual.setMonth(fechaActual.getMonth() + direccion));
-    setFechaActual(new Date(nuevaFecha));
+    // Seteamos el día 1 antes de cambiar de mes para evitar saltos por meses de distinta duración
+    const nuevaFecha = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + direccion, 1);
+    setFechaActual(nuevaFecha);
     setDiaSeleccionado(null);
   };
 

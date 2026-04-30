@@ -240,13 +240,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">Mejor Racha</p>
               {(() => {
                 const todos = [...habitos, ...diarias];
-                const rachaMax = Math.max(0, ...todos.map(i => i.racha || 0));
+                const rachaMax = Math.max(0, ...todos.map(i => Math.max(i.racha || 0, i.rachaAnterior || 0)));
                 
                 if (rachaMax === 0) {
                   return <p className="text-2xl font-black text-[#2C4159] leading-tight">0 Días</p>;
                 }
 
-                const mejores = todos.filter(i => i.racha === rachaMax);
+                const mejores = todos.filter(i => Math.max(i.racha || 0, i.rachaAnterior || 0) === rachaMax);
                 const nombresStr = mejores.length > 2 
                   ? `${mejores[0].nombre} y ${mejores.length - 1} más` 
                   : mejores.map(i => i.nombre).join(', ');
