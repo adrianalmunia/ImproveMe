@@ -9,27 +9,25 @@ import IconosRangos from '../componentes/IconosRangos';
 
 // Mapeo de iconos para poder usarlos dinámicamente
 const IconMap = {
-  Circle: IconosRangos.Piedra,
-  Triangle: IconosRangos.Bronce,
-  Square: IconosRangos.Plata,
-  Pentagon: IconosRangos.Oro,
-  Hexagon: IconosRangos.Esmeralda,
-  Shield: IconosRangos.Zafiro,
-  Gem: IconosRangos.Diamante,
-  Star: IconosRangos.Amatista,
-  Sparkles: IconosRangos.Rubi
+  Piedra: IconosRangos.Piedra,
+  Bronce: IconosRangos.Bronce,
+  Plata: IconosRangos.Plata,
+  Oro: IconosRangos.Oro,
+  Esmeralda: IconosRangos.Esmeralda,
+  Zafiro: IconosRangos.Zafiro,
+  Amatista: IconosRangos.Amatista,
+  Rubi: IconosRangos.Rubi
 };
 
 export const RANK_CATEGORIES = [
-  { id: 'piedra', name: 'Piedra', iconName: 'Circle', color: 'text-stone-500', bg: 'bg-stone-500', glow: 'shadow-stone-500/50', gradient: 'from-stone-400 to-stone-600', desc: 'El comienzo de tu viaje. Forja tu voluntad.' },
-  { id: 'bronce', name: 'Bronce', iconName: 'Triangle', color: 'text-amber-700', bg: 'bg-amber-700', glow: 'shadow-amber-700/50', gradient: 'from-amber-600 to-amber-800', desc: 'La consistencia empieza a dar sus frutos.' },
-  { id: 'plata', name: 'Plata', iconName: 'Square', color: 'text-slate-400', bg: 'bg-slate-400', glow: 'shadow-slate-400/50', gradient: 'from-slate-300 to-slate-500', desc: 'Un reflejo de tu disciplina diaria.' },
-  { id: 'oro', name: 'Oro', iconName: 'Pentagon', color: 'text-yellow-500', bg: 'bg-yellow-500', glow: 'shadow-yellow-500/50', gradient: 'from-yellow-400 to-yellow-600', desc: 'Brillas con luz propia entre los mejores.' },
-  { id: 'esmeralda', name: 'Esmeralda', iconName: 'Hexagon', color: 'text-emerald-500', bg: 'bg-emerald-500', glow: 'shadow-emerald-500/50', gradient: 'from-emerald-400 to-emerald-600', desc: 'Tu crecimiento es imparable y natural.' },
-  { id: 'diamante', name: 'Diamante', iconName: 'Gem', color: 'text-blue-400', bg: 'bg-blue-400', glow: 'shadow-blue-400/50', gradient: 'from-blue-300 to-blue-500', desc: 'Dureza y claridad inquebrantables.' },
-  { id: 'zafiro', name: 'Zafiro', iconName: 'Shield', color: 'text-cyan-500', bg: 'bg-cyan-500', glow: 'shadow-cyan-500/50', gradient: 'from-cyan-400 to-cyan-600', desc: 'Sabiduría y profundidad en cada acción.' },
-  { id: 'amatista', name: 'Amatista', iconName: 'Star', color: 'text-purple-500', bg: 'bg-purple-500', glow: 'shadow-purple-500/50', gradient: 'from-purple-400 to-purple-600', desc: 'Dominio absoluto de tu mente y cuerpo.' },
-  { id: 'rubi', name: 'Rubí', iconName: 'Sparkles', color: 'text-red-500', bg: 'bg-red-500', glow: 'shadow-red-500/50', gradient: 'from-red-400 to-red-600', desc: 'La leyenda máxima. Has alcanzado la cima.' }
+  { id: 'piedra', name: 'Piedra', iconName: 'Piedra', color: 'text-stone-500', bg: 'bg-stone-500', glow: 'shadow-stone-500/50', gradient: 'from-stone-400 to-stone-600', desc: 'El comienzo de tu viaje. Forja tu voluntad.' },
+  { id: 'bronce', name: 'Bronce', iconName: 'Bronce', color: 'text-amber-700', bg: 'bg-amber-700', glow: 'shadow-amber-700/50', gradient: 'from-amber-600 to-amber-800', desc: 'La consistencia empieza a dar sus frutos.' },
+  { id: 'plata', name: 'Plata', iconName: 'Plata', color: 'text-slate-400', bg: 'bg-slate-400', glow: 'shadow-slate-400/50', gradient: 'from-slate-300 to-slate-500', desc: 'Un reflejo de tu disciplina diaria.' },
+  { id: 'oro', name: 'Oro', iconName: 'Oro', color: 'text-yellow-500', bg: 'bg-yellow-500', glow: 'shadow-yellow-500/50', gradient: 'from-yellow-400 to-yellow-600', desc: 'Brillas con luz propia entre los mejores.' },
+  { id: 'esmeralda', name: 'Esmeralda', iconName: 'Esmeralda', color: 'text-emerald-500', bg: 'bg-emerald-500', glow: 'shadow-emerald-500/50', gradient: 'from-emerald-400 to-emerald-600', desc: 'Tu crecimiento es imparable y natural.' },
+  { id: 'zafiro', name: 'Zafiro', iconName: 'Zafiro', color: 'text-blue-500', bg: 'bg-blue-500', glow: 'shadow-blue-500/50', gradient: 'from-blue-400 to-blue-600', desc: 'Sabiduría y profundidad en cada acción.' },
+  { id: 'amatista', name: 'Amatista', iconName: 'Amatista', color: 'text-purple-500', bg: 'bg-purple-500', glow: 'shadow-purple-500/50', gradient: 'from-purple-400 to-purple-600', desc: 'Dominio absoluto de tu mente y cuerpo.' },
+  { id: 'rubi', name: 'Rubí', iconName: 'Rubi', color: 'text-red-500', bg: 'bg-red-500', glow: 'shadow-red-500/50', gradient: 'from-red-400 to-red-600', desc: 'La leyenda máxima. Has alcanzado la cima.' }
 ];
 
 const XP_PER_TIER = 500;
