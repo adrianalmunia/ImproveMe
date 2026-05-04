@@ -76,8 +76,8 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
           backfaceVisibility: "hidden"
         }}
       >
-        <div className="w-full h-full bg-white rounded-[37px] relative overflow-hidden flex flex-col items-center">
-          <div className="absolute inset-0 bg-gradient-to-b from-white to-[#4F99CC]/5 pointer-events-none"></div>
+        <div className="w-full h-full bg-white dark:bg-gray-800 rounded-[37px] relative overflow-hidden flex flex-col items-center transition-colors duration-300">
+          <div className="absolute inset-0 bg-gradient-to-b from-white dark:from-gray-800 to-[#4F99CC]/5 dark:to-[#4F99CC]/10 pointer-events-none transition-colors duration-300"></div>
           
           <div className="mb-2 mt-4 relative z-10 shrink-0 text-center flex flex-col items-center" style={{ transform: "translateZ(20px)" }}>
             <p className="text-[10px] font-black text-[#4F99CC] uppercase tracking-[0.1em]">{fechaStr}</p>
@@ -92,7 +92,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
 
           {/* Previsualización de Imagen si existe */}
           {entrada.archivos_multimedia?.find(a => a.tipo_archivo === 'imagen') ? (
-            <div className="w-full h-28 mt-2 rounded-2xl overflow-hidden shadow-sm border border-gray-100 relative z-10 shrink-0" style={{ transform: "translateZ(10px)" }}>
+            <div className="w-full h-28 mt-2 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative z-10 shrink-0 transition-colors duration-300" style={{ transform: "translateZ(10px)" }}>
               <img 
                 src={`http://localhost:3000${entrada.archivos_multimedia.find(a => a.tipo_archivo === 'imagen').url_archivo}`} 
                 alt="Miniatura" 
@@ -111,7 +111,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
           )}
 
           <div className="flex-1 w-full flex items-center justify-center mt-2 px-2 overflow-hidden" style={{ transform: "translateZ(0)" }}>
-            <p className="text-xs font-['Tilt_Warp'] text-gray-700 leading-relaxed text-center w-full break-words line-clamp-6">
+            <p className="text-xs font-['Tilt_Warp'] text-gray-700 dark:text-gray-300 leading-relaxed text-center w-full break-words line-clamp-6 transition-colors duration-300">
               {extracto}
             </p>
           </div>
@@ -121,7 +121,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
 
         {/* Icono Flotante de Humor */}
         <motion.div 
-          className="absolute -top-6 -left-6 w-20 h-20 bg-white rounded-full shadow-lg border-[3px] flex items-center justify-center overflow-hidden z-20"
+          className="absolute -top-6 -left-6 w-20 h-20 bg-white dark:bg-gray-800 rounded-full shadow-lg border-[3px] flex items-center justify-center overflow-hidden z-20 transition-colors duration-300"
           style={{ 
             borderColor: humorInfo.color,
             transformStyle: "preserve-3d",
@@ -169,7 +169,7 @@ export function PaginaRegistros() {
   const nombreMesAnio = `${meses[fechaFiltro.getMonth()]} ${fechaFiltro.getFullYear()}`;
 
   return (
-    <main className="flex-1 relative overflow-y-auto h-full p-8 lg:p-12 pb-24 font-['Inter']">
+    <main className="flex-1 relative overflow-y-auto h-full p-8 lg:p-12 pb-24 font-['Inter'] dark:bg-gray-900 transition-colors duration-300">
       
       {/* HEADER / LOGO COMPLETO */}
       <div className="flex justify-center mb-8">
@@ -187,12 +187,12 @@ export function PaginaRegistros() {
           <div className="flex justify-center items-center gap-6 mb-12">
           <button 
             onClick={() => cambiarMes(-1)}
-            className="w-10 h-10 bg-gray-200 text-gray-600 hover:bg-[#4F99CC] hover:text-white rounded-full flex items-center justify-center transition-colors text-xl shadow-sm"
+            className="w-10 h-10 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-[#4F99CC] dark:hover:bg-[#4F99CC] hover:text-white rounded-full flex items-center justify-center transition-colors text-xl shadow-sm"
           >
             &#9664;
           </button>
-          <div className="relative bg-gray-200 hover:bg-gray-300 transition-colors px-8 py-2.5 rounded-full min-w-[200px] text-center shadow-inner cursor-pointer flex items-center justify-center overflow-hidden">
-            <h2 className="text-xl font-['Tilt_Warp'] text-gray-800 tracking-wider relative z-10 pointer-events-none">{nombreMesAnio}</h2>
+          <div className="relative bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors px-8 py-2.5 rounded-full min-w-[200px] text-center shadow-inner cursor-pointer flex items-center justify-center overflow-hidden duration-300">
+            <h2 className="text-xl font-['Tilt_Warp'] text-gray-800 dark:text-white tracking-wider relative z-10 pointer-events-none transition-colors duration-300">{nombreMesAnio}</h2>
             <input 
               type="month" 
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
@@ -214,7 +214,7 @@ export function PaginaRegistros() {
           </div>
           <button 
             onClick={() => cambiarMes(1)}
-            className="w-10 h-10 bg-gray-200 text-gray-600 hover:bg-[#4F99CC] hover:text-white rounded-full flex items-center justify-center transition-colors text-xl shadow-sm"
+            className="w-10 h-10 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-[#4F99CC] dark:hover:bg-[#4F99CC] hover:text-white rounded-full flex items-center justify-center transition-colors text-xl shadow-sm"
           >
             &#9654;
           </button>
@@ -226,7 +226,7 @@ export function PaginaRegistros() {
             <div className="w-12 h-12 border-4 border-[#4F99CC] border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : entradas.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
+          <div className="text-center py-20 text-gray-400 dark:text-gray-500 transition-colors duration-300">
             <p className="text-xl font-['Tilt_Warp']">No hay registros en {nombreMesAnio.toLowerCase()}.</p>
             <p className="mt-2 text-sm">Empieza a escribir en tu diario para verlos aquí.</p>
           </div>
@@ -268,10 +268,10 @@ export function PaginaRegistros() {
                 className="w-full h-[85vh] max-h-[700px] rounded-[55px] shadow-2xl p-[3px] flex flex-col relative"
                 style={{ background: 'linear-gradient(180deg, #4F99CC 0%, #C6A55E 100%)' }}
               >
-                <div className="w-full h-full bg-white rounded-[52px] relative overflow-hidden flex flex-col p-8 items-center">
+                <div className="w-full h-full bg-white dark:bg-gray-800 rounded-[52px] relative overflow-hidden flex flex-col p-8 items-center transition-colors duration-300">
                   <button 
                     onClick={() => setEntradaSeleccionada(null)}
-                    className="absolute top-4 right-4 w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full flex items-center justify-center transition-colors z-30"
+                    className="absolute top-4 right-4 w-10 h-10 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-full flex items-center justify-center transition-colors z-30"
                   >
                     ✕
                   </button>
@@ -310,7 +310,7 @@ export function PaginaRegistros() {
                   )}
 
                   <div className="flex-1 w-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-start py-4 px-2">
-                    <p className="text-xl font-['Tilt_Warp'] text-gray-800 leading-snug text-center w-full break-words">
+                    <p className="text-xl font-['Tilt_Warp'] text-gray-800 dark:text-white leading-snug text-center w-full break-words transition-colors duration-300">
                       {entradaSeleccionada.contenido_texto || "Sin contenido..."}
                     </p>
                   </div>
@@ -318,7 +318,7 @@ export function PaginaRegistros() {
 
                 {/* Icono Flotante en el Modal */}
                 <div 
-                  className="absolute -top-8 -left-8 w-24 h-24 bg-white rounded-full shadow-xl border-4 flex items-center justify-center overflow-hidden z-20"
+                  className="absolute -top-8 -left-8 w-24 h-24 bg-white dark:bg-gray-800 rounded-full shadow-xl border-4 flex items-center justify-center overflow-hidden z-20 transition-colors duration-300"
                   style={{ borderColor: (humores.find(h => h.id === entradaSeleccionada.puntuacion_animo) || humores[2]).color }}
                 >
                   <img src={(humores.find(h => h.id === entradaSeleccionada.puntuacion_animo) || humores[2]).imagen} alt="Humor" className="w-full h-full object-cover" />
@@ -350,7 +350,7 @@ export function PaginaRegistros() {
                 className="p-2 rounded-[32px] shadow-2xl"
                 style={{ background: 'linear-gradient(135deg, #4F99CC 0%, #C6A55E 100%)' }}
               >
-                <div className="bg-white rounded-[24px] overflow-hidden relative flex justify-center">
+                <div className="bg-white dark:bg-gray-800 rounded-[24px] overflow-hidden relative flex justify-center transition-colors duration-300">
                   <button
                     onClick={() => setImagenExpandida(null)}
                     className="absolute top-4 right-4 w-10 h-10 bg-black/50 hover:bg-black/80 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-colors z-10"

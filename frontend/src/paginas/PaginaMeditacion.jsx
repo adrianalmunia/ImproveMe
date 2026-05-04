@@ -357,8 +357,8 @@ export function PaginaMeditacion() {
   const dashOffset = circunferencia - (progreso / 100) * circunferencia;
 
   return (
-    <main className="flex-1 h-full overflow-y-auto relative font-['Inter'] bg-neutral-50">
-      <div className="absolute inset-0 bg-gradient-to-tr from-emerald-50/60 to-white pointer-events-none" />
+    <main className="flex-1 h-full overflow-y-auto relative font-['Inter'] bg-neutral-50 dark:bg-gray-900 transition-colors duration-300">
+      <div className="absolute inset-0 bg-gradient-to-tr from-emerald-50/60 dark:from-emerald-900/20 to-white dark:to-gray-900 pointer-events-none transition-colors duration-300" />
 
       <div className="max-w-3xl mx-auto px-8 py-12 flex flex-col items-center justify-center min-h-full relative z-10">
         <AnimatePresence mode="wait">
@@ -366,19 +366,19 @@ export function PaginaMeditacion() {
           {/* ====== SELECTOR ====== */}
           {!estaMeditando && !sesionFinalizada && (
             <motion.div key="selector" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg bg-white/80 backdrop-blur-xl border border-white rounded-[48px] shadow-2xl p-10 flex flex-col items-center">
+              className="w-full max-w-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white dark:border-gray-700 rounded-[48px] shadow-2xl p-10 flex flex-col items-center transition-colors duration-300">
 
               <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-6 shadow-lg"
                 style={{ background: `linear-gradient(135deg, ${COLOR} 0%, ${COLOR2} 100%)` }}>
                 <Flower2 size={40} className="text-white" />
               </div>
-              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 mb-1">Momento de Calma</h2>
-              <p className="text-gray-400 text-sm mb-8 text-center">Elige cuánto tiempo quieres meditar hoy.</p>
+              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-1 transition-colors duration-300">Momento de Calma</h2>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mb-8 text-center transition-colors duration-300">Elige cuánto tiempo quieres meditar hoy.</p>
 
               {/* Selector de tiempo */}
-              <div className="flex items-center gap-6 mb-4 bg-emerald-50/60 px-8 py-5 rounded-[28px] border border-emerald-100/60 w-full justify-center relative">
+              <div className="flex items-center gap-6 mb-4 bg-emerald-50/60 dark:bg-emerald-900/30 px-8 py-5 rounded-[28px] border border-emerald-100/60 dark:border-emerald-900/50 w-full justify-center relative transition-colors duration-300">
                 <button onClick={() => setTiempoSeleccionado(p => Math.max(1, p - 1))}
-                  className="w-11 h-11 bg-white rounded-2xl shadow flex items-center justify-center text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all">
+                  className="w-11 h-11 bg-white dark:bg-gray-800 rounded-2xl shadow flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white transition-all">
                   <ChevronDown size={22} />
                 </button>
 
@@ -393,10 +393,10 @@ export function PaginaMeditacion() {
                   <AnimatePresence>
                     {mostrarDropdown && (
                       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                        className="absolute top-full mt-3 bg-white rounded-[20px] shadow-2xl border border-emerald-100 p-3 z-50 grid grid-cols-3 gap-2 w-48">
+                        className="absolute top-full mt-3 bg-white dark:bg-gray-800 rounded-[20px] shadow-2xl border border-emerald-100 dark:border-emerald-900/50 p-3 z-50 grid grid-cols-3 gap-2 w-48 transition-colors duration-300">
                         {PRESETS.map(p => (
                           <button key={p} onClick={() => { setTiempoSeleccionado(p); setMostrarDropdown(false); }}
-                            className={`py-2 rounded-xl text-sm font-bold transition-all ${tiempoSeleccionado === p ? 'bg-emerald-500 text-white shadow' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
+                            className={`py-2 rounded-xl text-sm font-bold transition-all ${tiempoSeleccionado === p ? 'bg-emerald-500 text-white shadow' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'}`}>
                             {p} min
                           </button>
                         ))}
@@ -406,7 +406,7 @@ export function PaginaMeditacion() {
                 </div>
 
                 <button onClick={() => setTiempoSeleccionado(p => Math.min(60, p + 1))}
-                  className="w-11 h-11 bg-white rounded-2xl shadow flex items-center justify-center text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all">
+                  className="w-11 h-11 bg-white dark:bg-gray-800 rounded-2xl shadow flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white transition-all">
                   <ChevronUp size={22} />
                 </button>
               </div>
@@ -421,7 +421,7 @@ export function PaginaMeditacion() {
               <AnimatePresence>
                 {mostrarAjustes && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                    className="w-full bg-emerald-50/60 rounded-[24px] border border-emerald-100/60 p-5 mb-6 space-y-3 overflow-hidden">
+                    className="w-full bg-emerald-50/60 dark:bg-emerald-900/30 rounded-[24px] border border-emerald-100/60 dark:border-emerald-900/50 p-5 mb-6 space-y-3 overflow-hidden transition-colors duration-300">
                     
                     {/* Gongs */}
                     <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-2"><Bell size={12}/> Sonidos de Gong</p>
@@ -431,9 +431,9 @@ export function PaginaMeditacion() {
                       { key: 'gongFinal', label: 'Gong al final' },
                     ].map(({ key, label }) => (
                       <div key={key} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 font-medium">{label}</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium transition-colors duration-300">{label}</span>
                         <button onClick={() => setAjustes(a => ({ ...a, [key]: !a[key] }))}
-                          className={`w-11 h-6 rounded-full transition-all relative ${ajustes[key] ? 'bg-emerald-500' : 'bg-gray-200'}`}>
+                          className={`w-11 h-6 rounded-full transition-all relative ${ajustes[key] ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-600'}`}>
                           <motion.div animate={{ x: ajustes[key] ? 22 : 2 }}
                             className="w-5 h-5 bg-white rounded-full shadow absolute top-0.5" />
                         </button>
@@ -441,11 +441,11 @@ export function PaginaMeditacion() {
                     ))}
 
                     {/* Música */}
-                    <div className="pt-3 border-t border-emerald-100 space-y-3">
+                    <div className="pt-3 border-t border-emerald-100 dark:border-emerald-900/50 space-y-3 transition-colors duration-300">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2"><Music size={12}/> Música Ambiental</span>
                         <button onClick={() => setAjustes(a => ({ ...a, musica: !a.musica }))}
-                          className={`w-11 h-6 rounded-full transition-all relative ${ajustes.musica ? 'bg-emerald-500' : 'bg-gray-200'}`}>
+                          className={`w-11 h-6 rounded-full transition-all relative ${ajustes.musica ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-600'}`}>
                           <motion.div animate={{ x: ajustes.musica ? 22 : 2 }}
                             className="w-5 h-5 bg-white rounded-full shadow absolute top-0.5" />
                         </button>
@@ -458,7 +458,7 @@ export function PaginaMeditacion() {
                             const activa = ajustes.pistaMusica === p.id;
                             return (
                               <button key={p.id} onClick={() => setAjustes(a => ({ ...a, pistaMusica: p.id }))}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-left ${activa ? 'bg-emerald-500 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-emerald-50 border border-gray-100'}`}>
+                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-left ${activa ? 'bg-emerald-500 text-white shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border border-gray-100 dark:border-gray-700'}`}>
                                 <Icono size={18} />
                                 <span className="text-xs font-bold">{p.label}</span>
                               </button>
@@ -469,14 +469,14 @@ export function PaginaMeditacion() {
                     </div>
 
                     {/* Técnica de Respiración */}
-                    <div className="pt-3 border-t border-emerald-100 space-y-3">
+                    <div className="pt-3 border-t border-emerald-100 dark:border-emerald-900/50 space-y-3 transition-colors duration-300">
                       <span className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">Técnica de Respiración</span>
                       <div className="flex flex-col gap-2">
                         {TECNICAS_RESPIRACION.map(t => (
                           <button key={t.id} onClick={() => setAjustes(a => ({ ...a, tecnicaRespiracion: t.id }))}
-                            className={`p-4 rounded-2xl transition-all text-left border ${ajustes.tecnicaRespiracion === t.id ? 'bg-emerald-500 text-white border-emerald-600 shadow-lg' : 'bg-white text-gray-600 border-gray-100 hover:bg-emerald-50'}`}>
+                            className={`p-4 rounded-2xl transition-all text-left border ${ajustes.tecnicaRespiracion === t.id ? 'bg-emerald-500 text-white border-emerald-600 shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-100 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'}`}>
                             <p className="text-xs font-black uppercase tracking-widest mb-1">{t.label}</p>
-                            <p className={`text-[10px] leading-relaxed ${ajustes.tecnicaRespiracion === t.id ? 'text-white/80' : 'text-gray-400'}`}>{t.desc}</p>
+                            <p className={`text-[10px] leading-relaxed ${ajustes.tecnicaRespiracion === t.id ? 'text-white/80' : 'text-gray-400 dark:text-gray-500'}`}>{t.desc}</p>
                           </button>
                         ))}
                       </div>
@@ -513,7 +513,7 @@ export function PaginaMeditacion() {
                     }} />
                 </svg>
                 <div className="flex flex-col items-center justify-center z-10">
-                  <span className="text-5xl font-['Tilt_Warp'] text-gray-800">{fmt(segundosRestantes)}</span>
+                  <span className="text-5xl font-['Tilt_Warp'] text-gray-800 dark:text-white transition-colors duration-300">{fmt(segundosRestantes)}</span>
                   <div className="flex items-center gap-1 text-emerald-400 mt-1">
                     <Timer size={13} />
                     <span className="text-[10px] font-bold uppercase tracking-widest">Restante</span>
@@ -555,7 +555,7 @@ export function PaginaMeditacion() {
 
               {/* Control de Volumen (solo si hay música activa) */}
               {ajustes.musica && (
-                <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm px-5 py-3 rounded-2xl shadow-md border border-emerald-100/50 w-full max-w-xs">
+                <div className="flex items-center gap-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-5 py-3 rounded-2xl shadow-md border border-emerald-100/50 dark:border-emerald-900/50 w-full max-w-xs transition-colors duration-300">
                   <Volume2 size={16} className="text-emerald-500 shrink-0" />
                   <input
                     type="range" min="0" max="1" step="0.05"
@@ -573,11 +573,11 @@ export function PaginaMeditacion() {
               {/* Controles */}
               <div className="flex items-center gap-5">
                 <button onClick={manejarPlayPause}
-                  className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center text-gray-600 hover:text-emerald-600 transition-colors">
+                  className="w-16 h-16 bg-white dark:bg-gray-800 rounded-2xl shadow-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                   {estaPausado ? <Play size={24} fill="currentColor" /> : <Pause size={24} fill="currentColor" />}
                 </button>
                 <button onClick={salir}
-                  className="px-8 py-4 bg-white text-red-400 rounded-2xl shadow-lg font-bold flex items-center gap-2 hover:bg-red-50 transition-colors text-sm">
+                  className="px-8 py-4 bg-white dark:bg-gray-800 text-red-400 rounded-2xl shadow-lg font-bold flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm">
                   <X size={18} /> Salir
                 </button>
               </div>
@@ -587,19 +587,19 @@ export function PaginaMeditacion() {
           {/* ====== SESIÓN FINALIZADA ====== */}
           {sesionFinalizada && (
             <motion.div key="final" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-              className="w-full max-w-md bg-white rounded-[48px] shadow-2xl p-12 flex flex-col items-center text-center">
-              <div className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mb-6">
+              className="w-full max-w-md bg-white dark:bg-gray-800 rounded-[48px] shadow-2xl p-12 flex flex-col items-center text-center transition-colors duration-300">
+              <div className="w-24 h-24 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6 transition-colors duration-300">
                 <CheckCircle2 size={52} className="text-emerald-500" />
               </div>
-              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 mb-3">¡Sesión Completada!</h2>
-              <p className="text-gray-400 text-sm mb-6">Has dedicado {tiempoSeleccionado} minutos a tu bienestar. Tu mente te lo agradecerá.</p>
+              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-3 transition-colors duration-300">¡Sesión Completada!</h2>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mb-6 transition-colors duration-300">Has dedicado {tiempoSeleccionado} minutos a tu bienestar. Tu mente te lo agradecerá.</p>
               
               {xpGanada > 0 && (
                 <motion.div 
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.5, type: 'spring' }}
-                  className="bg-orange-50 border border-orange-100 px-6 py-3 rounded-2xl flex items-center gap-3 mb-8 shadow-sm"
+                  className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/50 px-6 py-3 rounded-2xl flex items-center gap-3 mb-8 shadow-sm transition-colors duration-300"
                 >
                   <Flame className="text-orange-500 fill-orange-500" size={24} />
                   <div className="text-left">

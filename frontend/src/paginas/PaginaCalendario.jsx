@@ -151,19 +151,19 @@ const PaginaCalendario = () => {
   const infoDia = diaSeleccionado ? datosMes[diaSeleccionado] : null;
 
   return (
-    <div className="h-full w-full bg-neutral-50 overflow-hidden flex flex-col md:flex-row p-6 gap-6">
+    <div className="h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-hidden flex flex-col md:flex-row p-6 gap-6 transition-colors duration-300">
       
       {/* SECCIÓN IZQUIERDA: CALENDARIO */}
-      <div className="flex-1 flex flex-col bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
         
         {/* Header Calendario */}
-        <header className="p-6 border-b border-gray-50 flex items-center justify-between">
+        <header className="p-6 border-b border-gray-50 dark:border-gray-700 flex items-center justify-between transition-colors duration-300">
           <div>
-            <h1 className="text-2xl font-black text-[#2C4159] flex items-center gap-2">
+            <h1 className="text-2xl font-black text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
               <CalendarIcon className="text-[#4F99CC]" />
               {fechaActual.toLocaleString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase()}
             </h1>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Tu viaje personal en el tiempo</p>
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">Tu viaje personal en el tiempo</p>
           </div>
           
           <div className="flex gap-2">
@@ -180,7 +180,7 @@ const PaginaCalendario = () => {
         </header>
 
         {/* Grid de Días de la Semana */}
-        <div className="grid grid-cols-7 border-b border-gray-50">
+        <div className="grid grid-cols-7 border-b border-gray-50 dark:border-gray-700 transition-colors duration-300">
           {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(d => (
             <div key={d} className="py-3 text-center text-[10px] font-black text-gray-400 uppercase tracking-tighter">
               {d}
@@ -191,7 +191,7 @@ const PaginaCalendario = () => {
         {/* Grid del Calendario */}
         <div className="flex-1 grid grid-cols-7 auto-rows-fr relative">
           {estaCargando && (
-            <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+            <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 backdrop-blur-[1px] z-10 flex items-center justify-center transition-colors duration-300">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4F99CC]" />
             </div>
           )}
@@ -201,19 +201,19 @@ const PaginaCalendario = () => {
               key={idx} 
               onClick={() => dia.clave && setDiaSeleccionado(dia.clave)}
               className={`
-                border-r border-b border-gray-50 p-2 min-h-[80px] transition-all cursor-pointer group
-                ${!dia.fecha ? 'bg-gray-50/50' : 'hover:bg-[#4F99CC]/5'}
+                border-r border-b border-gray-50 dark:border-gray-700 p-2 min-h-[80px] transition-all cursor-pointer group
+                ${!dia.fecha ? 'bg-gray-50/50 dark:bg-gray-800/50' : 'hover:bg-[#4F99CC]/5 dark:hover:bg-[#4F99CC]/20'}
                 ${diaSeleccionado === dia.clave ? 'bg-[#4F99CC]/10 ring-2 ring-inset ring-[#4F99CC]' : ''}
               `}
             >
               {dia.fecha && (
                 <div className="h-full flex flex-col justify-between">
                   <div className="flex justify-between items-start">
-                    <span className={`text-xs font-black ${dia.esHoy ? 'bg-[#4F99CC] text-white w-6 h-6 flex items-center justify-center rounded-lg shadow-sm' : 'text-[#2C4159]'}`}>
+                    <span className={`text-xs font-black ${dia.esHoy ? 'bg-[#4F99CC] text-white w-6 h-6 flex items-center justify-center rounded-lg shadow-sm' : 'text-[#2C4159] dark:text-gray-300'}`}>
                       {dia.fecha.getDate()}
                     </span>
                     {dia.datos?.diario && (
-                      <div className="w-5 h-5 rounded-md overflow-hidden flex items-center justify-center border border-gray-100 shadow-sm">
+                      <div className="w-5 h-5 rounded-md overflow-hidden flex items-center justify-center border border-gray-100 dark:border-gray-700 shadow-sm transition-colors duration-300">
                         {renderIconoAnimo(dia.datos.diario.animo, 20)}
                       </div>
                     )}
@@ -249,8 +249,8 @@ const PaginaCalendario = () => {
               className="flex flex-col gap-6 pb-4"
             >
               {/* Card de Resumen Diario */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-black text-[#2C4159] mb-1">
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
+                <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-1 transition-colors duration-300">
                   {new Date(diaSeleccionado + "T00:00:00").toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
                 </h2>
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Resumen de actividad</p>
@@ -259,16 +259,16 @@ const PaginaCalendario = () => {
                   <div className="space-y-6">
                     {/* Animo y Sueño */}
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-neutral-50 p-3 rounded-2xl flex flex-col items-center justify-center text-center">
-                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Ánimo</p>
-                        <div className="text-[#2C4159] flex items-center gap-1">
-                          {renderIconoAnimo(infoDia.diario?.animo, 16) || <div className="w-4 h-4 rounded-full bg-gray-200" />}
+                      <div className="bg-neutral-50 dark:bg-gray-700/50 p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-colors duration-300">
+                        <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-1">Ánimo</p>
+                        <div className="text-[#2C4159] dark:text-white flex items-center gap-1 transition-colors duration-300">
+                          {renderIconoAnimo(infoDia.diario?.animo, 16) || <div className="w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-600" />}
                           <span className="font-black">{infoDia.diario?.animo || '--'}/5</span>
                         </div>
                       </div>
-                      <div className="bg-neutral-50 p-3 rounded-2xl flex flex-col items-center justify-center text-center">
-                        <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Sueño</p>
-                        <div className="text-[#2C4159] flex items-center gap-1">
+                      <div className="bg-neutral-50 dark:bg-gray-700/50 p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-colors duration-300">
+                        <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-1">Sueño</p>
+                        <div className="text-[#2C4159] dark:text-white flex items-center gap-1 transition-colors duration-300">
                           <Moon size={14} className="text-blue-400" />
                           <span className="font-black">{infoDia.diario?.sueno || '--'}h</span>
                         </div>
@@ -279,12 +279,12 @@ const PaginaCalendario = () => {
                     <div className="space-y-4">
                       {infoDia.habitos?.some(h => h.estado === 'positivo') && (
                         <div>
-                          <p className="text-[9px] font-black text-gray-400 uppercase mb-2 flex items-center gap-1">
+                          <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 flex items-center gap-1">
                             <Flame size={12} className="text-orange-500" /> Hábitos cumplidos
                           </p>
                           <div className="flex flex-wrap gap-1.5">
                             {infoDia.habitos.filter(h => h.estado === 'positivo').map(h => (
-                              <span key={h.id} className="px-2 py-1 bg-orange-50 text-orange-600 text-[10px] font-bold rounded-lg border border-orange-100">
+                              <span key={h.id} className="px-2 py-1 bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold rounded-lg border border-orange-100 dark:border-orange-900/50">
                                 {h.nombre}
                               </span>
                             ))}
@@ -294,12 +294,12 @@ const PaginaCalendario = () => {
 
                       {infoDia.diarias?.some(d => d.completada) && (
                         <div>
-                          <p className="text-[9px] font-black text-gray-400 uppercase mb-2 flex items-center gap-1">
+                          <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 flex items-center gap-1">
                             <CheckCircle2 size={12} className="text-yellow-500" /> Tareas completadas
                           </p>
                           <div className="flex flex-wrap gap-1.5">
                             {infoDia.diarias.filter(d => d.completada).map(d => (
-                              <span key={d.id} className="px-2 py-1 bg-yellow-50 text-yellow-600 text-[10px] font-bold rounded-lg border border-yellow-100">
+                              <span key={d.id} className="px-2 py-1 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 text-[10px] font-bold rounded-lg border border-yellow-100 dark:border-yellow-900/50">
                                 {d.nombre}
                               </span>
                             ))}
@@ -309,13 +309,13 @@ const PaginaCalendario = () => {
 
                       {infoDia.meditación?.length > 0 && (
                         <div>
-                          <p className="text-[9px] font-black text-gray-400 uppercase mb-2 flex items-center gap-1">
+                          <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 flex items-center gap-1">
                             <Wind size={12} className="text-blue-500" /> Meditación
                           </p>
                           {infoDia.meditación.map(m => (
-                            <div key={m.id} className="bg-blue-50/50 p-2 rounded-xl flex items-center gap-2 mb-1">
+                            <div key={m.id} className="bg-blue-50/50 dark:bg-blue-900/20 p-2 rounded-xl flex items-center gap-2 mb-1 transition-colors duration-300">
                               <Music size={12} className="text-blue-500" />
-                              <span className="text-[10px] font-bold text-blue-700">{Math.floor(m.duracion / 60)} min - {m.tecnica}</span>
+                              <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400">{Math.floor(m.duracion / 60)} min - {m.tecnica}</span>
                             </div>
                           ))}
                         </div>
@@ -324,12 +324,12 @@ const PaginaCalendario = () => {
 
                     {/* Texto del Diario */}
                     {infoDia.diario?.contenido && (
-                      <div className="pt-4 border-t border-gray-50">
-                        <p className="text-[9px] font-black text-gray-400 uppercase mb-2 flex items-center gap-1">
+                      <div className="pt-4 border-t border-gray-50 dark:border-gray-700 transition-colors duration-300">
+                        <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 flex items-center gap-1">
                           <FileText size={12} /> Reflexión del día
                         </p>
-                        <div className="max-h-60 overflow-y-auto custom-scrollbar bg-neutral-50 p-3 rounded-2xl border border-gray-100">
-                          <p className="text-xs text-gray-600 leading-relaxed italic">
+                        <div className="max-h-60 overflow-y-auto custom-scrollbar bg-neutral-50 dark:bg-gray-700/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-600 transition-colors duration-300">
+                          <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed italic">
                             "{infoDia.diario.contenido}"
                           </p>
                         </div>
@@ -354,9 +354,9 @@ const PaginaCalendario = () => {
               </div>
             </motion.div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-white rounded-3xl border border-dashed border-gray-200">
-              <CalendarIcon size={48} className="text-gray-200 mb-4" />
-              <p className="text-gray-400 font-bold text-sm">Selecciona un día para ver los detalles de tu progreso</p>
+            <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-white dark:bg-gray-800 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700 transition-colors duration-300">
+              <CalendarIcon size={48} className="text-gray-200 dark:text-gray-600 mb-4" />
+              <p className="text-gray-400 dark:text-gray-500 font-bold text-sm">Selecciona un día para ver los detalles de tu progreso</p>
             </div>
           )}
         </AnimatePresence>

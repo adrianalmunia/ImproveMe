@@ -10,7 +10,8 @@ async function controlarObtenerEstadisticas(req, res) {
             return res.status(400).json({ error: 'ID de usuario no válido' });
         }
 
-        const stats = await obtenerEstadisticasGenerales(usuarioId);
+        const dias = parseInt(req.query.dias) || 30;
+        const stats = await obtenerEstadisticasGenerales(usuarioId, dias);
         res.status(200).json(stats);
     } catch (error) {
         console.error('Error en controlador estadisticas:', error.message);

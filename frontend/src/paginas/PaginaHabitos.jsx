@@ -56,6 +56,10 @@ const PaginaHabitos = ({ setVistaActual }) => {
   const tokenRef = useRef(token);
   const necesitaSincronizar = useRef(false);
   const timerRef = useRef(null);
+  // Contador de sincronizaciones a omitir (cuando el estado viene del servidor)
+  // En React 18, los 3 setState tras una respuesta se baten en 1 re-render = 1 efecto
+  // Por tanto 1 skip es suficiente para evitar el bucle infinito
+  const saltarSincronizaciones = useRef(0);
 
   // Mantener refs actualizados
   useEffect(() => { tokenRef.current = token; }, [token]);
@@ -75,6 +79,8 @@ const PaginaHabitos = ({ setVistaActual }) => {
         // 2. Obtener hábitos y tareas
         const datos = await servicioAPI.obtenerGamificacion(token);
         if (montado) {
+          // Marcar para omitir la sincronización que se disparará al actualizar estado
+          saltarSincronizaciones.current = 1;
           if (datos.habitos.length === 0 && datos.diarias.length === 0 && datos.tareas.length === 0) {
             setHabitos(habitosPorDefecto);
             setDiarias(diariasPorDefecto);
@@ -96,10 +102,16 @@ const PaginaHabitos = ({ setVistaActual }) => {
     return () => { montado = false; };
   }, [token]);
 
-  // Sincronizar con el backend de forma automática (debounce 1s)
+  // Sincronizar con el backend de forma automática (debounce 500ms)
   useEffect(() => {
     if (primeraCarga || estaCargandoDatos) return;
     if (!token) return;
+
+    // Si el estado viene del servidor (carga inicial o respuesta de sync), omitir
+    if (saltarSincronizaciones.current > 0) {
+      saltarSincronizaciones.current -= 1;
+      return;
+    }
 
     necesitaSincronizar.current = true;
 
@@ -109,9 +121,10 @@ const PaginaHabitos = ({ setVistaActual }) => {
         necesitaSincronizar.current = false;
         const nuevosDatos = await servicioAPI.sincronizarGamificacion(datosRef.current, tokenRef.current);
         
-        // Es vital actualizar el estado con los datos que vienen del servidor
-        // porque contienen los IDs reales de la base de datos (reemplazando los temporales)
+        // Actualizar estado con IDs reales de la BD (reemplazando IDs temporales)
+        // Marcar 1 skip para que el efecto no vuelva a disparar un nuevo sync
         if (nuevosDatos) {
+          saltarSincronizaciones.current = 1;
           setHabitos(nuevosDatos.habitos);
           setDiarias(nuevosDatos.diarias);
           setTareas(nuevosDatos.tareas);
@@ -216,7 +229,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
   };
 
   return (
-    <div className="h-full w-full bg-neutral-50 overflow-y-auto custom-scrollbar p-6 relative">
+    <div className="h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-y-auto custom-scrollbar p-6 relative transition-colors duration-300">
 
       {/* Notificaciones Flotantes de XP */}
       <AnimatePresence>
@@ -237,14 +250,14 @@ const PaginaHabitos = ({ setVistaActual }) => {
       {/* Header */}
       <header className="mb-8 flex justify-between items-end">
         <div>
-          <h1 className="text-4xl font-black text-[#2C4159] tracking-tight mb-1">
+          <h1 className="text-4xl font-black text-[#2C4159] dark:text-white tracking-tight mb-1 transition-colors duration-300">
             Mis <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]">Hábitos</span>
           </h1>
-          <p className="text-gray-500 font-medium">Forja tu mejor versión día tras día.</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium transition-colors duration-300">Forja tu mejor versión día tras día.</p>
         </div>
 
         <div className="flex gap-4">
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors duration-300">
             <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600">
               <Zap size={24} fill="currentColor" />
             </div>
@@ -255,7 +268,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 const rachaMax = Math.max(0, ...todos.map(i => Math.max(i.racha || 0, i.rachaAnterior || 0)));
                 
                 if (rachaMax === 0) {
-                  return <p className="text-2xl font-black text-[#2C4159] leading-tight">0 Días</p>;
+                  return <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">0 Días</p>;
                 }
 
                 const mejores = todos.filter(i => Math.max(i.racha || 0, i.rachaAnterior || 0) === rachaMax);
@@ -265,7 +278,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
 
                 return (
                   <div className="relative group cursor-help">
-                    <p className="text-2xl font-black text-[#2C4159] leading-tight">{rachaMax} Días</p>
+                    <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{rachaMax} Días</p>
                     <p className="text-[10px] font-bold text-[#4F99CC] truncate max-w-[120px]">
                       {nombresStr}
                     </p>
@@ -287,13 +300,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
               })()}
             </div>
           </div>
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 relative overflow-hidden transition-colors duration-300">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4F99CC] to-[#C6A55E] flex items-center justify-center text-white shadow-md">
               <Trophy size={24} />
             </div>
             <div>
               <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">Nivel {nivelActual}</p>
-              <p className="text-xl font-black text-[#2C4159]">{xpActual} XP</p>
+              <p className="text-xl font-black text-[#2C4159] dark:text-white transition-colors duration-300">{xpActual} XP</p>
               <div className="w-full bg-gray-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] rounded-full"
@@ -311,12 +324,12 @@ const PaginaHabitos = ({ setVistaActual }) => {
         {/* COLUMNA 1: HÁBITOS */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-2">
-            <h2 className="text-lg font-bold text-[#2C4159] flex items-center gap-2">
+            <h2 className="text-lg font-bold text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
               <Flame size={18} className="text-orange-500" /> Hábitos
             </h2>
             <button
               onClick={() => setSeccionActiva('habito')}
-              className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-[#4F99CC] hover:bg-[#4F99CC] hover:text-white transition-colors shadow-sm"
+              className="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-[#4F99CC] hover:bg-[#4F99CC] hover:text-white transition-colors shadow-sm"
             >
               <Plus size={18} />
             </button>
@@ -327,13 +340,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white p-3 rounded-2xl shadow-sm border border-[#4F99CC]/20"
+                className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-[#4F99CC]/20 dark:border-gray-700 transition-colors duration-300"
               >
                 <input
                   autoFocus
                   type="text"
                   placeholder="Nuevo hábito..."
-                  className="w-full bg-neutral-50 p-2 rounded-xl border-none focus:ring-2 focus:ring-[#4F99CC] outline-none text-sm mb-2"
+                  className="w-full bg-neutral-50 dark:bg-gray-700 p-2 rounded-xl border-none focus:ring-2 focus:ring-[#4F99CC] outline-none text-sm mb-2 text-gray-800 dark:text-white transition-colors duration-300"
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && agregarItem('habito')}
@@ -365,7 +378,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <motion.div
                 layout
                 key={h.id}
-                className={`bg-white group p-4 rounded-2xl shadow-sm border flex items-center justify-between hover:shadow-md transition-all border-l-4 ${h.estado === 'positivo' ? 'border-l-green-400 opacity-80' : h.estado === 'negativo' ? 'border-l-red-400 opacity-80' : 'border-l-[#4F99CC]'}`}
+                className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border dark:border-gray-700 flex items-center justify-between hover:shadow-md transition-all border-l-4 ${h.estado === 'positivo' ? 'border-l-green-400 opacity-80' : h.estado === 'negativo' ? 'border-l-red-400 opacity-80' : 'border-l-[#4F99CC]'}`}
               >
                 <div className="flex items-center gap-3">
                   <button 
@@ -378,7 +391,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                     <Target size={18} />
                   </div>
                   <div>
-                    <p className={`font-bold text-[#2C4159] leading-tight ${h.estado ? 'text-gray-500 line-through' : ''}`}>{h.nombre}</p>
+                    <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${h.estado ? 'text-gray-500 line-through' : ''}`}>{h.nombre}</p>
                     <div className="flex items-center gap-3 mt-0.5">
                          <div className="flex items-center gap-1">
                            <Flame size={12} className={h.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
@@ -437,12 +450,12 @@ const PaginaHabitos = ({ setVistaActual }) => {
         {/* COLUMNA 2: DIARIAS */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-2">
-            <h2 className="text-lg font-bold text-[#2C4159] flex items-center gap-2">
+            <h2 className="text-lg font-bold text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
               <Calendar size={18} className="text-[#C6A55E]" /> Diarias
             </h2>
             <button
               onClick={() => setSeccionActiva('diaria')}
-              className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-[#C6A55E] hover:bg-[#C6A55E] hover:text-white transition-colors shadow-sm"
+              className="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-[#C6A55E] hover:bg-[#C6A55E] hover:text-white transition-colors shadow-sm"
             >
               <Plus size={18} />
             </button>
@@ -453,13 +466,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white p-3 rounded-2xl shadow-sm border border-[#C6A55E]/20"
+                className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-[#C6A55E]/20 dark:border-gray-700 transition-colors duration-300"
               >
                 <input
                   autoFocus
                   type="text"
                   placeholder="Nueva diaria..."
-                  className="w-full bg-neutral-50 p-2 rounded-xl border-none focus:ring-2 focus:ring-[#C6A55E] outline-none text-sm mb-2"
+                  className="w-full bg-neutral-50 dark:bg-gray-700 p-2 rounded-xl border-none focus:ring-2 focus:ring-[#C6A55E] outline-none text-sm mb-2 text-gray-800 dark:text-white transition-colors duration-300"
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && agregarItem('diaria')}
@@ -477,7 +490,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <motion.div
                 layout
                 key={d.id}
-                className={`bg-white group p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 transition-all border-l-4 hover:shadow-md ${d.completada ? 'border-l-green-400 opacity-60' : 'border-l-[#C6A55E]'}`}
+                className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-all border-l-4 hover:shadow-md ${d.completada ? 'border-l-green-400 opacity-60' : 'border-l-[#C6A55E]'}`}
               >
                 <button
                   onClick={(e) => {
@@ -494,7 +507,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                   <CheckCircle2 size={16} />
                 </button>
                 <div className="flex-1">
-                  <p className={`font-bold text-[#2C4159] leading-tight ${d.completada ? 'line-through text-gray-400' : ''}`}>{d.nombre}</p>
+                  <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${d.completada ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{d.nombre}</p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <Flame size={12} className={d.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{d.racha} días</p>
@@ -514,12 +527,12 @@ const PaginaHabitos = ({ setVistaActual }) => {
         {/* COLUMNA 3: TAREAS */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-2">
-            <h2 className="text-lg font-bold text-[#2C4159] flex items-center gap-2">
+            <h2 className="text-lg font-bold text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
               <CheckSquare size={18} className="text-indigo-500" /> Pendientes
             </h2>
             <button
               onClick={() => setSeccionActiva('tarea')}
-              className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-indigo-500 hover:bg-indigo-500 hover:text-white transition-colors shadow-sm"
+              className="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center text-indigo-500 hover:bg-indigo-500 hover:text-white transition-colors shadow-sm"
             >
               <Plus size={18} />
             </button>
@@ -530,13 +543,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white p-3 rounded-2xl shadow-sm border border-indigo-500/20"
+                className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-sm border border-indigo-500/20 dark:border-gray-700 transition-colors duration-300"
               >
                 <input
                   autoFocus
                   type="text"
                   placeholder="Nueva tarea..."
-                  className="w-full bg-neutral-50 p-2 rounded-xl border-none focus:ring-2 focus:ring-indigo-500 outline-none text-sm mb-2"
+                  className="w-full bg-neutral-50 dark:bg-gray-700 p-2 rounded-xl border-none focus:ring-2 focus:ring-indigo-500 outline-none text-sm mb-2 text-gray-800 dark:text-white transition-colors duration-300"
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && agregarItem('tarea')}
@@ -559,7 +572,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <motion.div
                 layout
                 key={t.id}
-                className={`bg-white group p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 transition-all border-l-4 hover:shadow-md ${t.completada ? 'border-l-green-400 opacity-60' : 'border-l-indigo-500'}`}
+                className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-all border-l-4 hover:shadow-md ${t.completada ? 'border-l-green-400 opacity-60' : 'border-l-indigo-500'}`}
               >
                 <button
                   onClick={(e) => {
@@ -580,7 +593,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                   <CheckCircle2 size={16} />
                 </button>
                 <div className="flex-1">
-                  <p className={`font-bold text-[#2C4159] leading-tight ${t.completada ? 'line-through text-gray-400' : ''}`}>{t.nombre}</p>
+                  <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${t.completada ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{t.nombre}</p>
                   <span className={`inline-block mt-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${t.prioridad === 'alta' ? 'bg-red-100 text-red-600' :
                       t.prioridad === 'media' ? 'bg-orange-100 text-orange-600' :
                         'bg-blue-100 text-blue-600'
@@ -619,13 +632,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
           <Zap className="absolute -right-8 -bottom-8 w-48 h-48 text-white/10" />
         </div>
 
-        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col justify-center">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-center transition-colors duration-300">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-14 h-14 rounded-2xl bg-[#C6A55E]/10 flex items-center justify-center text-[#C6A55E]">
               <Trophy size={28} />
             </div>
             <div>
-              <h3 className="text-xl font-black text-[#2C4159]">Ranked Mode</h3>
+              <h3 className="text-xl font-black text-[#2C4159] dark:text-white transition-colors duration-300">Ranked Mode</h3>
               <p className="text-gray-400 text-sm font-medium leading-tight mt-1">Acumula XP para competir en la tabla de clasificación semanal.</p>
             </div>
           </div>

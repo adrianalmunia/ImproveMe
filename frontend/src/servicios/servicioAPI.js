@@ -209,8 +209,8 @@ export async function obtenerResumenCalendario(usuarioId, mes, anio, token) {
 /**
  * Obtiene las estadísticas generales del usuario
  */
-export async function obtenerEstadisticasGenerales(usuarioId, token) {
-    return realizarSolicitud(`estadisticas/${usuarioId}`, 'GET', null, token);
+export async function obtenerEstadisticasGenerales(usuarioId, token, dias = 30) {
+    return realizarSolicitud(`estadisticas/${usuarioId}?dias=${dias}`, 'GET', null, token);
 }
 
 /**

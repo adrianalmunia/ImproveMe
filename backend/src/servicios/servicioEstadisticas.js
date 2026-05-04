@@ -3,16 +3,16 @@ const prisma = require('../configuracion/baseDatos');
 /**
  * Obtiene estadísticas detalladas para el usuario
  */
-async function obtenerEstadisticasGenerales(usuarioId) {
-    // 1. Evolución del Ánimo (últimos 30 días)
+async function obtenerEstadisticasGenerales(usuarioId, dias = 30) {
+    // 1. Evolución del Ánimo (rango seleccionado)
     const hoy = new Date();
-    const hace30Dias = new Date();
-    hace30Dias.setDate(hoy.getDate() - 30);
+    const haceRangoDias = new Date();
+    haceRangoDias.setDate(hoy.getDate() - dias);
 
     const entradasDiario = await prisma.entradas_diario.findMany({
         where: {
             usuario_id: usuarioId,
-            fecha: { gte: hace30Dias }
+            fecha: { gte: haceRangoDias }
         },
         orderBy: { fecha: 'asc' },
         select: { fecha: true, puntuacion_animo: true, horas_sueno: true }
@@ -23,14 +23,15 @@ async function obtenerEstadisticasGenerales(usuarioId) {
         where: { usuario_id: usuarioId },
         include: {
             registros_cumplimiento: {
-                where: { fecha: { gte: hace30Dias } }
+                where: { fecha: { gte: haceRangoDias } }
             }
         }
     });
 
     const statsHabitos = habitos.map(h => {
         const completados = h.registros_cumplimiento.filter(r => r.estado === 'positivo').length;
-        const totalDias = 30;
+        // Calculamos el porcentaje basado en el rango solicitado
+        const totalDias = dias;
         return {
             nombre: h.nombre,
             porcentaje: Math.round((completados / totalDias) * 100),
@@ -48,32 +49,33 @@ async function obtenerEstadisticasGenerales(usuarioId) {
         ...diarias.map(d => ({ nombre: d.nombre, racha: d.racha || 0, tipo: 'diaria' }))
     ].sort((a, b) => b.racha - a.racha);
 
-    // 2c. Comparación semana actual vs semana anterior (porcentaje real)
-    const inicioSemana = new Date(hoy);
-    inicioSemana.setDate(hoy.getDate() - hoy.getDay() + 1); // Lunes de esta semana
-    inicioSemana.setHours(0, 0, 0, 0);
-    const inicioSemanaAnterior = new Date(inicioSemana);
-    inicioSemanaAnterior.setDate(inicioSemana.getDate() - 7);
+    // 2c. Comparación periodo actual vs periodo anterior
+    const haceDobleRango = new Date();
+    haceDobleRango.setDate(hoy.getDate() - (dias * 2));
 
-    const entradasEstaSemana = entradasDiario.filter(e => {
-        const fecha = new Date(e.fecha);
-        return fecha >= inicioSemana;
-    });
-    const entradasSemanaAnterior = entradasDiario.filter(e => {
-        const fecha = new Date(e.fecha);
-        return fecha >= inicioSemanaAnterior && fecha < inicioSemana;
+    // Necesitamos volver a consultar o filtrar de una lista más larga
+    const entradasParaComparar = await prisma.entradas_diario.findMany({
+        where: {
+            usuario_id: usuarioId,
+            fecha: { gte: haceDobleRango }
+        },
+        orderBy: { fecha: 'asc' },
+        select: { fecha: true, puntuacion_animo: true }
     });
 
-    const avgEstaSemana = entradasEstaSemana.length > 0
-        ? entradasEstaSemana.reduce((acc, e) => acc + e.puntuacion_animo, 0) / entradasEstaSemana.length
+    const periodoActual = entradasParaComparar.filter(e => e.fecha >= haceRangoDias);
+    const periodoAnterior = entradasParaComparar.filter(e => e.fecha >= haceDobleRango && e.fecha < haceRangoDias);
+
+    const avgActual = periodoActual.length > 0
+        ? periodoActual.reduce((acc, e) => acc + e.puntuacion_animo, 0) / periodoActual.length
         : null;
-    const avgSemanaAnterior = entradasSemanaAnterior.length > 0
-        ? entradasSemanaAnterior.reduce((acc, e) => acc + e.puntuacion_animo, 0) / entradasSemanaAnterior.length
+    const avgAnterior = periodoAnterior.length > 0
+        ? periodoAnterior.reduce((acc, e) => acc + e.puntuacion_animo, 0) / periodoAnterior.length
         : null;
 
-    let comparacionSemanal = null;
-    if (avgEstaSemana !== null && avgSemanaAnterior !== null && avgSemanaAnterior > 0) {
-        comparacionSemanal = Math.round(((avgEstaSemana - avgSemanaAnterior) / avgSemanaAnterior) * 100);
+    let comparacionTemporal = null;
+    if (avgActual !== null && avgAnterior !== null && avgAnterior > 0) {
+        comparacionTemporal = Math.round(((avgActual - avgAnterior) / avgAnterior) * 100);
     }
 
     // 3. Correlación Hábitos vs Ánimo
@@ -81,7 +83,7 @@ async function obtenerEstadisticasGenerales(usuarioId) {
     const registrosHabitos = await prisma.registros_habitos.findMany({
         where: {
             habito: { usuario_id: usuarioId },
-            fecha: { gte: hace30Dias }
+            fecha: { gte: haceRangoDias }
         },
         include: { habito: true }
     });
@@ -144,7 +146,7 @@ async function obtenerEstadisticasGenerales(usuarioId) {
         prisma.sesiones_meditacion.findMany({
             where: {
                 usuario_id: usuarioId,
-                fecha: { gte: hace30Dias }
+                fecha: { gte: haceRangoDias }
             },
             orderBy: { fecha: 'asc' }
         }),
@@ -216,7 +218,7 @@ async function obtenerEstadisticasGenerales(usuarioId) {
         correlacionSuenoAnimo: suenoAnimo,
         mejorHabitoHistorico: mejorRachaHistorica,
         rachasActuales,
-        comparacionSemanal,
+        comparacionTemporal,
         meditacion: {
             totalMinutos: minutosTotalesMeditacion,
             rachaActual: rachaFinal,

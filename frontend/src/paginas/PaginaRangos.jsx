@@ -164,14 +164,14 @@ const PaginaRangos = () => {
   }
 
   return (
-    <div className="h-full w-full bg-neutral-50 overflow-y-auto custom-scrollbar p-6 lg:p-10 pb-24">
+    <div className="h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-y-auto custom-scrollbar p-6 lg:p-10 pb-24 transition-colors duration-300">
       <div className="max-w-5xl mx-auto space-y-12">
       {/* Encabezado */}
       <header className="text-center space-y-4">
-        <h1 className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] uppercase tracking-tighter">
+        <h1 className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] uppercase tracking-tighter transition-colors duration-300">
           Clasificación Ranked
         </h1>
-        <p className="text-gray-500 max-w-2xl mx-auto font-medium">
+        <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium transition-colors duration-300">
           Tu disciplina se convierte en poder. Asciende en las ligas completando tus metas diarias.
         </p>
       </header>
@@ -180,11 +180,11 @@ const PaginaRangos = () => {
       <motion.div 
         whileHover={{ scale: 1.01 }}
         onClick={() => setMostrarModalLigas(true)}
-        className="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all relative overflow-hidden group"
+        className="bg-white dark:bg-gray-800 rounded-[32px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all relative overflow-hidden group duration-300"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-[#4F99CC]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 transition-colors duration-300">
             Ligas Disponibles
           </h3>
           <span className="text-[10px] font-black text-[#4F99CC] uppercase tracking-widest flex items-center gap-1">
@@ -206,7 +206,7 @@ const PaginaRangos = () => {
       </motion.div>
 
       {/* Visualización Principal del Rango */}
-      <div className="relative bg-white rounded-[48px] p-8 md:p-16 shadow-xl border border-gray-100 overflow-hidden">
+      <div className="relative bg-white dark:bg-gray-800 rounded-[48px] p-8 md:p-16 shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full blur-[160px] opacity-[0.08] ${rankInfo.category.bg} pointer-events-none`} />
 
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-40">
@@ -216,13 +216,13 @@ const PaginaRangos = () => {
               <>
                 <RankIcon rankData={rankInfo.prevRank} tier={rankInfo.prevRank.tier} size="sm" />
                 <div className="text-center">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Anterior</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Anterior</p>
                   <p className={`text-xs font-bold ${rankInfo.prevRank.color}`}>{rankInfo.prevRank.fullName}</p>
                 </div>
               </>
             ) : (
-              <div className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 rounded-3xl">
-                <p className="text-[8px] font-black uppercase text-gray-200">Inicio</p>
+              <div className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-3xl transition-colors duration-300">
+                <p className="text-[8px] font-black uppercase text-gray-200 dark:text-gray-600">Inicio</p>
               </div>
             )}
           </div>
@@ -242,12 +242,12 @@ const PaginaRangos = () => {
               />
             </div>
             <div className="text-center space-y-3">
-              <h2 className={`text-6xl md:text-7xl font-black tracking-tighter uppercase ${rankInfo.category.color}`}>
+              <h2 className={`text-6xl md:text-7xl font-black tracking-tighter uppercase ${rankInfo.category.color} transition-colors duration-300`}>
                 {rankInfo.fullName}
               </h2>
-              <div className="inline-flex items-center gap-3 bg-neutral-50 px-6 py-2 rounded-full border border-gray-100 shadow-sm">
+              <div className="inline-flex items-center gap-3 bg-neutral-50 dark:bg-gray-900 px-6 py-2 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm transition-colors duration-300">
                 <span className={`w-2 h-2 rounded-full ${rankInfo.category.bg} animate-pulse`}></span>
-                <p className="text-sm font-black text-gray-500 uppercase tracking-[0.1em]">
+                <p className="text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.1em] transition-colors duration-300">
                   {xp} XP Acumulados
                 </p>
               </div>
@@ -260,12 +260,12 @@ const PaginaRangos = () => {
               <>
                 <RankIcon rankData={rankInfo.nextRank} tier={rankInfo.nextRank.tier} size="sm" />
                 <div className="text-center">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Siguiente</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Siguiente</p>
                   <p className={`text-xs font-bold ${rankInfo.nextRank.color}`}>{rankInfo.nextRank.fullName}</p>
                 </div>
               </>
             ) : (
-              <div className="w-20 h-20 flex flex-col items-center justify-center bg-yellow-50 rounded-3xl border border-yellow-100">
+              <div className="w-20 h-20 flex flex-col items-center justify-center bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl border border-yellow-100 dark:border-yellow-900/50 transition-colors duration-300">
                 <Trophy size={28} className="text-yellow-500 opacity-50" />
               </div>
             )}
@@ -275,15 +275,15 @@ const PaginaRangos = () => {
         {/* Barra de Progreso Mejorada */}
         <div className="relative z-10 max-w-2xl mx-auto mt-20 space-y-6">
           <div className="flex justify-between items-end px-2">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Progreso del Nivel</p>
-            <p className="text-sm font-black text-gray-700">
+            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest transition-colors duration-300">Progreso del Nivel</p>
+            <p className="text-sm font-black text-gray-700 dark:text-gray-200 transition-colors duration-300">
               <span className={rankInfo.category.color}>{rankInfo.xpInCurrentTier}</span>
-              <span className="text-gray-300 mx-1">/</span>
+              <span className="text-gray-300 dark:text-gray-600 mx-1">/</span>
               <span>{rankInfo.xpTotalForThisTier} XP</span>
             </p>
           </div>
           
-          <div className="h-6 bg-gray-100 rounded-2xl overflow-hidden shadow-inner p-1.5 border border-gray-200/50">
+          <div className="h-6 bg-gray-100 dark:bg-gray-700 rounded-2xl overflow-hidden shadow-inner p-1.5 border border-gray-200/50 dark:border-gray-600/50 transition-colors duration-300">
             <motion.div 
               className={`h-full rounded-xl bg-gradient-to-r ${rankInfo.category.gradient} shadow-lg relative`}
               initial={{ width: 0 }}
@@ -302,8 +302,8 @@ const PaginaRangos = () => {
               </p>
             ) : (
               <div className="flex flex-col items-center gap-1">
-                <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">Ascenso en camino</p>
-                <p className="text-lg font-bold text-gray-800">
+                <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300">Ascenso en camino</p>
+                <p className="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300">
                   Te faltan <span className={`${rankInfo.nextRank?.color || 'text-[#4F99CC]'} font-black`}>{rankInfo.xpRemaining}</span> puntos para <span className="uppercase">{rankInfo.nextRank?.fullName}</span>
                 </p>
               </div>
@@ -326,12 +326,12 @@ const PaginaRangos = () => {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-[40px] w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col"
+              className="bg-white dark:bg-gray-800 rounded-[40px] w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col transition-colors duration-300"
               onClick={e => e.stopPropagation()}
             >
-              <div className="p-8 border-b border-gray-100 shrink-0">
-                <h2 className="text-3xl font-black text-[#2C4159] uppercase tracking-tighter">Jerarquía de Ligas</h2>
-                <p className="text-gray-500 text-sm">Descubre el camino hacia la maestría absoluta en ImproveMe.</p>
+              <div className="p-8 border-b border-gray-100 dark:border-gray-700 shrink-0 transition-colors duration-300">
+                <h2 className="text-3xl font-black text-[#2C4159] dark:text-white uppercase tracking-tighter transition-colors duration-300">Jerarquía de Ligas</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">Descubre el camino hacia la maestría absoluta en ImproveMe.</p>
               </div>
               
               <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
@@ -343,7 +343,7 @@ const PaginaRangos = () => {
                     return (
                       <div 
                         key={`${tierData.name}-${idx}`} 
-                        className={`p-6 rounded-[32px] border-2 transition-all flex items-center gap-6 ${isUnlocked ? 'bg-white border-gray-100 shadow-sm' : 'bg-gray-50 border-dashed border-gray-200 opacity-60'}`}
+                        className={`p-6 rounded-[32px] border-2 transition-all flex items-center gap-6 ${isUnlocked ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 shadow-sm' : 'bg-gray-50 dark:bg-gray-900 border-dashed border-gray-200 dark:border-gray-700 opacity-60'}`}
                       >
                         <div className="shrink-0">
                           <RankIcon rankData={cat} tier={tierData.tier} size="sm" showGlow={false} />
@@ -351,9 +351,9 @@ const PaginaRangos = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-center mb-1">
                             <h4 className={`text-xl font-black uppercase tracking-tight ${cat.color}`}>{tierData.name}</h4>
-                            <span className="text-[10px] font-black text-gray-400">MIN. {tierData.xp} XP</span>
+                            <span className="text-[10px] font-black text-gray-400 dark:text-gray-500">MIN. {tierData.xp} XP</span>
                           </div>
-                          <p className="text-xs text-gray-500 leading-relaxed italic">"{tierData.desc}"</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed italic">"{tierData.desc}"</p>
                         </div>
                       </div>
                     );
@@ -361,7 +361,7 @@ const PaginaRangos = () => {
                 </div>
               </div>
               
-              <div className="p-8 bg-gray-50 shrink-0">
+              <div className="p-8 bg-gray-50 dark:bg-gray-900 shrink-0 transition-colors duration-300">
                 <button 
                   onClick={() => setMostrarModalLigas(false)}
                   className="w-full py-4 bg-[#2C4159] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-black transition-colors"

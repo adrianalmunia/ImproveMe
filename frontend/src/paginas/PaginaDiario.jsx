@@ -367,8 +367,8 @@ export function PaginaDiario() {
 
             {/* Título y Fecha */}
             <div>
-              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 tracking-tight">Entrada del {fecha}</h2>
-              <p className="text-md text-gray-500 mt-1">¿Cómo te sientes hoy?</p>
+              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white tracking-tight transition-colors duration-300">Entrada del {fecha}</h2>
+              <p className="text-md text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">¿Cómo te sientes hoy?</p>
             </div>
 
             {/* Selector de Humor (Imágenes más grandes y sin punto) */}
@@ -393,13 +393,13 @@ export function PaginaDiario() {
 
             {/* Área de Texto */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 ml-4 uppercase tracking-widest">Tu Diario</label>
-              <div className="w-full h-96 bg-white/80 backdrop-blur-sm rounded-[40px] shadow-inner border-2 border-white focus-within:border-[#4F99CC] transition-all py-6 px-4">
+              <label className="text-xs font-bold text-gray-400 dark:text-gray-500 ml-4 uppercase tracking-widest">Tu Diario</label>
+              <div className="w-full h-96 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-[40px] shadow-inner border-2 border-white dark:border-gray-700 focus-within:border-[#4F99CC] transition-all py-6 px-4">
                 <textarea
                   value={texto}
                   onChange={(e) => setTexto(e.target.value)}
                   placeholder="Escribe aquí tus pensamientos..."
-                  className="w-full h-full bg-transparent outline-none resize-none text-gray-700 leading-relaxed custom-scrollbar overflow-y-auto pr-4"
+                  className="w-full h-full bg-transparent outline-none resize-none text-gray-700 dark:text-gray-200 leading-relaxed custom-scrollbar overflow-y-auto pr-4 transition-colors duration-300"
                 ></textarea>
               </div>
             </div>
@@ -407,7 +407,7 @@ export function PaginaDiario() {
             {/* Slider de Sueño (Custom) */}
             <div className="space-y-4 px-4">
               <div className="flex justify-between items-end">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Calidad del Sueño</label>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Calidad del Sueño</label>
                 <span className="text-[#4F99CC] font-bold">{sueno >= 10 ? '+10' : sueno} horas</span>
               </div>
               <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-visible">
@@ -426,7 +426,7 @@ export function PaginaDiario() {
                 />
                 <motion.div
                   animate={{ left: `${(sueno / 10) * 100}%` }}
-                  className="absolute top-1/2 -translate-y-1/2 -ml-3 w-6 h-6 bg-white rounded-full shadow-lg border-2 border-[#4F99CC] pointer-events-none"
+                  className="absolute top-1/2 -translate-y-1/2 -ml-3 w-6 h-6 bg-white dark:bg-gray-800 rounded-full shadow-lg border-2 border-[#4F99CC] pointer-events-none"
                 />
               </div>
             </div>
@@ -443,7 +443,7 @@ export function PaginaDiario() {
 
               <button
                 onClick={() => inputImagenRef.current.click()}
-                className={`flex-1 relative py-3 px-6 bg-white border rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors ${imagen ? 'border-[#4F99CC] text-[#4F99CC]' : 'border-gray-200 text-gray-600'}`}
+                className={`flex-1 relative py-3 px-6 bg-white dark:bg-gray-800 border rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${imagen ? 'border-[#4F99CC] text-[#4F99CC]' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
               >
                 {imagen ? 'Imagen Lista' : 'Añadir Imagen'}
                 {imagen && (
@@ -459,11 +459,11 @@ export function PaginaDiario() {
 
               <button
                 onClick={manejarAudioClick}
-                className={`flex-1 relative py-3 px-6 bg-white border rounded-full text-xs font-bold flex items-center justify-center gap-2 transition-colors ${estaGrabando
+                className={`flex-1 relative py-3 px-6 bg-white dark:bg-gray-800 border rounded-full text-xs font-bold flex items-center justify-center gap-2 transition-colors ${estaGrabando
                     ? 'border-red-500 text-red-500 animate-pulse'
                     : audio
-                      ? 'border-[#4F99CC] text-[#4F99CC] hover:bg-gray-50'
-                      : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                      ? 'border-[#4F99CC] text-[#4F99CC] hover:bg-gray-50 dark:hover:bg-gray-700'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
               >
                 {estaGrabando ? 'Grabando...' : audio ? 'Audio Listo' : 'Grabar Audio'}
@@ -521,9 +521,9 @@ export function PaginaDiario() {
                   backfaceVisibility: "hidden"
                 }}
               >
-                <div className="w-full h-full bg-white rounded-[52px] relative overflow-hidden">
+                <div className="w-full h-full bg-white dark:bg-gray-800 rounded-[52px] relative overflow-hidden transition-colors duration-300">
                   {/* Degradado sutil de fondo en la tarjeta */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-white to-[#4F99CC]/5 pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-gradient-to-b from-white dark:from-gray-800 to-[#4F99CC]/5 pointer-events-none transition-colors duration-300"></div>
 
                   {/* Contenedor SIN scroll general, solo en el texto */}
                   <div className="absolute inset-0 p-8 flex flex-col items-center">
@@ -575,7 +575,7 @@ export function PaginaDiario() {
 
                           <button
                             onClick={alternarVelocidad}
-                            className="text-xs font-bold bg-white text-[#4F99CC] px-2 py-1 rounded-full shadow-sm hover:bg-gray-50 border border-[#4F99CC]/20 shrink-0 min-w-[36px] text-center"
+                            className="text-xs font-bold bg-white dark:bg-gray-800 text-[#4F99CC] px-2 py-1 rounded-full shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 border border-[#4F99CC]/20 shrink-0 min-w-[36px] text-center transition-colors duration-300"
                           >
                             {velocidadAudio}x
                           </button>
@@ -594,7 +594,7 @@ export function PaginaDiario() {
 
                     {/* Contenedor de Texto con Scroll Independiente */}
                     <div className="flex-1 w-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-start py-2" style={{ transform: "translateZ(0)" }}>
-                      <p className="text-lg font-['Tilt_Warp'] text-gray-800 leading-tight text-center w-full break-words">
+                      <p className="text-lg font-['Tilt_Warp'] text-gray-800 dark:text-white leading-tight text-center w-full break-words transition-colors duration-300">
                         {texto || "Aquí se muestra cómo queda la entrada..."}
                       </p>
                     </div>
@@ -609,7 +609,7 @@ export function PaginaDiario() {
                   key={humor}
                   initial={{ scale: 0, rotate: -15 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  className="absolute -top-10 -left-10 w-32 h-32 bg-white rounded-full shadow-2xl border-4 flex items-center justify-center overflow-hidden z-20"
+                  className="absolute -top-10 -left-10 w-32 h-32 bg-white dark:bg-gray-800 rounded-full shadow-2xl border-4 flex items-center justify-center overflow-hidden z-20 transition-colors duration-300"
                   style={{
                     borderColor: humores.find(h => h.id === humor)?.color || '#4F99CC',
                     transform: "translateZ(60px)", // Pop-out effect

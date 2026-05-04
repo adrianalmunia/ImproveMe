@@ -75,6 +75,15 @@ const PaginaEstadisticas = () => {
   const { usuario, token } = useAutenticacion();
   const [stats, setStats] = useState(null);
   const [estaCargando, setEstaCargando] = useState(true);
+  const [rangoDias, setRangoDias] = useState(30);
+
+  const opcionesRango = [
+    { label: '15 Días', value: 15 },
+    { label: 'Mes', value: 30 },
+    { label: '3 Meses', value: 90 },
+    { label: '6 Meses', value: 180 },
+    { label: 'Año', value: 365 },
+  ];
 
   useEffect(() => {
     const cargarStats = async () => {
@@ -84,7 +93,7 @@ const PaginaEstadisticas = () => {
       }
       try {
         setEstaCargando(true);
-        const data = await servicioAPI.obtenerEstadisticasGenerales(usuario.id, token);
+        const data = await servicioAPI.obtenerEstadisticasGenerales(usuario.id, token, rangoDias);
         console.log("Stats recibidas:", data);
         setStats(data);
       } catch (error) {
@@ -94,15 +103,15 @@ const PaginaEstadisticas = () => {
       }
     };
     cargarStats();
-  }, [usuario, token]);
+  }, [usuario, token, rangoDias]);
 
   // Si no hay datos, mostramos el estado de carga o el mensaje de error
   if (estaCargando) {
     return (
-      <div className="h-full w-full flex items-center justify-center bg-neutral-50">
+      <div className="h-full w-full flex items-center justify-center bg-neutral-50 dark:bg-gray-900 transition-colors duration-300">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-[#4F99CC] border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-black text-[#2C4159] uppercase tracking-widest">Analizando tu progreso...</p>
+          <p className="text-sm font-black text-[#2C4159] dark:text-gray-300 uppercase tracking-widest transition-colors duration-300">Analizando tu progreso...</p>
         </div>
       </div>
     );
@@ -111,12 +120,12 @@ const PaginaEstadisticas = () => {
   // VALIDACIÓN DE DATOS MÍNIMOS
   if (!stats || !stats.animoEvolucion || stats.animoEvolucion.length < 2) {
     return (
-      <div className="h-full w-full flex flex-col items-center justify-center bg-neutral-50 p-10 text-center">
-        <div className="w-24 h-24 bg-white rounded-[32px] shadow-sm flex items-center justify-center mb-6 border border-dashed border-gray-200">
-          <Activity size={48} className="text-gray-200" />
+      <div className="h-full w-full flex flex-col items-center justify-center bg-neutral-50 dark:bg-gray-900 p-10 text-center transition-colors duration-300">
+        <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[32px] shadow-sm flex items-center justify-center mb-6 border border-dashed border-gray-200 dark:border-gray-700 transition-colors duration-300">
+          <Activity size={48} className="text-gray-200 dark:text-gray-600" />
         </div>
-        <h2 className="text-2xl font-black text-[#2C4159] mb-2 uppercase tracking-tight">Faltan datos para el análisis</h2>
-        <p className="text-gray-400 max-w-sm font-medium">
+        <h2 className="text-2xl font-black text-[#2C4159] dark:text-white mb-2 uppercase tracking-tight transition-colors duration-300">Faltan datos para el análisis</h2>
+        <p className="text-gray-400 dark:text-gray-500 max-w-sm font-medium transition-colors duration-300">
           Necesitamos al menos 2 registros diarios para empezar a generar tus estadísticas. 
           ¡Sigue escribiendo en tu diario y vuelve pronto!
         </p>
@@ -206,7 +215,7 @@ const PaginaEstadisticas = () => {
     labels: stats?.cumplimientoHabitos.map(h => h.nombre),
     datasets: [
       {
-        label: 'Días completados (últimos 30d)',
+        label: `Días completados (últimos ${rangoDias}d)`,
         data: stats?.cumplimientoHabitos.map(h => h.total),
         backgroundColor: [
           '#4F99CC', '#C6A55E', '#2C4159', '#F97316', '#10B981', '#6366F1'
@@ -255,14 +264,33 @@ const PaginaEstadisticas = () => {
   };
 
   return (
-    <div className="h-full w-full bg-neutral-50 overflow-y-auto p-6 lg:p-10 custom-scrollbar">
+    <div className="h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-y-auto p-6 lg:p-10 custom-scrollbar transition-colors duration-300">
       
       {/* Header */}
-      <header className="mb-10">
-        <h1 className="text-4xl font-black text-[#2C4159] tracking-tight">
-          Tu <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]">Evolución</span>
-        </h1>
-        <p className="text-gray-500 font-medium mt-1">Análisis detallado de tus hábitos y bienestar emocional.</p>
+      <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black text-[#2C4159] dark:text-white tracking-tight transition-colors duration-300">
+            Tu <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]">Evolución</span>
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 font-medium mt-1 transition-colors duration-300">Análisis detallado de tus hábitos y bienestar emocional.</p>
+        </div>
+
+        {/* Selector de Rango Temporal */}
+        <div className="flex bg-white dark:bg-gray-800 p-1.5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 self-start md:self-center transition-colors duration-300">
+          {opcionesRango.map((opc) => (
+            <button
+              key={opc.value}
+              onClick={() => setRangoDias(opc.value)}
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                rangoDias === opc.value
+                  ? 'bg-[#2C4159] text-white shadow-md scale-105'
+                  : 'text-gray-400 dark:text-gray-500 hover:text-[#2C4159] dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
+              }`}
+            >
+              {opc.label}
+            </button>
+          ))}
+        </div>
       </header>
 
       {/* Grid Principal */}
@@ -270,118 +298,121 @@ const PaginaEstadisticas = () => {
         
         {/* KPI Cards */}
         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#4F99CC]">
+          <div className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#4F99CC]">
               <Smile size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ánimo Promedio</p>
-              <p className="text-2xl font-black text-[#2C4159] leading-tight">
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Ánimo Promedio</p>
+              <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">
                 {(stats?.animoEvolucion.reduce((acc, curr) => acc + curr.valor, 0) / (stats?.animoEvolucion.length || 1)).toFixed(1)}
               </p>
             </div>
           </div>
           
-          <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
+          <div className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-500">
               <Moon size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sueño Promedio</p>
-              <p className="text-2xl font-black text-[#2C4159] leading-tight">
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Sueño Promedio</p>
+              <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">
                 {(stats?.animoEvolucion.reduce((acc, curr) => acc + curr.sueno, 0) / (stats?.animoEvolucion.length || 1)).toFixed(1)}h
               </p>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-yellow-50 flex items-center justify-center text-yellow-600">
+          <div className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-yellow-50 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600">
               <Target size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Hábitos Activos</p>
-              <p className="text-2xl font-black text-[#2C4159] leading-tight">{stats?.cumplimientoHabitos.length}</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Hábitos Activos</p>
+              <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats?.cumplimientoHabitos.length}</p>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+          <div className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
               <Activity size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Registros (30d)</p>
-              <p className="text-2xl font-black text-[#2C4159] leading-tight">{stats?.animoEvolucion.length}</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Registros ({rangoDias}d)</p>
+              <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats?.animoEvolucion.length}</p>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600">
+          <div className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center text-teal-600">
               <Flower2 size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Racha Zen</p>
-              <p className="text-2xl font-black text-[#2C4159] leading-tight">{stats?.meditacion?.rachaActual || 0} días</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Racha Zen</p>
+              <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats?.meditacion?.rachaActual || 0} días</p>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600">
+          <div className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors duration-300">
+            <div className="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600">
               <Zap size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Meditado</p>
-              <p className="text-2xl font-black text-[#2C4159] leading-tight">{stats?.meditacion?.totalMinutos || 0} min</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Total Meditado</p>
+              <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats?.meditacion?.totalMinutos || 0} min</p>
             </div>
           </div>
         </div>
 
         {/* Resumen Semanal vs Mensual */}
-        <div className="lg:col-span-1 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 flex flex-col h-[450px]">
-          <h2 className="text-xl font-black text-[#2C4159] mb-6 flex items-center gap-2 shrink-0">
+        <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-[450px] transition-colors duration-300">
+          <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-6 flex items-center gap-2 shrink-0 transition-colors duration-300">
             <Calendar size={20} className="text-[#4F99CC]" />
-            Resumen Temporal
+            Comparativa
           </h2>
           
           {/* Info Superior */}
           <div className="space-y-4 shrink-0">
             <div className="flex justify-between items-end">
               <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Esta Semana</p>
+                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Este Periodo</p>
                 <p className="text-3xl font-black text-[#4F99CC]">
-                  {(stats?.animoEvolucion.slice(-7).reduce((acc, curr) => acc + curr.valor, 0) / (Math.min(stats?.animoEvolucion.length, 7) || 1)).toFixed(1)}
+                  {(stats?.animoEvolucion.reduce((acc, curr) => acc + curr.valor, 0) / (stats?.animoEvolucion.length || 1)).toFixed(1)}
                 </p>
               </div>
               <div className="text-right">
-                {stats?.comparacionSemanal !== null && stats?.comparacionSemanal !== undefined ? (
-                  <p className={`text-[10px] font-black uppercase tracking-widest ${stats.comparacionSemanal >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {stats.comparacionSemanal >= 0 ? '+' : ''}{stats.comparacionSemanal}% vs anterior
+                {stats?.comparacionTemporal !== null && stats?.comparacionTemporal !== undefined ? (
+                  <p className={`text-[10px] font-black uppercase tracking-widest ${stats.comparacionTemporal >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {stats.comparacionTemporal >= 0 ? '+' : ''}{stats.comparacionTemporal}% vs anterior
                   </p>
                 ) : (
                   <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Sin datos previos</p>
                 )}
               </div>
             </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden transition-colors duration-300">
               <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(100, Math.max(10, ((stats?.animoEvolucion.slice(-7).reduce((acc, curr) => acc + curr.valor, 0) / (Math.min(stats?.animoEvolucion.length, 7) || 1)) / 5) * 100))}%` }}
+                animate={{ 
+                  width: `${Math.min(100, Math.max(10, 
+                    ((stats?.animoEvolucion.reduce((acc, curr) => acc + curr.valor, 0) / (stats?.animoEvolucion.length || 1)) / 5) * 100
+                  ))}%` 
+                }}
                 className="h-full bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]" 
               />
             </div>
           </div>
 
           {/* Sección Deslizable de Rachas */}
-          <div className="flex-1 flex flex-col min-h-0 pt-6 mt-4 border-t border-gray-50">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 shrink-0">Rachas más consistentes</p>
+          <div className="flex-1 flex flex-col min-h-0 pt-6 mt-4 border-t border-gray-50 dark:border-gray-700 transition-colors duration-300">
+            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 shrink-0">Rachas más consistentes</p>
             <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
               {(stats?.rachasActuales || []).filter(r => r.racha > 0).length > 0 ? (
                 (stats?.rachasActuales || []).filter(r => r.racha > 0).map(r => (
                   <div key={r.nombre} className="flex items-center gap-3">
-                     <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-500">
+                     <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-500">
                         <Flame size={16} />
                      </div>
                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-black text-[#2C4159] truncate">{r.nombre}</p>
+                        <p className="text-[12px] font-black text-[#2C4159] dark:text-white truncate">{r.nombre}</p>
                         <p className="text-[9px] font-bold text-orange-500">{r.racha} {r.racha === 1 ? 'día' : 'días'} seguidos</p>
                      </div>
                   </div>
@@ -394,14 +425,14 @@ const PaginaEstadisticas = () => {
 
           {/* Bloque Fijo Inferior */}
           {stats?.mejorHabitoHistorico && (
-            <div className="pt-4 border-t border-gray-50 mt-auto shrink-0">
+            <div className="pt-4 border-t border-gray-50 dark:border-gray-700 mt-auto shrink-0 transition-colors duration-300">
               <p className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#C6A55E] to-[#4F99CC] uppercase tracking-widest mb-2">Tu récord histórico</p>
-              <div className="bg-gradient-to-br from-neutral-50 to-white p-3 rounded-2xl border border-[#C6A55E]/20 shadow-sm flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center text-[#C6A55E]">
+              <div className="bg-gradient-to-br from-neutral-50 dark:from-gray-800 to-white dark:to-gray-800 p-3 rounded-2xl border border-[#C6A55E]/20 shadow-sm flex items-center gap-3 transition-colors duration-300">
+                <div className="w-10 h-10 rounded-xl bg-yellow-50 dark:bg-yellow-900/30 flex items-center justify-center text-[#C6A55E]">
                   <Award size={20} />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-[#2C4159] leading-tight">{stats.mejorHabitoHistorico.nombre}</p>
+                  <p className="text-sm font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats.mejorHabitoHistorico.nombre}</p>
                   <p className="text-[10px] font-bold text-[#C6A55E] uppercase">Racha: {stats.mejorHabitoHistorico.racha} días</p>
                 </div>
               </div>
@@ -410,12 +441,12 @@ const PaginaEstadisticas = () => {
         </div>
 
         {/* Cumplimiento de Hábitos (Consistencia) */}
-        <div className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 h-[450px]">
-          <h2 className="text-xl font-black text-[#2C4159] mb-2 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 h-[450px] transition-colors duration-300">
+          <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
             <Target size={20} className="text-[#C6A55E]" />
             Consistencia
           </h2>
-          <p className="text-[10px] font-bold text-gray-400 uppercase mb-4">Días completados en los últimos 30</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-4">Días completados en los últimos {rangoDias}</p>
           <div className="h-[310px]">
             <Bar 
               data={dataHabitos} 
@@ -437,12 +468,12 @@ const PaginaEstadisticas = () => {
         </div>
 
         {/* Meditación Dashboard (Paz Mental) */}
-        <div className="lg:col-span-1 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 flex flex-col h-[450px]">
-          <h2 className="text-xl font-black text-[#2C4159] mb-2 flex items-center gap-2">
+        <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-[450px] transition-colors duration-300">
+          <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
             <Flower2 size={20} className="text-teal-500" />
             Paz Mental
           </h2>
-          <p className="text-[10px] font-bold text-gray-400 uppercase mb-4">Tu compromiso con el mindfulness</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-4">Tu compromiso con el mindfulness</p>
           <div className="h-[230px] mb-4">
             <Bar 
               data={dataMeditacion} 
@@ -453,17 +484,17 @@ const PaginaEstadisticas = () => {
             />
           </div>
           <div className="mt-auto">
-            <div className="bg-teal-50/50 rounded-3xl border border-teal-100 p-5 flex flex-col items-center justify-center gap-1">
-              <span className="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] text-center">Meditación hoy</span>
+            <div className="bg-teal-50/50 dark:bg-teal-900/20 rounded-3xl border border-teal-100 dark:border-teal-900/50 p-5 flex flex-col items-center justify-center gap-1 transition-colors duration-300">
+              <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.2em] text-center">Meditación hoy</span>
               <div className="flex items-center gap-2">
-                <Flower2 size={16} className="text-teal-500" />
-                <span className="text-3xl font-black text-teal-900 leading-none">
+                <Flower2 size={16} className="text-teal-500 dark:text-teal-400" />
+                <span className="text-3xl font-black text-teal-900 dark:text-teal-100 leading-none transition-colors duration-300">
                   {(() => {
                     const ahora = new Date();
                     const hoyStr = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`;
                     return stats?.meditacion?.evolucion?.find(e => e.fecha === hoyStr)?.minutos || 0;
                   })()}
-                  <span className="text-xs ml-1 text-teal-700/60 font-bold uppercase">min</span>
+                  <span className="text-xs ml-1 text-teal-700/60 dark:text-teal-300/60 font-bold uppercase transition-colors duration-300">min</span>
                 </span>
               </div>
             </div>
@@ -471,14 +502,14 @@ const PaginaEstadisticas = () => {
         </div>
 
         {/* Evolución Ánimo (Bienestar Emocional) */}
-        <div className="lg:col-span-2 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 h-[450px]">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 h-[450px] transition-colors duration-300">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-black text-[#2C4159] flex items-center gap-2">
+            <h2 className="text-xl font-black text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
               <TrendingUp size={20} className="text-[#4F99CC]" />
               Bienestar Emocional
             </h2>
             <div className="flex gap-2">
-              <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400">
+              <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400 dark:text-gray-500">
                 <div className="w-2 h-2 rounded-full bg-[#4F99CC]" /> Ánimo
               </span>
             </div>
@@ -489,12 +520,12 @@ const PaginaEstadisticas = () => {
         </div>
 
         {/* Correlación Radar (Impacto Vital) */}
-        <div className="bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 h-[450px]">
-          <h2 className="text-xl font-black text-[#2C4159] mb-2 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 h-[450px] transition-colors duration-300">
+          <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
             <Zap size={20} className="text-yellow-500" />
             Impacto Vital
           </h2>
-          <p className="text-[10px] font-bold text-gray-400 uppercase mb-6">¿Cómo afectan tus hábitos a tu humor?</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">¿Cómo afectan tus hábitos a tu humor?</p>
           <div className="h-[280px] flex items-center justify-center">
             <Radar 
               data={dataRadar} 
@@ -522,12 +553,12 @@ const PaginaEstadisticas = () => {
         </div>
 
         {/* Análisis de Sueño vs Ánimo */}
-        <div className="lg:col-span-2 bg-white rounded-[40px] p-8 shadow-sm border border-gray-100 h-[450px]">
-          <h2 className="text-xl font-black text-[#2C4159] mb-2 flex items-center gap-2">
+        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 h-[450px] transition-colors duration-300">
+          <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
             <Moon size={20} className="text-indigo-500" />
             Descanso vs Ánimo
           </h2>
-          <p className="text-[10px] font-bold text-gray-400 uppercase mb-6">Relación entre horas dormidas y bienestar</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">Relación entre horas dormidas y bienestar</p>
           <div className="h-[300px]">
             <Scatter 
               data={{

@@ -1,5 +1,11 @@
 const prisma = require('../configuracion/baseDatos');
 
+// Helper: misma lógica que servicioTareas para fechas UTC consistentes
+function obtenerHoyUTC() {
+    const ahora = new Date();
+    return new Date(Date.UTC(ahora.getUTCFullYear(), ahora.getUTCMonth(), ahora.getUTCDate()));
+}
+
 /**
  * Obtiene un resumen de toda la actividad del usuario en un mes específico
  * @param {number} usuarioId 
@@ -44,14 +50,6 @@ async function obtenerResumenCalendario(usuarioId, mes, anio) {
             diaria: { usuario_id: usuarioId }
         },
         include: { diaria: true }
-    });
-
-    // 5. OBTENER ESTADO ACTUAL (Para que aparezca "hoy" aunque no haya registro histórico)
-    const habitosHoy = await prisma.habitos.findMany({
-        where: { usuario_id: usuarioId, estado: { not: null } }
-    });
-    const diariasHoy = await prisma.tareas_diarias.findMany({
-        where: { usuario_id: usuarioId, completada: true }
     });
 
     // Organizar datos por fecha (YYYY-MM-DD)

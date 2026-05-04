@@ -92,7 +92,7 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-neutral-100 overflow-hidden font-['Inter']">
+        <div className="flex items-center justify-center min-h-screen bg-neutral-100 dark:bg-gray-900 overflow-hidden font-['Inter'] transition-colors duration-300">
             {/* MARCO DE FIGMA (ESTÁTICO) */}
             <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -103,7 +103,7 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
                 <div className="left-[304px] top-[45px] absolute">
                     <svg width="840" height="602" viewBox="0 0 840 602" fill="none">
                         <g filter="url(#filter0_di_auth)">
-                            <path d="M4 20C4 8.95 12.95 0 24 0H816C827.05 0 836 8.95 836 20V574C836 585.05 827.05 594 816 594H24C12.95 594 4 585.05 4 574V20Z" fill="white" />
+                            <path d="M4 20C4 8.95 12.95 0 24 0H816C827.05 0 836 8.95 836 20V574C836 585.05 827.05 594 816 594H24C12.95 594 4 585.05 4 574V20Z" className="fill-white dark:fill-gray-800 transition-colors duration-300" />
                             <path d="M24 1H816C826.49 1 835 9.5 835 20V574C835 584.49 826.49 593 816 593H24C13.5 593 5 584.49 5 574V20C5 9.5 13.5 1 24 1Z" stroke="url(#paint0_linear_auth)" strokeWidth="2" />
                         </g>
                         <defs>
@@ -140,7 +140,7 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
                     className="w-24 h-24 left-[676px] top-[297px] absolute rounded-full shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center overflow-hidden z-20 p-[2px]"
                     style={{ background: 'linear-gradient(90deg, #4F99CC 0%, #C6A55E 100%)' }}
                 >
-                    <div className="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden">
+                    <div className="w-full h-full bg-white dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden transition-colors duration-300">
                         <img src={logoImproveMe} alt="Logo" className="w-full h-full object-cover rounded-full" />
                     </div>
                 </motion.div>
@@ -159,8 +159,8 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
                             >
                                 {/* Título Login */}
                                 <div className="w-80 text-center mb-8">
-                                    <h2 className="text-black text-2xl font-normal font-['Tilt_Warp']">Bienvenido de nuevo.</h2>
-                                    <p className="text-black text-[10px] font-normal font-['Inter'] mt-2 px-6">
+                                    <h2 className="text-black dark:text-white text-2xl font-normal font-['Tilt_Warp'] transition-colors duration-300">Bienvenido de nuevo.</h2>
+                                    <p className="text-black dark:text-gray-300 text-[10px] font-normal font-['Inter'] mt-2 px-6 transition-colors duration-300">
                                         Inicia sesión para retomar tu progreso y seguir avanzando.
                                     </p>
                                 </div>
@@ -170,14 +170,14 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
                                         <div className="w-full text-red-600 text-[11px] text-center bg-red-100/80 backdrop-blur-sm p-2 rounded-md mb-4 shadow-sm border border-red-200">{errorLocal || error}</div>
                                     )}
                                     <div className="mb-6">
-                                        <label className="block text-black text-sm font-['Advent_Pro'] mb-1 ml-2">E-Mail</label>
-                                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito px-4 text-xs focus:outline-Azul-Principal" />
+                                        <label className="block text-black dark:text-gray-200 text-sm font-['Advent_Pro'] mb-1 ml-2 transition-colors duration-300">E-Mail</label>
+                                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito dark:outline-gray-600 dark:bg-gray-700 dark:text-white px-4 text-xs focus:outline-Azul-Principal transition-colors duration-300" />
                                     </div>
                                     <div className="mb-6">
-                                        <label className="block text-black text-sm font-['Advent_Pro'] mb-1 ml-2">Contraseña</label>
-                                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito px-4 text-xs focus:outline-Azul-Principal" />
+                                        <label className="block text-black dark:text-gray-200 text-sm font-['Advent_Pro'] mb-1 ml-2 transition-colors duration-300">Contraseña</label>
+                                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito dark:outline-gray-600 dark:bg-gray-700 dark:text-white px-4 text-xs focus:outline-Azul-Principal transition-colors duration-300" />
                                     </div>
-                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit" disabled={estaCargando} className="w-full h-9 bg-black text-white text-xs rounded-full shadow-lg mt-2">
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit" disabled={estaCargando} className="w-full h-9 bg-black dark:bg-white text-white dark:text-black text-xs rounded-full shadow-lg mt-2 transition-colors duration-300">
                                         {estaCargando ? 'Cargando...' : 'Iniciar Sesión'}
                                     </motion.button>
                                 </form>
@@ -192,12 +192,12 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
                                 className="w-full h-full flex flex-col items-center justify-center pointer-events-auto"
                             >
                                 <div className="w-64 text-center">
-                                    <h2 className="text-black text-2xl font-normal font-['Tilt_Warp']">¿Ya eres usuario?</h2>
-                                    <p className="text-black text-[10px] font-normal font-['Inter'] mt-2">Identificate para acceder a ImproveMe</p>
+                                    <h2 className="text-black dark:text-white text-2xl font-normal font-['Tilt_Warp'] transition-colors duration-300">¿Ya eres usuario?</h2>
+                                    <p className="text-black dark:text-gray-300 text-[10px] font-normal font-['Inter'] mt-2 transition-colors duration-300">Identificate para acceder a ImproveMe</p>
                                     <motion.button 
                                         whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                                         onClick={alternarVista}
-                                        className="w-48 h-7 bg-black text-white text-xs rounded-full shadow-md mt-6"
+                                        className="w-48 h-7 bg-black dark:bg-white text-white dark:text-black text-xs rounded-full shadow-md mt-6 transition-colors duration-300"
                                     >
                                         Iniciar Sesión
                                     </motion.button>
@@ -221,8 +221,8 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
                             >
                                 {/* Título Registro */}
                                 <div className="w-80 text-center mb-6">
-                                    <h2 className="text-black text-2xl font-normal font-['Tilt_Warp']">Empieza hoy mismo</h2>
-                                    <p className="text-black text-[10px] font-normal font-['Inter'] mt-2 px-6">
+                                    <h2 className="text-black dark:text-white text-2xl font-normal font-['Tilt_Warp'] transition-colors duration-300">Empieza hoy mismo</h2>
+                                    <p className="text-black dark:text-gray-300 text-[10px] font-normal font-['Inter'] mt-2 px-6 transition-colors duration-300">
                                         Regístrate para guardar tu progreso y mejorar cada día.
                                     </p>
                                 </div>
@@ -232,18 +232,18 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
                                         <div className="w-full text-red-600 text-[11px] text-center bg-red-100/80 backdrop-blur-sm p-2 rounded-md mb-4 shadow-sm border border-red-200">{errorLocal || error}</div>
                                     )}
                                     <div className="mb-4">
-                                        <label className="block text-black text-sm font-['Advent_Pro'] mb-1 ml-2">Usuario</label>
-                                        <input type="text" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito px-4 text-xs focus:outline-Azul-Principal" />
+                                        <label className="block text-black dark:text-gray-200 text-sm font-['Advent_Pro'] mb-1 ml-2 transition-colors duration-300">Usuario</label>
+                                        <input type="text" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito dark:outline-gray-600 dark:bg-gray-700 dark:text-white px-4 text-xs focus:outline-Azul-Principal transition-colors duration-300" />
                                     </div>
                                     <div className="mb-4">
-                                        <label className="block text-black text-sm font-['Advent_Pro'] mb-1 ml-2">E-Mail</label>
-                                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito px-4 text-xs focus:outline-Azul-Principal" />
+                                        <label className="block text-black dark:text-gray-200 text-sm font-['Advent_Pro'] mb-1 ml-2 transition-colors duration-300">E-Mail</label>
+                                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito dark:outline-gray-600 dark:bg-gray-700 dark:text-white px-4 text-xs focus:outline-Azul-Principal transition-colors duration-300" />
                                     </div>
                                     <div className="mb-4">
-                                        <label className="block text-black text-sm font-['Advent_Pro'] mb-1 ml-2">Contraseña</label>
-                                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito px-4 text-xs focus:outline-Azul-Principal" />
+                                        <label className="block text-black dark:text-gray-200 text-sm font-['Advent_Pro'] mb-1 ml-2 transition-colors duration-300">Contraseña</label>
+                                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito dark:outline-gray-600 dark:bg-gray-700 dark:text-white px-4 text-xs focus:outline-Azul-Principal transition-colors duration-300" />
                                     </div>
-                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit" disabled={estaCargando} className="w-full h-9 bg-black text-white text-xs rounded-full shadow-lg mt-2">
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit" disabled={estaCargando} className="w-full h-9 bg-black dark:bg-white text-white dark:text-black text-xs rounded-full shadow-lg mt-2 transition-colors duration-300">
                                         {estaCargando ? 'Registrando...' : 'Registrarse'}
                                     </motion.button>
                                 </form>
@@ -258,12 +258,12 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
                                 className="w-full h-full flex flex-col items-center justify-center pointer-events-auto"
                             >
                                 <div className="w-64 text-center">
-                                    <h2 className="text-black text-2xl font-normal font-['Tilt_Warp']">¿No tienes cuenta?</h2>
-                                    <p className="text-black text-[10px] font-normal font-['Inter'] mt-2">Registrate para evolucionar con ImproveMe</p>
+                                    <h2 className="text-black dark:text-white text-2xl font-normal font-['Tilt_Warp'] transition-colors duration-300">¿No tienes cuenta?</h2>
+                                    <p className="text-black dark:text-gray-300 text-[10px] font-normal font-['Inter'] mt-2 transition-colors duration-300">Registrate para evolucionar con ImproveMe</p>
                                     <motion.button 
                                         whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                                         onClick={alternarVista}
-                                        className="w-48 h-7 bg-black text-white text-xs rounded-full shadow-md mt-6"
+                                        className="w-48 h-7 bg-black dark:bg-white text-white dark:text-black text-xs rounded-full shadow-md mt-6 transition-colors duration-300"
                                     >
                                         Registrarse
                                     </motion.button>

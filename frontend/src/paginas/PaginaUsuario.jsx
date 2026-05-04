@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import { useTema } from '../contextos/ContextoTema';
 import { obtenerEntradasPorMes, exportarDatos } from '../servicios/servicioAPI';
 import logoCompleto from '../assets/logo_completo.png';
 import { User, Mail, Lock, LogOut, Save, ShieldCheck, Eye, EyeOff, AlertTriangle, Trash2, Image as ImageIcon, Mic, ChevronRight, X, Calendar, Sun, Moon, FileText, Info, Download } from 'lucide-react';
@@ -8,6 +9,7 @@ import { ReproductorAudio } from '../componentes/ReproductorAudio';
 
 export function PaginaUsuario() {
   const { usuario, logout, eliminar, actualizarUsuario, token } = useAutenticacion();
+  const { temaOscuro, toggleTema } = useTema();
   const [nombre, setNombre] = useState(usuario?.nombre_usuario || '');
   const [email, setEmail] = useState(usuario?.correo || '');
   const [newPassword, setNewPassword] = useState('');
@@ -219,7 +221,7 @@ export function PaginaUsuario() {
   );
 
   return (
-    <main className="flex-1 relative overflow-y-auto h-full p-8 lg:p-12 pb-24 font-['Inter']">
+    <main className="flex-1 relative overflow-y-auto h-full p-8 lg:p-12 pb-24 font-['Inter'] bg-neutral-50 dark:bg-gray-900 transition-colors duration-300">
 
       {/* HEADER / LOGO */}
       <div className="flex justify-center mb-8">
@@ -238,7 +240,7 @@ export function PaginaUsuario() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/80 backdrop-blur-xl border border-white rounded-[40px] shadow-2xl overflow-hidden"
+          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-white dark:border-gray-700 rounded-[40px] shadow-2xl overflow-hidden transition-colors duration-300"
         >
           <div className="h-32 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] relative">
             <div className="absolute -bottom-12 left-12 w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center border-4 border-white overflow-hidden">
@@ -248,34 +250,34 @@ export function PaginaUsuario() {
             </div>
           </div>
           <div className="pt-16 pb-8 px-12">
-            <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800">{usuario?.nombre_usuario}</h2>
-            <p className="text-gray-500 font-medium">{usuario?.correo}</p>
+            <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white transition-colors duration-300">{usuario?.nombre_usuario}</h2>
+            <p className="text-gray-500 dark:text-gray-400 font-medium transition-colors duration-300">{usuario?.correo}</p>
           </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
           {/* DATOS PERSONALES */}
-          <motion.div className="bg-white rounded-[32px] p-8 shadow-xl border border-gray-100 flex flex-col h-full">
-            <h3 className="text-xl font-['Tilt_Warp'] text-gray-800 mb-6 flex items-center gap-2">
+          <motion.div className="bg-white dark:bg-gray-800 rounded-[32px] p-8 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col h-full transition-colors duration-300">
+            <h3 className="text-xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-6 flex items-center gap-2 transition-colors duration-300">
               <User size={20} className="text-[#4F99CC]" /> Datos Personales
             </h3>
             <form onSubmit={manejarGuardarPerfil} className="space-y-4 flex flex-col flex-1">
               <div>
-                <label className="text-xs font-bold text-gray-400 uppercase ml-2 mb-1 block">Nombre de Usuario</label>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">Nombre de Usuario</label>
                 <input
                   type="text" value={nombre} onChange={(e) => setNombre(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-100 text-gray-800 rounded-2xl outline-none transition-all font-medium"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all font-medium"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-400 uppercase ml-2 mb-1 block">Correo</label>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">Correo</label>
                 <input
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-100 text-gray-800 rounded-2xl outline-none transition-all font-medium"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all font-medium"
                 />
               </div>
               <div className="mt-auto pt-4">
-                <button type="submit" className="w-full py-3 bg-[#4F99CC] text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#3d82b3] transition-colors">
+                <button type="submit" className="w-full py-3 bg-[#4F99CC] dark:bg-[#4F99CC]/80 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#3d82b3] dark:hover:bg-[#4F99CC] transition-colors">
                   <Save size={18} /> Guardar Cambios
                 </button>
               </div>
@@ -283,33 +285,33 @@ export function PaginaUsuario() {
           </motion.div>
 
           {/* SEGURIDAD */}
-          <motion.div className="bg-white rounded-[32px] p-8 shadow-xl border border-gray-100 flex flex-col h-full">
-            <h3 className="text-xl font-['Tilt_Warp'] text-gray-800 mb-6 flex items-center gap-2">
+          <motion.div className="bg-white dark:bg-gray-800 rounded-[32px] p-8 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col h-full transition-colors duration-300">
+            <h3 className="text-xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-6 flex items-center gap-2 transition-colors duration-300">
               <Lock size={20} className="text-[#C6A55E]" /> Seguridad
             </h3>
             <form onSubmit={manejarCambioPassword} className="space-y-4 flex flex-col flex-1">
               <div className="relative">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-2 mb-1 block">Nueva Clave</label>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">Nueva Clave</label>
                 <input
                   type={verNewPassword ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-100 text-gray-800 rounded-2xl outline-none" placeholder="••••••••"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all" placeholder="••••••••"
                 />
-                <button type="button" onClick={() => setVerNewPassword(!verNewPassword)} className="absolute right-4 bottom-3 text-gray-400">
+                <button type="button" onClick={() => setVerNewPassword(!verNewPassword)} className="absolute right-4 bottom-3 text-gray-400 dark:text-gray-500">
                   {verNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
               <div className="relative">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-2 mb-1 block">Confirmar Clave</label>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">Confirmar Clave</label>
                 <input
                   type={verConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-100 text-gray-800 rounded-2xl outline-none" placeholder="••••••••"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all" placeholder="••••••••"
                 />
-                <button type="button" onClick={() => setVerConfirmPassword(!verConfirmPassword)} className="absolute right-4 bottom-3 text-gray-400">
+                <button type="button" onClick={() => setVerConfirmPassword(!verConfirmPassword)} className="absolute right-4 bottom-3 text-gray-400 dark:text-gray-500">
                   {verConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
               <div className="mt-auto pt-4">
-                <button type="submit" className="w-full py-3 bg-[#C6A55E] text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#b0914d] transition-colors">
+                <button type="submit" className="w-full py-3 bg-[#C6A55E] dark:bg-[#C6A55E]/80 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#b0914d] dark:hover:bg-[#C6A55E] transition-colors">
                   <Lock size={18} /> Actualizar Clave
                 </button>
               </div>
@@ -321,12 +323,12 @@ export function PaginaUsuario() {
         <AnimatePresence>
           {mostrarConfirmacion && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-md flex items-center justify-center p-6">
-              <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="w-full max-w-md bg-white rounded-[40px] p-10 shadow-2xl text-center">
-                <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#4F99CC]">
+              <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="w-full max-w-md bg-white dark:bg-gray-800 rounded-[40px] p-10 shadow-2xl text-center">
+                <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#4F99CC]">
                   <ShieldCheck size={40} />
                 </div>
-                <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 mb-2">Confirmar Cambios</h3>
-                <p className="text-gray-500 text-sm mb-8">Por seguridad, introduce tu contraseña actual para aplicar los cambios en tu {tipoCambio === 'perfil' ? 'perfil' : 'contraseña'}.</p>
+                <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-2">Confirmar Cambios</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">Por seguridad, introduce tu contraseña actual para aplicar los cambios en tu {tipoCambio === 'perfil' ? 'perfil' : 'contraseña'}.</p>
 
                 <div className="relative mb-6">
                   <input
@@ -334,7 +336,7 @@ export function PaginaUsuario() {
                     value={passwordConfirmacion}
                     onChange={(e) => setPasswordConfirmacion(e.target.value)}
                     placeholder="Contraseña actual"
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none text-center font-bold"
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-2xl outline-none text-center font-bold dark:text-white transition-colors"
                     autoFocus
                   />
                 </div>
@@ -343,13 +345,13 @@ export function PaginaUsuario() {
                   <button
                     onClick={confirmarCambios}
                     disabled={estaCargando || !passwordConfirmacion}
-                    className="w-full py-4 bg-[#4F99CC] text-white rounded-2xl font-black uppercase tracking-widest shadow-lg hover:bg-[#3d82b3] disabled:opacity-50 transition-all"
+                    className="w-full py-4 bg-[#4F99CC] dark:bg-[#4F99CC]/80 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg hover:bg-[#3d82b3] dark:hover:bg-[#4F99CC] disabled:opacity-50 transition-all"
                   >
                     {estaCargando ? 'Procesando...' : 'Confirmar y Guardar'}
                   </button>
                   <button
                     onClick={() => { setMostrarConfirmacion(false); setPasswordConfirmacion(''); }}
-                    className="w-full py-4 bg-gray-50 text-gray-400 rounded-2xl font-bold hover:bg-gray-100 transition-all"
+                    className="w-full py-4 bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-300 rounded-2xl font-bold hover:bg-gray-100 dark:hover:bg-gray-600 transition-all"
                   >
                     Cancelar
                   </button>
@@ -381,94 +383,95 @@ export function PaginaUsuario() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             onClick={() => setMostrarAcerca(true)}
-            className="flex items-center justify-between p-6 bg-white border border-gray-100 text-gray-800 rounded-[32px] shadow-xl group transition-all w-full"
+            className="flex items-center justify-between p-6 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-[32px] shadow-xl group transition-colors duration-300 w-full"
           >
             <div className="flex items-center gap-4 text-left">
-              <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-500">
+              <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center text-purple-500">
                 <Info size={24} />
               </div>
               <div>
                 <h4 className="font-['Tilt_Warp'] text-lg">Acerca de</h4>
-                <p className="text-gray-400 text-[10px]">Sobre ImproveMe</p>
+                <p className="text-gray-400 dark:text-gray-500 text-[10px]">Sobre ImproveMe</p>
               </div>
             </div>
-            <ChevronRight size={20} className="opacity-30" />
+            <ChevronRight size={20} className="opacity-30 dark:opacity-50" />
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.02 }}
-            className="flex items-center justify-between p-6 bg-white border border-gray-100 text-gray-800 rounded-[32px] shadow-xl group transition-all w-full"
+            onClick={toggleTema}
+            className="flex items-center justify-between p-6 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-[32px] shadow-xl group transition-colors duration-300 w-full"
           >
             <div className="flex items-center gap-4 text-left">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-orange-50 text-orange-500">
-                <Sun size={24} />
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-orange-50 dark:bg-orange-900/30 text-orange-500">
+                {temaOscuro ? <Moon size={24} /> : <Sun size={24} />}
               </div>
               <div>
-                <h4 className="font-['Tilt_Warp'] text-lg">Modo Oscuro</h4>
-                <p className="text-gray-400 text-[10px]">Cambiar apariencia</p>
+                <h4 className="font-['Tilt_Warp'] text-lg">Modo {temaOscuro ? 'Claro' : 'Oscuro'}</h4>
+                <p className="text-gray-400 dark:text-gray-500 text-[10px]">Cambiar apariencia</p>
               </div>
             </div>
-            <ChevronRight size={20} className="opacity-30" />
+            <ChevronRight size={20} className="opacity-30 dark:opacity-50" />
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.02 }}
             onClick={() => setMostrarTerminos(true)}
-            className="flex items-center justify-between p-6 bg-white border border-gray-100 text-gray-800 rounded-[32px] shadow-xl group transition-all w-full"
+            className="flex items-center justify-between p-6 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-[32px] shadow-xl group transition-colors duration-300 w-full"
           >
             <div className="flex items-center gap-4 text-left">
-              <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500">
+              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-500">
                 <FileText size={24} />
               </div>
               <div>
                 <h4 className="font-['Tilt_Warp'] text-lg">Términos</h4>
-                <p className="text-gray-400 text-[10px]">Legal y condiciones</p>
+                <p className="text-gray-400 dark:text-gray-500 text-[10px]">Legal y condiciones</p>
               </div>
             </div>
-            <ChevronRight size={20} className="opacity-30" />
+            <ChevronRight size={20} className="opacity-30 dark:opacity-50" />
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.02 }}
             onClick={() => setMostrarOpcionesExportar(true)}
-            className="p-6 bg-white border border-gray-100 text-gray-800 rounded-[32px] shadow-xl flex items-center justify-between group w-full"
+            className="p-6 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-[32px] shadow-xl flex items-center justify-between group w-full transition-colors duration-300"
           >
             <div className="flex items-center gap-4 text-left">
-              <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-[#C6A55E] group-hover:bg-orange-50 transition-colors">
+              <div className="w-12 h-12 bg-gray-50 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-[#C6A55E] group-hover:bg-orange-50 dark:group-hover:bg-orange-900/30 transition-colors">
                 <Download size={24} />
               </div>
               <div>
                 <h4 className="font-['Tilt_Warp'] text-lg">Exportar Datos</h4>
-                <p className="text-gray-400 text-[10px]">Toda tu información</p>
+                <p className="text-gray-400 dark:text-gray-500 text-[10px]">Toda tu información</p>
               </div>
             </div>
-            <ChevronRight size={20} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+            <ChevronRight size={20} className="opacity-30 dark:opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
           </motion.button>
         </div>
 
         {/* ZONA DE PELIGRO */}
-        <div className="bg-red-50/50 border border-red-100 rounded-[32px] p-8">
+        <div className="bg-red-50/50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-[32px] p-8 transition-colors duration-300">
           <div className="flex items-center gap-4 mb-6">
             <AlertTriangle className="text-red-500" size={24} />
-            <h3 className="text-xl font-['Tilt_Warp'] text-red-600">Zona de Peligro</h3>
+            <h3 className="text-xl font-['Tilt_Warp'] text-red-600 dark:text-red-400">Zona de Peligro</h3>
           </div>
           {!mostrarConfirmarBorrado ? (
-            <button onClick={() => setMostrarConfirmarBorrado(true)} className="px-6 py-3 bg-red-500 text-white rounded-2xl font-bold">
+            <button onClick={() => setMostrarConfirmarBorrado(true)} className="px-6 py-3 bg-red-500 dark:bg-red-600/80 text-white rounded-2xl font-bold hover:bg-red-600 dark:hover:bg-red-500 transition-colors">
               Eliminar Cuenta Permanente
             </button>
           ) : (
-            <div className="bg-white p-6 rounded-3xl border border-red-200 shadow-xl">
-              <p className="text-sm font-bold text-gray-700 mb-4">Escribe <span className="text-red-500 underline">"{FRASE_ELIMINAR}"</span>:</p>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-red-200 dark:border-red-900/50 shadow-xl transition-colors duration-300">
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Escribe <span className="text-red-500 underline">"{FRASE_ELIMINAR}"</span>:</p>
               <div className="flex gap-4">
-                <input type="text" value={fraseConfirmacion} onChange={(e) => setFraseConfirmacion(e.target.value)} className="flex-1 px-5 py-3 bg-red-50 rounded-2xl outline-none font-bold text-red-600" />
+                <input type="text" value={fraseConfirmacion} onChange={(e) => setFraseConfirmacion(e.target.value)} className="flex-1 px-5 py-3 bg-red-50 dark:bg-red-900/20 rounded-2xl outline-none font-bold text-red-600 dark:text-red-400" />
                 <button
                   disabled={fraseConfirmacion !== FRASE_ELIMINAR}
                   onClick={manejarBorrarCuenta}
-                  className={`px-6 py-3 rounded-2xl font-black ${fraseConfirmacion === FRASE_ELIMINAR ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-gray-200 text-gray-400'}`}
+                  className={`px-6 py-3 rounded-2xl font-black transition-colors ${fraseConfirmacion === FRASE_ELIMINAR ? 'bg-red-500 dark:bg-red-600/80 text-white hover:bg-red-600 dark:hover:bg-red-500' : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'}`}
                 >
                   Borrar
                 </button>
-                <button onClick={() => setMostrarConfirmarBorrado(false)} className="px-6 py-3 bg-gray-100 rounded-2xl font-bold text-gray-500">Cancelar</button>
+                <button onClick={() => setMostrarConfirmarBorrado(false)} className="px-6 py-3 bg-gray-100 dark:bg-gray-700 rounded-2xl font-bold text-gray-500 dark:text-gray-400">Cancelar</button>
               </div>
             </div>
           )}
@@ -476,7 +479,7 @@ export function PaginaUsuario() {
 
         {/* CERRAR SESIÓN */}
         <div className="flex justify-center pt-4">
-          <button onClick={logout} className="flex items-center gap-3 px-8 py-4 bg-red-50 text-red-500 rounded-full font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">
+          <button onClick={logout} className="flex items-center gap-3 px-8 py-4 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-full font-black uppercase tracking-widest hover:bg-red-500 dark:hover:bg-red-500 hover:text-white dark:hover:text-white transition-all duration-300">
             <LogOut size={20} /> Cerrar Sesión
           </button>
         </div>
@@ -487,9 +490,9 @@ export function PaginaUsuario() {
       <AnimatePresence>
         {mostrarGaleria && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 lg:p-12">
-            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="w-full max-w-6xl h-full bg-white rounded-[48px] overflow-hidden flex flex-col shadow-2xl relative">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="w-full max-w-6xl h-full bg-white dark:bg-gray-900 rounded-[48px] overflow-hidden flex flex-col shadow-2xl relative transition-colors duration-300">
               <div className="h-48 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] p-12 flex flex-col justify-end relative shrink-0">
-                <button onClick={() => setMostrarGaleria(false)} className="absolute top-8 right-8 w-12 h-12 bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-md hover:bg-white/40"><X /></button>
+                <button onClick={() => setMostrarGaleria(false)} className="absolute top-8 right-8 w-12 h-12 bg-white/20 dark:bg-black/20 text-white rounded-full flex items-center justify-center backdrop-blur-md hover:bg-white/40 dark:hover:bg-black/40 transition-colors duration-300"><X /></button>
                 <h2 className="text-4xl font-['Tilt_Warp'] text-white">Galería Multimedia</h2>
                 <div className="mt-4 flex gap-3 bg-white/10 w-fit px-4 py-2 rounded-2xl border border-white/20">
                   <Calendar size={16} className="text-white" />
@@ -501,21 +504,21 @@ export function PaginaUsuario() {
                   </select>
                 </div>
               </div>
-              <div className="flex gap-4 p-8 border-b border-gray-100 bg-gray-50/50 shrink-0">
-                <button onClick={() => setFiltroGaleria('imagenes')} className={`px-6 py-3 rounded-full font-bold ${filtroGaleria === 'imagenes' ? 'bg-[#4F99CC] text-white shadow-lg' : 'bg-white text-gray-400 shadow-sm'}`}>Imágenes ({archivosReales.filter(a => a.tipo_archivo === 'imagen').length})</button>
-                <button onClick={() => setFiltroGaleria('audios')} className={`px-6 py-3 rounded-full font-bold ${filtroGaleria === 'audios' ? 'bg-[#C6A55E] text-white shadow-lg' : 'bg-white text-gray-400 shadow-sm'}`}>Audios ({archivosReales.filter(a => a.tipo_archivo === 'audio').length})</button>
+              <div className="flex gap-4 p-8 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 shrink-0 transition-colors duration-300">
+                <button onClick={() => setFiltroGaleria('imagenes')} className={`px-6 py-3 rounded-full font-bold transition-colors duration-300 ${filtroGaleria === 'imagenes' ? 'bg-[#4F99CC] text-white shadow-lg' : 'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-300 shadow-sm'}`}>Imágenes ({archivosReales.filter(a => a.tipo_archivo === 'imagen').length})</button>
+                <button onClick={() => setFiltroGaleria('audios')} className={`px-6 py-3 rounded-full font-bold transition-colors duration-300 ${filtroGaleria === 'audios' ? 'bg-[#C6A55E] text-white shadow-lg' : 'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-300 shadow-sm'}`}>Audios ({archivosReales.filter(a => a.tipo_archivo === 'audio').length})</button>
               </div>
-              <div className="flex-1 overflow-y-auto p-12 bg-neutral-50 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-12 bg-neutral-50 dark:bg-gray-900 custom-scrollbar transition-colors duration-300">
                 {estaCargandoGaleria ? (
-                  <div className="flex flex-col items-center justify-center h-64 gap-4"><div className="w-12 h-12 border-4 border-[#4F99CC] border-t-transparent rounded-full animate-spin"></div><p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Cargando...</p></div>
+                  <div className="flex flex-col items-center justify-center h-64 gap-4"><div className="w-12 h-12 border-4 border-[#4F99CC] border-t-transparent rounded-full animate-spin"></div><p className="text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest text-xs transition-colors duration-300">Cargando...</p></div>
                 ) : archivosFiltrados.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {archivosFiltrados.map((archivo) => (
-                      <div key={archivo.id} className="bg-white rounded-[32px] border border-gray-100 shadow-xl overflow-hidden flex flex-col h-80 relative group">
+                      <div key={archivo.id} className="bg-white dark:bg-gray-800 rounded-[32px] border border-gray-100 dark:border-gray-700 shadow-xl overflow-hidden flex flex-col h-80 relative group transition-colors duration-300">
                         {/* Overlay estético - pointer-events-none para no bloquear clics */}
                         <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-                        <div className="flex-1 bg-gray-100 relative overflow-hidden flex flex-col">
+                        <div className="flex-1 bg-gray-100 dark:bg-gray-700 relative overflow-hidden flex flex-col transition-colors duration-300">
                           {archivo.tipo_archivo === 'imagen' ? (
                             <img
                               src={`http://localhost:3000${archivo.url_archivo}`}
@@ -535,8 +538,8 @@ export function PaginaUsuario() {
                           )}
 
                           {/* FECHA OVERLAY */}
-                          <div className="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-2xl shadow-lg pointer-events-none">
-                            <p className="text-[10px] font-black text-gray-800 uppercase">
+                          <div className="absolute top-4 left-4 z-20 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-2xl shadow-lg pointer-events-none transition-colors duration-300">
+                            <p className="text-[10px] font-black text-gray-800 dark:text-white uppercase transition-colors duration-300">
                               {new Date(archivo.fecha).getUTCDate()} {meses[new Date(archivo.fecha).getUTCMonth()].substring(0, 3)}.
                             </p>
                           </div>
@@ -545,7 +548,7 @@ export function PaginaUsuario() {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-64 text-center text-gray-400"><h4 className="text-xl font-['Tilt_Warp']">No hay {filtroGaleria}</h4><p className="text-sm">Intenta con otro mes.</p></div>
+                  <div className="flex flex-col items-center justify-center h-64 text-center text-gray-400 dark:text-gray-500 transition-colors duration-300"><h4 className="text-xl font-['Tilt_Warp']">No hay {filtroGaleria}</h4><p className="text-sm">Intenta con otro mes.</p></div>
                 )}
               </div>
             </motion.div>
@@ -553,31 +556,31 @@ export function PaginaUsuario() {
         )}
         {mostrarTerminos && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 lg:p-12">
-            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="w-full max-w-3xl h-[80vh] bg-white rounded-[48px] overflow-hidden flex flex-col shadow-2xl relative">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="w-full max-w-3xl h-[80vh] bg-white dark:bg-gray-900 rounded-[48px] overflow-hidden flex flex-col shadow-2xl relative transition-colors duration-300">
               <div className="p-12 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] flex justify-between items-center shrink-0 shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
+                <div className="absolute inset-0 bg-white/10 dark:bg-black/10 backdrop-blur-[2px]" />
                 <h2 className="text-3xl font-['Tilt_Warp'] text-white relative z-10">Términos y Condiciones</h2>
-                <button onClick={() => setMostrarTerminos(false)} className="w-12 h-12 bg-white/20 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-colors relative z-10 backdrop-blur-md border border-white/30"><X /></button>
+                <button onClick={() => setMostrarTerminos(false)} className="w-12 h-12 bg-white/20 dark:bg-black/20 text-white rounded-full flex items-center justify-center hover:bg-white/40 dark:hover:bg-black/40 transition-colors relative z-10 backdrop-blur-md border border-white/30 dark:border-white/10"><X /></button>
               </div>
-              <div className="flex-1 overflow-y-auto p-12 text-gray-600 space-y-6 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-12 text-gray-600 dark:text-gray-300 space-y-6 custom-scrollbar transition-colors duration-300">
                 <section>
-                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">1. Aceptación de los Términos</h3>
+                  <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs transition-colors duration-300">1. Aceptación de los Términos</h3>
                   <p className="text-sm leading-relaxed">Al utilizar ImproveMe, aceptas cumplir con estos términos. Esta aplicación está diseñada para el crecimiento personal y el registro de hábitos.</p>
                 </section>
                 <section>
-                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">2. Privacidad de los Datos</h3>
+                  <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs transition-colors duration-300">2. Privacidad de los Datos</h3>
                   <p className="text-sm leading-relaxed">Tus registros diarios, audios e imágenes se almacenan de forma segura. ImproveMe no comparte tu información personal con terceros sin tu consentimiento explícito.</p>
                 </section>
                 <section>
-                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">3. Uso Responsable</h3>
+                  <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs transition-colors duration-300">3. Uso Responsable</h3>
                   <p className="text-sm leading-relaxed">Te comprometes a utilizar la aplicación de manera constructiva. El contenido multimedia subido debe respetar las normas de convivencia y legalidad vigente.</p>
                 </section>
                 <section>
-                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">4. Propiedad Intelectual</h3>
+                  <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs transition-colors duration-300">4. Propiedad Intelectual</h3>
                   <p className="text-sm leading-relaxed">Toda la propiedad intelectual de la aplicación ImproveMe pertenece a sus desarrolladores. El contenido que subas sigue siendo de tu propiedad.</p>
                 </section>
                 <section>
-                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">5. Modificaciones</h3>
+                  <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs transition-colors duration-300">5. Modificaciones</h3>
                   <p className="text-sm leading-relaxed">Nos reservamos el derecho de modificar estos términos en cualquier momento. Se te notificará de cualquier cambio significativo.</p>
                 </section>
                 <div className="pt-8 text-center border-t border-gray-50">
@@ -589,18 +592,18 @@ export function PaginaUsuario() {
         )}
         {mostrarAcerca && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 lg:p-12">
-            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="w-full max-w-3xl h-[80vh] bg-white rounded-[48px] overflow-hidden flex flex-col shadow-2xl relative">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} className="w-full max-w-3xl h-[80vh] bg-white dark:bg-gray-900 rounded-[48px] overflow-hidden flex flex-col shadow-2xl relative transition-colors duration-300">
               <div className="p-12 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] flex justify-between items-center shrink-0 shadow-lg relative overflow-hidden">
-                <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
+                <div className="absolute inset-0 bg-white/10 dark:bg-black/10 backdrop-blur-[2px]" />
                 <h2 className="text-3xl font-['Tilt_Warp'] text-white relative z-10">Acerca del Proyecto</h2>
-                <button onClick={() => setMostrarAcerca(false)} className="w-12 h-12 bg-white/20 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-colors relative z-10 backdrop-blur-md border border-white/30"><X /></button>
+                <button onClick={() => setMostrarAcerca(false)} className="w-12 h-12 bg-white/20 dark:bg-black/20 text-white rounded-full flex items-center justify-center hover:bg-white/40 dark:hover:bg-black/40 transition-colors relative z-10 backdrop-blur-md border border-white/30 dark:border-white/10"><X /></button>
               </div>
-              <div className="flex-1 overflow-y-auto p-12 text-gray-600 space-y-6 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-12 text-gray-600 dark:text-gray-300 space-y-6 custom-scrollbar transition-colors duration-300">
                 <div className="flex justify-center mb-8">
-                  <img src={logoCompleto} alt="Logo" className="h-20 mix-blend-multiply" />
+                  <img src={logoCompleto} alt="Logo" className="h-20 mix-blend-multiply dark:opacity-80" />
                 </div>
                 <section>
-                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">Nuestra Misión</h3>
+                  <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs transition-colors duration-300">Nuestra Misión</h3>
                   <p className="text-sm leading-relaxed text-justify">
                     ImproveMe es una plataforma integral diseñada para facilitar el autoconocimiento y el crecimiento personal.
                     Nace de la necesidad de tener un espacio privado y seguro donde registrar no solo lo que hacemos, sino cómo nos sentimos,
@@ -608,7 +611,7 @@ export function PaginaUsuario() {
                   </p>
                 </section>
                 <section>
-                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">Características Principales</h3>
+                  <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs transition-colors duration-300">Características Principales</h3>
                   <ul className="list-disc list-inside text-sm space-y-2 ml-2">
                     <li>Registro diario de emociones y pensamientos.</li>
                     <li>Seguimiento de hábitos saludables (sueño, meditación, etc.).</li>
@@ -617,7 +620,7 @@ export function PaginaUsuario() {
                   </ul>
                 </section>
                 <section>
-                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">Tecnología</h3>
+                  <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs transition-colors duration-300">Tecnología</h3>
                   <p className="text-sm leading-relaxed">
                     Este proyecto ha sido desarrollado utilizando tecnologías modernas como <strong>React</strong> para el frontend,
                     <strong>Tailwind CSS</strong> para un diseño premium y <strong>Node.js</strong> con <strong>Prisma</strong> para una gestión de datos eficiente y segura.
@@ -635,17 +638,17 @@ export function PaginaUsuario() {
       <AnimatePresence>
         {mostrarOpcionesExportar && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[400] bg-black/60 backdrop-blur-md flex items-center justify-center p-6">
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="w-full max-w-sm bg-white rounded-[40px] p-10 shadow-2xl text-center">
-              <div className="w-20 h-20 bg-orange-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#C6A55E]">
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-[40px] p-10 shadow-2xl text-center transition-colors duration-300">
+              <div className="w-20 h-20 bg-orange-50 dark:bg-orange-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#C6A55E] transition-colors duration-300">
                 <Download size={40} />
               </div>
-              <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 mb-2">Exportar Datos</h3>
-              <p className="text-gray-500 text-sm mb-8">Selecciona el formato en el que quieres descargar tu información.</p>
+              <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-2 transition-colors duration-300">Exportar Datos</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-8 transition-colors duration-300">Selecciona el formato en el que quieres descargar tu información.</p>
 
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => manejarExportarDatos('json')}
-                  className="w-full py-4 bg-gray-50 border border-gray-100 text-gray-700 rounded-2xl font-bold flex items-center justify-between px-6 hover:bg-blue-50 hover:border-blue-100 transition-all group"
+                  className="w-full py-4 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-2xl font-bold flex items-center justify-between px-6 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-100 dark:hover:border-blue-800 transition-all group duration-300"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center text-[10px]">JSON</div>
@@ -656,7 +659,7 @@ export function PaginaUsuario() {
 
                 <button
                   onClick={() => manejarExportarDatos('excel')}
-                  className="w-full py-4 bg-gray-50 border border-gray-100 text-gray-700 rounded-2xl font-bold flex items-center justify-between px-6 hover:bg-green-50 hover:border-green-100 transition-all group"
+                  className="w-full py-4 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-2xl font-bold flex items-center justify-between px-6 hover:bg-green-50 dark:hover:bg-green-900/30 hover:border-green-100 dark:hover:border-green-800 transition-all group duration-300"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center text-[10px]">CSV</div>
