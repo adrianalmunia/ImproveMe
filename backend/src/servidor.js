@@ -25,14 +25,15 @@ const ENTORNO = process.env.NODE_ENV || 'desarrollo';
 // ============ MIDDLEWARES GLOBALES ============
 // Estos se ejecutan en TODAS las solicitudes
 
-// CORS: Permite que el frontend (React) acceda a nuestro API
+// 1. CORS (Debe ir antes de los parsers)
 app.use(cors({
-    origin: process.env.ORIGEN_CORS || 'http://localhost:5173', // Puerto por defecto de Vite
-    credentials: true // Permite enviar cookies y headers de autenticación
+    origin: process.env.ORIGEN_CORS || 'http://localhost:5173',
+    credentials: true
 }));
 
-// Parser JSON: Convierte el body de las solicitudes a objetos JavaScript
+// 2. Parsers de Body (Importantes para recibir datos)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Servir archivos estáticos de la carpeta uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -40,6 +41,10 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Middleware para logging (mostrar información de las solicitudes)
 app.use((req, res, siguiente) => {
     console.log(`📨 ${req.method} ${req.path}`);
+    if (req.method !== 'GET') {
+        console.log(`   Headers:`, req.headers['content-type']);
+        console.log(`   Body:`, req.body ? 'Presente' : 'Ausente/Undefined');
+    }
     siguiente();
 });
 

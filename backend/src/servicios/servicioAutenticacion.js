@@ -68,6 +68,7 @@ async function registrarUsuario(nombreUsuario, email, password) {
         data: {
             nombre_usuario: nombreUsuario,
             correo: email,
+            alias: nombreUsuario, // Inicialmente el alias es el nombre de usuario
             contrasena_hash: passwordEncriptada,
             puntos_experiencia: 0
         },
@@ -75,6 +76,7 @@ async function registrarUsuario(nombreUsuario, email, password) {
             id: true,
             nombre_usuario: true,
             correo: true,
+            alias: true,
             puntos_experiencia: true,
             fecha_registro: true
         }
@@ -114,6 +116,7 @@ async function iniciarSesion(email, password) {
             id: true,
             nombre_usuario: true,
             correo: true,
+            alias: true,
             contrasena_hash: true,
             puntos_experiencia: true
         }
@@ -155,6 +158,7 @@ async function obtenerPerfilUsuario(idUsuario) {
             id: true,
             nombre_usuario: true,
             correo: true,
+            alias: true,
             puntos_experiencia: true,
             fecha_registro: true
         }
@@ -171,7 +175,7 @@ async function actualizarPerfilUsuario(idUsuario, datos) {
     const dataAActualizar = {};
 
     // 0. VERIFICAR CONTRASEÑA ACTUAL SI SE CAMBIAN DATOS SENSIBLES
-    const requiereVerificacion = datos.nombre_usuario || datos.correo || datos.contrasena;
+    const requiereVerificacion = datos.nombre_usuario || datos.correo || datos.contrasena || datos.alias;
 
     if (requiereVerificacion) {
         if (!datos.contrasena_actual) {
@@ -214,6 +218,10 @@ async function actualizarPerfilUsuario(idUsuario, datos) {
             }
             dataAActualizar.contrasena_hash = await bcrypt.hash(datos.contrasena, VUELTAS_BCRYPT);
         }
+
+        if (datos.alias !== undefined) {
+            dataAActualizar.alias = datos.alias;
+        }
     }
 
     if (datos.puntos_experiencia !== undefined) {
@@ -233,6 +241,7 @@ async function actualizarPerfilUsuario(idUsuario, datos) {
             id: true,
             nombre_usuario: true,
             correo: true,
+            alias: true,
             puntos_experiencia: true,
             fecha_registro: true
         }
@@ -245,9 +254,26 @@ async function actualizarPerfilUsuario(idUsuario, datos) {
     return usuarioActualizado;
 }
 
-async function eliminarUsuario(idUsuario) {
+async function eliminarUsuario(idUsuario, contrasena) {
+    if (!contrasena) {
+        throw new Error('Se requiere la contraseña para eliminar la cuenta');
+    }
+
+    const usuarioActual = await prisma.usuarios.findUnique({
+        where: { id: idUsuario },
+        select: { contrasena_hash: true }
+    });
+
+    if (!usuarioActual) {
+        throw new Error('Usuario no encontrado');
+    }
+
+    const passwordCorrecta = await bcrypt.compare(contrasena, usuarioActual.contrasena_hash);
+    if (!passwordCorrecta) {
+        throw new Error('La contraseña es incorrecta');
+    }
+
     // Prisma manejará el borrado en cascada si está configurado en el schema
-    // En nuestro schema, las relaciones tienen onDelete: Cascade
     const usuarioEliminado = await prisma.usuarios.delete({
         where: { id: idUsuario }
     });

@@ -123,7 +123,9 @@ async function controlarActualizarPerfil(req, res) {
 async function controlarEliminarPerfil(req, res) {
     try {
         const idUsuario = req.usuarioId;
-        const resultado = await eliminarUsuario(idUsuario);
+        const { contrasena } = req.body;
+
+        const resultado = await eliminarUsuario(idUsuario, contrasena);
 
         return res.status(200).json(resultado);
     } catch (error) {

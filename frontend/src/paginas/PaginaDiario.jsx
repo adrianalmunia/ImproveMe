@@ -175,11 +175,16 @@ export function PaginaDiario() {
       const borradorKey = `diario_borrador_${usuario.id}_${new Date().toDateString()}`;
       localStorage.removeItem(borradorKey);
 
-      setMensajeStatus({ texto: '¡Entrada guardada con éxito!', tipo: 'exito' });
+      if (respuesta && respuesta.xpGanada > 0) {
+        setMensajeStatus({ texto: `¡Entrada guardada! +${respuesta.xpGanada} XP`, tipo: 'exito' });
+      } else {
+        setMensajeStatus({ texto: 'Entrada actualizada con éxito', tipo: 'exito' });
+      }
+      
       setArchivoImagen(null);
       setArchivoAudio(null);
-      // Limpiar mensaje tras 3 segundos
-      setTimeout(() => setMensajeStatus({ texto: '', tipo: '' }), 3000);
+      // Limpiar mensaje tras 4 segundos para que dé tiempo a leerlo
+      setTimeout(() => setMensajeStatus({ texto: '', tipo: '' }), 4000);
 
       // GANAR XP (Sincronizado con el backend)
       if (respuesta && respuesta.xpGanada > 0) {
@@ -368,7 +373,9 @@ export function PaginaDiario() {
             {/* Título y Fecha */}
             <div>
               <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white tracking-tight transition-colors duration-300">Entrada del {fecha}</h2>
-              <p className="text-md text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">¿Cómo te sientes hoy?</p>
+              <p className="text-md text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">
+                {usuario?.alias ? `Hola ${usuario.alias}, ¿cómo te sientes hoy?` : '¿Cómo te sientes hoy?'}
+              </p>
             </div>
 
             {/* Selector de Humor (Imágenes más grandes y sin punto) */}
@@ -673,13 +680,28 @@ export function PaginaDiario() {
         {notificacionesXP.map(notif => (
           <motion.div
             key={notif.id}
-            initial={{ opacity: 1, y: notif.y - 20, x: notif.x - 20, scale: 0.5 }}
-            animate={{ opacity: 0, y: notif.y - 100, scale: 1.2 }}
+            initial={{ opacity: 0, y: notif.y, x: notif.x, scale: 0.5 }}
+            animate={{ 
+              opacity: [0, 1, 1, 0], 
+              y: notif.y - 150, 
+              scale: [0.5, 1.5, 1.5, 1],
+              rotate: [-10, 10, -10, 0]
+            }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="fixed z-[9999] font-black text-xl drop-shadow-md pointer-events-none text-yellow-500"
+            transition={{ duration: 2, ease: "easeOut" }}
+            className="fixed z-[9999] font-black text-3xl pointer-events-none flex items-center gap-2"
+            style={{ 
+              color: '#FACC15',
+              textShadow: '0 0 20px rgba(250, 204, 21, 0.6), 0 4px 10px rgba(0,0,0,0.3)'
+            }}
           >
-            +{notif.cantidad} XP
+            <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">+{notif.cantidad} XP</span>
+            <motion.span
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            >
+              ✨
+            </motion.span>
           </motion.div>
         ))}
       </AnimatePresence>

@@ -177,12 +177,12 @@ export function ProveedorAutenticacion({ children }) {
         }
     }
 
-    async function eliminar() {
+    async function eliminar(contrasena) {
         if (!token) return;
         try {
             setError(null);
             setEstaCargando(true);
-            await servicioAPI.eliminarCuenta(token);
+            await servicioAPI.eliminarCuenta(token, contrasena);
             logout(); // Limpiamos todo localmente
         } catch (err) {
             setError(err.message);

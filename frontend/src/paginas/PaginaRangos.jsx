@@ -60,7 +60,7 @@ export const RANK_TIERS = [
   { xp: 350000, name: 'Rubí I', tier: 'I', categoryId: 'rubi', desc: 'La cima del mundo. Eres la definición de ImproveMe.' }
 ];
 
-function calcularRangoInfo(xp) {
+export function calcularRangoInfo(xp) {
   let currentTierIndex = 0;
   for (let i = 0; i < RANK_TIERS.length; i++) {
     if (xp >= RANK_TIERS[i].xp) {
@@ -105,7 +105,7 @@ function calcularRangoInfo(xp) {
   };
 }
 
-const RankIcon = ({ rankData, tier = 'III', size = 'md', className = '', showGlow = true }) => {
+export const RankIcon = ({ rankData, tier = 'III', size = 'md', className = '', showGlow = true }) => {
   if (!rankData) return null;
   
   const IconComponent = IconMap[rankData.iconName || rankData.icon] || Trophy;

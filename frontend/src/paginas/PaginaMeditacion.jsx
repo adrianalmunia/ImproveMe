@@ -326,20 +326,25 @@ export function PaginaMeditacion() {
   };
 
   const salir = () => {
-    // Si ha meditado más de 10 segundos, guardamos la sesión antes de salir
-    const totalSegundos = tiempoSeleccionado * 60;
-    const completados = totalSegundos - segundosRestantes;
-    
-    if (completados >= 10 && estaMeditando) {
-      console.log("Guardando sesión parcial antes de salir...");
-      finalizarSesion();
-    } else {
-      setEstaMeditando(false);
-      setSesionFinalizada(false);
-      setProgreso(0);
-      pararMusica();
-      clearInterval(intervalRef.current);
-      clearInterval(breathingRef.current);
+    // Si la sesión no ha terminado al 100%, simplemente cerramos sin guardar ni sumar XP
+    setEstaMeditando(false);
+    setSesionFinalizada(false);
+    setProgreso(0);
+    pararMusica();
+    clearInterval(intervalRef.current);
+    clearInterval(breathingRef.current);
+
+    // Limpiar rastro en localStorage para evitar restaurar una sesión cancelada
+    if (usuario?.id) {
+      const guardado = localStorage.getItem(`meditacion_${usuario.id}`);
+      if (guardado) {
+        const s = JSON.parse(guardado);
+        localStorage.setItem(`meditacion_${usuario.id}`, JSON.stringify({
+          ...s,
+          estaMeditando: false,
+          segundosRestantes: 0
+        }));
+      }
     }
   };
 
@@ -373,7 +378,9 @@ export function PaginaMeditacion() {
                 <Flower2 size={40} className="text-white" />
               </div>
               <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-1 transition-colors duration-300">Momento de Calma</h2>
-              <p className="text-gray-400 dark:text-gray-500 text-sm mb-8 text-center transition-colors duration-300">Elige cuánto tiempo quieres meditar hoy.</p>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mb-8 text-center transition-colors duration-300">
+                {usuario?.alias ? `${usuario.alias}, elige cuánto tiempo quieres meditar hoy.` : 'Elige cuánto tiempo quieres meditar hoy.'}
+              </p>
 
               {/* Selector de tiempo */}
               <div className="flex items-center gap-6 mb-4 bg-emerald-50/60 dark:bg-emerald-900/30 px-8 py-5 rounded-[28px] border border-emerald-100/60 dark:border-emerald-900/50 w-full justify-center relative transition-colors duration-300">

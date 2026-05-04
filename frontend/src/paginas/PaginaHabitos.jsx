@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // import { useNavigate } from 'react-router-dom';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import * as servicioAPI from '../servicios/servicioAPI';
+import { calcularRangoInfo, RankIcon } from './PaginaRangos';
 import {
   Plus,
   Minus,
@@ -25,6 +26,8 @@ const PaginaHabitos = ({ setVistaActual }) => {
   const xpActual = usuario?.puntos_experiencia || 0;
   const nivelActual = Math.floor(xpActual / 100) + 1; // Cada 100 XP es un nivel (por simplificar)
   const xpParaSiguienteNivel = 100 - (xpActual % 100);
+  
+  const rankInfo = calcularRangoInfo(xpActual);
 
   // IDs temporales (timestamps) para que el backend los trate como nuevos
   const habitosPorDefecto = [
@@ -253,7 +256,9 @@ const PaginaHabitos = ({ setVistaActual }) => {
           <h1 className="text-4xl font-black text-[#2C4159] dark:text-white tracking-tight mb-1 transition-colors duration-300">
             Mis <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]">Hábitos</span>
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 font-medium transition-colors duration-300">Forja tu mejor versión día tras día.</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium transition-colors duration-300">
+            {usuario?.alias ? `${usuario.alias}, forja tu mejor versión día tras día.` : 'Forja tu mejor versión día tras día.'}
+          </p>
         </div>
 
         <div className="flex gap-4">
@@ -300,7 +305,29 @@ const PaginaHabitos = ({ setVistaActual }) => {
               })()}
             </div>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 relative overflow-hidden transition-colors duration-300">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 relative overflow-visible group transition-colors duration-300">
+            {/* Tooltip de Rango */}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 -translate-y-2 group-hover:translate-y-0 z-[100]">
+              <div className="bg-white dark:bg-gray-800 rounded-[32px] p-6 shadow-2xl border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-3 min-w-[200px]">
+                <div className="relative">
+                  <div className={`absolute inset-0 blur-xl opacity-20 ${rankInfo.category.bg} rounded-full`} />
+                  <RankIcon rankData={rankInfo.category} tier={rankInfo.tier} size="track" />
+                </div>
+                <div className="text-center">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Rango Actual</p>
+                  <p className={`text-xl font-black uppercase tracking-tighter ${rankInfo.category.color}`}>{rankInfo.fullName}</p>
+                </div>
+                <div className="w-full h-1 bg-gray-100 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
+                   <div className={`h-full bg-gradient-to-r ${rankInfo.category.gradient}`} style={{ width: `${rankInfo.progressPercentage}%` }} />
+                </div>
+                <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">
+                   {rankInfo.isMaxRank ? '¡Máximo Rango!' : `Faltan ${rankInfo.xpRemaining} XP para subir`}
+                </p>
+              </div>
+              {/* Flecha del Tooltip */}
+              <div className="w-4 h-4 bg-white dark:bg-gray-800 rotate-45 absolute -top-2 left-1/2 -translate-x-1/2 border-l border-t border-gray-100 dark:border-gray-700" />
+            </div>
+
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4F99CC] to-[#C6A55E] flex items-center justify-center text-white shadow-md">
               <Trophy size={24} />
             </div>

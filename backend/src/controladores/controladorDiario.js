@@ -51,7 +51,7 @@ async function guardarEntradaDiaria(req, res) {
 
         // 2. Si es nueva entrada, otorgar XP
         if (esNuevaEntrada) {
-            xpGanada = 50;
+            xpGanada = 100;
             usuarioActualizado = await prisma.usuarios.update({
                 where: { id: parseInt(usuario_id) },
                 data: {

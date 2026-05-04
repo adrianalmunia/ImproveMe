@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { useTema } from '../contextos/ContextoTema';
+import { useIdioma } from '../contextos/ContextoIdioma';
 import { obtenerEntradasPorMes, exportarDatos } from '../servicios/servicioAPI';
 import logoCompleto from '../assets/logo_completo.png';
-import { User, Mail, Lock, LogOut, Save, ShieldCheck, Eye, EyeOff, AlertTriangle, Trash2, Image as ImageIcon, Mic, ChevronRight, X, Calendar, Sun, Moon, FileText, Info, Download } from 'lucide-react';
+import { User, Mail, Lock, LogOut, Save, ShieldCheck, Eye, EyeOff, AlertTriangle, Trash2, Image as ImageIcon, Mic, ChevronRight, X, Calendar, Sun, Moon, FileText, Info, Download, Languages } from 'lucide-react';
 import { ReproductorAudio } from '../componentes/ReproductorAudio';
 
 export function PaginaUsuario() {
@@ -12,11 +13,14 @@ export function PaginaUsuario() {
   const { temaOscuro, toggleTema } = useTema();
   const [nombre, setNombre] = useState(usuario?.nombre_usuario || '');
   const [email, setEmail] = useState(usuario?.correo || '');
+  const [alias, setAlias] = useState(usuario?.alias || '');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const [verNewPassword, setVerNewPassword] = useState(false);
   const [verConfirmPassword, setVerConfirmPassword] = useState(false);
+  const [verActualPasswordSeguridad, setVerActualPasswordSeguridad] = useState(false);
+  const [actualPasswordSeguridad, setActualPasswordSeguridad] = useState('');
 
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
   const [estaCargando, setEstaCargando] = useState(false);
@@ -34,9 +38,13 @@ export function PaginaUsuario() {
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [mostrarAcerca, setMostrarAcerca] = useState(false);
   const [mostrarOpcionesExportar, setMostrarOpcionesExportar] = useState(false);
+  const [mostrarIdiomas, setMostrarIdiomas] = useState(false);
+  const { idioma, setIdioma, t } = useIdioma();
 
   const [mesFiltro, setMesFiltro] = useState(new Date().getMonth() + 1);
   const [anioFiltro, setAnioFiltro] = useState(new Date().getFullYear());
+  const [passwordBorrado, setPasswordBorrado] = useState('');
+  const [verPasswordBorrado, setVerPasswordBorrado] = useState(false);
 
   const [fraseConfirmacion, setFraseConfirmacion] = useState('');
   const FRASE_ELIMINAR = "ELIMINAR MI CUENTA";
@@ -53,7 +61,7 @@ export function PaginaUsuario() {
 
   const manejarGuardarPerfil = (e) => {
     e.preventDefault();
-    if (nombre === usuario.nombre_usuario && email === usuario.correo) {
+    if (nombre === usuario.nombre_usuario && email === usuario.correo && alias === usuario.alias) {
       mostrarNotificacion('No hay cambios que guardar', 'error');
       return;
     }
@@ -71,6 +79,13 @@ export function PaginaUsuario() {
       mostrarNotificacion('Las contraseñas no coinciden', 'error');
       return;
     }
+    if (!actualPasswordSeguridad) {
+      mostrarNotificacion('Debes introducir tu contraseña actual para realizar el cambio', 'error');
+      return;
+    }
+    
+    // Si ya tenemos la contraseña actual aquí, podemos saltar el modal o simplemente pasarla
+    setPasswordConfirmacion(actualPasswordSeguridad);
     setTipoCambio('password');
     setMostrarConfirmacion(true);
   };
@@ -95,6 +110,7 @@ export function PaginaUsuario() {
       if (tipoCambio === 'perfil') {
         if (nombre !== usuario.nombre_usuario) datosAActualizar.nombre_usuario = nombre;
         if (email !== usuario.correo) datosAActualizar.correo = email;
+        if (alias !== usuario.alias) datosAActualizar.alias = alias;
       } else {
         datosAActualizar.contrasena = newPassword;
       }
@@ -104,6 +120,7 @@ export function PaginaUsuario() {
       mostrarNotificacion('¡Cambios guardados con éxito!');
       setMostrarConfirmacion(false);
       setPasswordConfirmacion('');
+      setActualPasswordSeguridad('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
@@ -115,9 +132,13 @@ export function PaginaUsuario() {
 
   const manejarBorrarCuenta = async () => {
     if (fraseConfirmacion !== FRASE_ELIMINAR) return;
+    if (!passwordBorrado) {
+      mostrarNotificacion('Debes introducir tu contraseña para confirmar el borrado', 'error');
+      return;
+    }
 
     try {
-      await eliminar();
+      await eliminar(passwordBorrado);
     } catch (error) {
       mostrarNotificacion(error.message || 'Error al eliminar cuenta', 'error');
     }
@@ -230,7 +251,7 @@ export function PaginaUsuario() {
           animate={{ y: 0, opacity: 1 }}
           src={logoCompleto}
           alt="ImproveMe Logo"
-          className="h-16 lg:h-20 object-contain mix-blend-multiply"
+          className="h-16 lg:h-20 object-contain transition-all duration-300"
         />
       </div>
 
@@ -250,8 +271,12 @@ export function PaginaUsuario() {
             </div>
           </div>
           <div className="pt-16 pb-8 px-12">
-            <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white transition-colors duration-300">{usuario?.nombre_usuario}</h2>
-            <p className="text-gray-500 dark:text-gray-400 font-medium transition-colors duration-300">{usuario?.correo}</p>
+            <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white transition-colors duration-300">
+              {usuario?.alias || usuario?.nombre_usuario}
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 font-medium transition-colors duration-300">
+              {usuario?.alias ? `@${usuario.nombre_usuario} • ` : ''}{usuario?.correo}
+            </p>
           </div>
         </motion.div>
 
@@ -267,6 +292,14 @@ export function PaginaUsuario() {
                 <input
                   type="text" value={nombre} onChange={(e) => setNombre(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all font-medium"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">Alias (Cómo te llamamos)</label>
+                <input
+                  type="text" value={alias} onChange={(e) => setAlias(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all font-medium"
+                  placeholder="Ej: Adri"
                 />
               </div>
               <div>
@@ -290,6 +323,16 @@ export function PaginaUsuario() {
               <Lock size={20} className="text-[#C6A55E]" /> Seguridad
             </h3>
             <form onSubmit={manejarCambioPassword} className="space-y-4 flex flex-col flex-1">
+              <div className="relative">
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">Contraseña Actual</label>
+                <input
+                  type={verActualPasswordSeguridad ? "text" : "password"} value={actualPasswordSeguridad} onChange={(e) => setActualPasswordSeguridad(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all" placeholder="••••••••"
+                />
+                <button type="button" onClick={() => setVerActualPasswordSeguridad(!verActualPasswordSeguridad)} className="absolute right-4 bottom-3 text-gray-400 dark:text-gray-500">
+                  {verActualPasswordSeguridad ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               <div className="relative">
                 <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">Nueva Clave</label>
                 <input
@@ -430,7 +473,25 @@ export function PaginaUsuario() {
             </div>
             <ChevronRight size={20} className="opacity-30 dark:opacity-50" />
           </motion.button>
-
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            onClick={() => setMostrarIdiomas(true)}
+            className="flex items-center justify-between p-6 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-[32px] shadow-xl group transition-colors duration-300 w-full"
+          >
+            <div className="flex items-center gap-4 text-left">
+              <div className="w-12 h-12 bg-green-50 dark:bg-green-900/30 rounded-2xl flex items-center justify-center text-green-500">
+                <Languages size={24} />
+              </div>
+              <div>
+                <h4 className="font-['Tilt_Warp'] text-lg">Idiomas</h4>
+                <p className="text-gray-400 dark:text-gray-500 text-[10px]">Elegir idioma / Language</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-gray-400 uppercase">{idioma === 'es' ? 'Español' : 'English'}</span>
+              <ChevronRight size={20} className="opacity-30 dark:opacity-50" />
+            </div>
+          </motion.button>
           <motion.button
             whileHover={{ scale: 1.02 }}
             onClick={() => setMostrarOpcionesExportar(true)}
@@ -461,17 +522,33 @@ export function PaginaUsuario() {
             </button>
           ) : (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-red-200 dark:border-red-900/50 shadow-xl transition-colors duration-300">
-              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">Escribe <span className="text-red-500 underline">"{FRASE_ELIMINAR}"</span>:</p>
-              <div className="flex gap-4">
-                <input type="text" value={fraseConfirmacion} onChange={(e) => setFraseConfirmacion(e.target.value)} className="flex-1 px-5 py-3 bg-red-50 dark:bg-red-900/20 rounded-2xl outline-none font-bold text-red-600 dark:text-red-400" />
-                <button
-                  disabled={fraseConfirmacion !== FRASE_ELIMINAR}
-                  onClick={manejarBorrarCuenta}
-                  className={`px-6 py-3 rounded-2xl font-black transition-colors ${fraseConfirmacion === FRASE_ELIMINAR ? 'bg-red-500 dark:bg-red-600/80 text-white hover:bg-red-600 dark:hover:bg-red-500' : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'}`}
-                >
-                  Borrar
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Paso 1: Confirma tu contraseña:</p>
+              <div className="relative mb-4">
+                <input
+                  type={verPasswordBorrado ? "text" : "password"}
+                  value={passwordBorrado}
+                  onChange={(e) => setPasswordBorrado(e.target.value)}
+                  placeholder="Tu contraseña actual"
+                  className="w-full px-5 py-3 bg-red-50 dark:bg-red-900/20 rounded-2xl outline-none font-bold text-red-600 dark:text-red-400"
+                />
+                <button type="button" onClick={() => setVerPasswordBorrado(!verPasswordBorrado)} className="absolute right-4 top-1/2 -translate-y-1/2 text-red-300">
+                  {verPasswordBorrado ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-                <button onClick={() => setMostrarConfirmarBorrado(false)} className="px-6 py-3 bg-gray-100 dark:bg-gray-700 rounded-2xl font-bold text-gray-500 dark:text-gray-400">Cancelar</button>
+              </div>
+
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Paso 2: Escribe <span className="text-red-500 underline">"{FRASE_ELIMINAR}"</span>:</p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <input type="text" value={fraseConfirmacion} onChange={(e) => setFraseConfirmacion(e.target.value)} className="flex-1 px-5 py-3 bg-red-50 dark:bg-red-900/20 rounded-2xl outline-none font-bold text-red-600 dark:text-red-400" />
+                <div className="flex gap-2">
+                  <button
+                    disabled={fraseConfirmacion !== FRASE_ELIMINAR || !passwordBorrado}
+                    onClick={manejarBorrarCuenta}
+                    className={`px-6 py-3 rounded-2xl font-black transition-colors ${fraseConfirmacion === FRASE_ELIMINAR && passwordBorrado ? 'bg-red-500 dark:bg-red-600/80 text-white hover:bg-red-600 dark:hover:bg-red-500' : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'}`}
+                  >
+                    Borrar
+                  </button>
+                  <button onClick={() => { setMostrarConfirmarBorrado(false); setPasswordBorrado(''); setFraseConfirmacion(''); }} className="px-6 py-3 bg-gray-100 dark:bg-gray-700 rounded-2xl font-bold text-gray-500 dark:text-gray-400">Cancelar</button>
+                </div>
               </div>
             </div>
           )}
@@ -600,7 +677,7 @@ export function PaginaUsuario() {
               </div>
               <div className="flex-1 overflow-y-auto p-12 text-gray-600 dark:text-gray-300 space-y-6 custom-scrollbar transition-colors duration-300">
                 <div className="flex justify-center mb-8">
-                  <img src={logoCompleto} alt="Logo" className="h-20 mix-blend-multiply dark:opacity-80" />
+                  <img src={logoCompleto} alt="Logo" className="h-20 transition-all duration-300" />
                 </div>
                 <section>
                   <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-2 uppercase tracking-widest text-xs transition-colors duration-300">Nuestra Misión</h3>
@@ -670,6 +747,48 @@ export function PaginaUsuario() {
 
                 <button
                   onClick={() => setMostrarOpcionesExportar(false)}
+                  className="mt-4 text-gray-400 font-bold hover:text-gray-600 transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+        {mostrarIdiomas && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[400] bg-black/60 backdrop-blur-md flex items-center justify-center p-6">
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-[40px] p-10 shadow-2xl text-center transition-colors duration-300">
+              <div className="w-20 h-20 bg-green-50 dark:bg-green-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6 text-green-500 transition-colors duration-300">
+                <Languages size={40} />
+              </div>
+              <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-2">Seleccionar Idioma</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">Elige el idioma de la aplicación.</p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => { setIdioma('es'); setMostrarIdiomas(false); }}
+                  className={`w-full py-4 border rounded-2xl font-bold flex items-center justify-between px-6 transition-all group ${idioma === 'es' ? 'bg-green-500 border-green-600 text-white shadow-lg' : 'bg-gray-50 dark:bg-gray-700 border-gray-100 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/30'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🇪🇸</span>
+                    <span>Español</span>
+                  </div>
+                  {idioma === 'es' && <ShieldCheck size={18} />}
+                </button>
+
+                <button
+                  onClick={() => { setIdioma('en'); setMostrarIdiomas(false); }}
+                  className={`w-full py-4 border rounded-2xl font-bold flex items-center justify-between px-6 transition-all group ${idioma === 'en' ? 'bg-green-500 border-green-600 text-white shadow-lg' : 'bg-gray-50 dark:bg-gray-700 border-gray-100 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/30'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🇺🇸</span>
+                    <span>English</span>
+                  </div>
+                  {idioma === 'en' && <ShieldCheck size={18} />}
+                </button>
+
+                <button
+                  onClick={() => setMostrarIdiomas(false)}
                   className="mt-4 text-gray-400 font-bold hover:text-gray-600 transition-colors"
                 >
                   Cancelar

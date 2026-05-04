@@ -10,7 +10,8 @@ const prisma = require('../configuracion/baseDatos');
  * Recibe: usuario_id, duracion_segundos, segundos_completados, tecnica_respiracion, pista_musica
  */
 async function registrarSesion(req, res) {
-    const { duracion_segundos, segundos_completados, tecnica_respiracion, pista_musica } = req.body;
+    console.log(`[Meditación] Body recibido:`, req.body);
+    const { duracion_segundos, segundos_completados, tecnica_respiracion, pista_musica } = req.body || {};
     const usuario_id = req.usuarioId;
 
     if (!duracion_segundos || !tecnica_respiracion) {
@@ -65,14 +66,16 @@ async function registrarSesion(req, res) {
         const ayerStr = `${ayer.getUTCFullYear()}-${String(ayer.getUTCMonth() + 1).padStart(2, '0')}-${String(ayer.getUTCDate()).padStart(2, '0')}`;
 
         if (fechasUnicas.length > 0) {
+            // Comprobamos si la última sesión fue hoy o ayer
             if (fechasUnicas[0] === hoyStr || fechasUnicas[0] === ayerStr) {
                 nuevaRacha = 1;
                 for (let i = 0; i < fechasUnicas.length - 1; i++) {
-                    const actual = new Date(fechasUnicas[i]);
-                    const siguiente = new Date(fechasUnicas[i + 1]);
-                    const diff = Math.round((actual - siguiente) / (1000 * 60 * 60 * 24));
+                    // Usamos fechas UTC puras para evitar desfases de zona horaria
+                    const actual = new Date(fechasUnicas[i] + 'T00:00:00Z');
+                    const siguiente = new Date(fechasUnicas[i + 1] + 'T00:00:00Z');
+                    const diff = Math.round((actual.getTime() - siguiente.getTime()) / (1000 * 60 * 60 * 24));
                     if (diff === 1) nuevaRacha++;
-                    else break;
+                    else if (diff > 0) break; // Si la diferencia es mayor a 1, la racha se rompe
                 }
             }
         }

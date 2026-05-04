@@ -24,9 +24,9 @@ const OPCIONES_DEFECTO = {
 async function realizarSolicitud(ruta, metodo = 'GET', datos = null, token = null, keepalive = false) {
     try {
         const opciones = {
-            ...OPCIONES_DEFECTO,
             method: metodo,
             keepalive: keepalive,
+            headers: { ...OPCIONES_DEFECTO.headers }
         };
 
         // Si hay un token, lo añadimos al header de autorización
@@ -217,8 +217,8 @@ export async function obtenerEstadisticasGenerales(usuarioId, token, dias = 30) 
  * Elimina la cuenta del usuario autenticado permanentemente
  * @param {string} token - Token JWT del usuario
  */
-export async function eliminarCuenta(token) {
-    return realizarSolicitud('autenticacion/perfil', 'DELETE', null, token);
+export async function eliminarCuenta(token, contrasena) {
+    return realizarSolicitud('autenticacion/perfil', 'DELETE', { contrasena }, token);
 }
 
 /**
