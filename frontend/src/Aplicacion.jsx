@@ -17,12 +17,16 @@ import PaginaEstadisticas from './paginas/PaginaEstadisticas';
 import DiseñoPrincipal from './componentes/DiseñoPrincipal';
 import { motion } from 'framer-motion';
 
+import LandingPage from './paginas/LandingPage';
+
 /**
  * Componente principal de la aplicación que gestiona las rutas privadas
  */
 function ContenidoAplicacion() {
   const { usuario } = useAutenticacion();
   const [vistaActual, setVistaActual] = useState('diario');
+  const [mostrarAuth, setMostrarAuth] = useState(false);
+  const [modoAuth, setModoAuth] = useState('login'); // 'login' o 'registro'
 
   console.log("ContenidoAplicacion renderizando con usuario:", usuario?.nombre_usuario, "y vista:", vistaActual);
 
@@ -47,12 +51,26 @@ function ContenidoAplicacion() {
     );
   }
 
-  // Si NO está autenticado, mostramos la pantalla de Login/Registro unificada.
+  // Si NO está autenticado, mostramos primero la Landing Page
+  if (!mostrarAuth) {
+    return (
+      <LandingPage 
+        onIrAAutenticacion={(modo) => {
+          setModoAuth(modo);
+          setMostrarAuth(true);
+        }} 
+      />
+    );
+  }
+
+  // Si el usuario decidió ir a Login/Registro desde la Landing
   return (
     <Autenticacion
+      modoInicial={modoAuth}
       onAccesoExitoso={(u) => {
         console.log("Acceso exitoso:", u);
       }}
+      onVolverALanding={() => setMostrarAuth(false)}
     />
   );
 }

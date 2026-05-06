@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { PenLine, Library, BarChart2, ListTodo, Trophy, Calendar, User, Flower2 } from 'lucide-react';
 import logoImproveMe from '../assets/logo_improveme.png';
+import { useIdioma } from '../contextos/ContextoIdioma';
 
 // Iconos simplificados para el Sidebar usando Lucide React
 const SidebarIcon = ({ Icon, label, active, onClick }) => (
@@ -21,6 +22,7 @@ const SidebarIcon = ({ Icon, label, active, onClick }) => (
 );
 
 export function DiseñoPrincipal({ children, vistaActual, setVistaActual }) {
+  const { t } = useIdioma();
   console.log("Vista actual en Diseño:", vistaActual);
 
   return (
@@ -40,24 +42,24 @@ export function DiseñoPrincipal({ children, vistaActual, setVistaActual }) {
 
         <SidebarIcon
           Icon={PenLine}
-          label="Entrada Diaria"
+          label={t('nav_diario')}
           active={vistaActual === 'diario'}
           onClick={() => setVistaActual('diario')}
         />
         <SidebarIcon
           Icon={Library}
-          label="Registros"
+          label={t('nav_registros')}
           active={vistaActual === 'registros'}
           onClick={() => setVistaActual('registros')}
         />
-        <SidebarIcon Icon={BarChart2} label="Estadísticas" active={vistaActual === 'estadisticas'} onClick={() => setVistaActual('estadisticas')} />
-        <SidebarIcon Icon={ListTodo} label="Hábitos" active={vistaActual === 'habitos'} onClick={() => setVistaActual('habitos')} />
-        <SidebarIcon Icon={Trophy} label="Ranked" active={vistaActual === 'ranked'} onClick={() => setVistaActual('ranked')} />
-        <SidebarIcon Icon={Calendar} label="Calendario" active={vistaActual === 'calendario'} onClick={() => setVistaActual('calendario')} />
-        <SidebarIcon Icon={Flower2} label="Meditación" active={vistaActual === 'meditacion'} onClick={() => setVistaActual('meditacion')} />
+        <SidebarIcon Icon={BarChart2} label={t('nav_estadisticas')} active={vistaActual === 'estadisticas'} onClick={() => setVistaActual('estadisticas')} />
+        <SidebarIcon Icon={ListTodo} label={t('nav_habitos')} active={vistaActual === 'habitos'} onClick={() => setVistaActual('habitos')} />
+        <SidebarIcon Icon={Trophy} label={t('nav_ranked')} active={vistaActual === 'ranked'} onClick={() => setVistaActual('ranked')} />
+        <SidebarIcon Icon={Calendar} label={t('nav_calendario')} active={vistaActual === 'calendario'} onClick={() => setVistaActual('calendario')} />
+        <SidebarIcon Icon={Flower2} label={t('nav_meditacion')} active={vistaActual === 'meditacion'} onClick={() => setVistaActual('meditacion')} />
 
         <div className="mt-auto">
-          <SidebarIcon Icon={User} label="Usuario" active={vistaActual === 'perfil'} onClick={() => setVistaActual('perfil')} />
+          <SidebarIcon Icon={User} label={t('nav_usuario')} active={vistaActual === 'perfil'} onClick={() => setVistaActual('perfil')} />
         </div>
       </aside>
 

@@ -2,19 +2,22 @@
 // PÁGINA: AUTENTICACIÓN UNIFICADA (LOGIN & REGISTRO)
 // ================================================================================
 // Este componente gestiona tanto el acceso como el registro en una sola vista.
-// Utiliza Framer Motion para animaciones internas fluidas mientras mantiene
-// el marco decorativo (card de Figma) estático.
+// Se ha actualizado el diseño para coincidir con el estilo general de la app.
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import logoImproveMe from '../assets/logo_improveme.png';
 
-export function Autenticacion({ onAccesoExitoso = () => { } }) {
+export function Autenticacion({ 
+    onAccesoExitoso = () => { }, 
+    modoInicial = 'login', 
+    onVolverALanding = () => { } 
+}) {
     const { login, registrar, estaCargando, error } = useAutenticacion();
-    
-    // Estado para alternar entre Login y Registro
-    const [esLogin, setEsLogin] = useState(true);
+
+    // Estado para alternar entre Login y Registro, inicializado según prop
+    const [esLogin, setEsLogin] = useState(modoInicial === 'login');
 
     // Estados de Formulario
     const [nombreUsuario, setNombreUsuario] = useState('');
@@ -54,7 +57,7 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
 
             // Llamada al contexto para registrar
             const resultado = await registrar(nombreUsuario, email, password);
-            
+
             // SOLO si el resultado es exitoso y tenemos usuario, procedemos
             if (resultado && (resultado.usuario || resultado.id)) {
                 onAccesoExitoso(resultado);
@@ -76,197 +79,218 @@ export function Autenticacion({ onAccesoExitoso = () => { } }) {
     };
 
     // --- ANIMACIONES ---
-    const slideVariants = {
-        enter: (direction) => ({
-            x: direction > 0 ? 100 : -100,
-            opacity: 0
-        }),
-        center: {
-            x: 0,
-            opacity: 1
-        },
-        exit: (direction) => ({
-            x: direction < 0 ? 100 : -100,
-            opacity: 0
-        })
+    const formVariants = {
+        hidden: { opacity: 0, x: 50 },
+        visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: "easeOut" } },
+        exit: { opacity: 0, x: -50, transition: { duration: 0.3, ease: "easeIn" } }
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-neutral-100 dark:bg-gray-900 overflow-hidden font-['Inter'] transition-colors duration-300">
-            {/* MARCO DE FIGMA (ESTÁTICO) */}
+        <div className="flex items-center justify-center min-h-screen bg-neutral-100 dark:bg-gray-900 overflow-hidden font-['Inter'] transition-colors duration-300 p-4 lg:p-8">
             <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="w-[1440px] h-[684px] relative scale-90 lg:scale-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="w-full max-w-[1000px] min-h-[600px] bg-white dark:bg-gray-800 rounded-[40px] shadow-2xl flex flex-col md:flex-row overflow-hidden relative"
             >
-                {/* SVG de Fondo */}
-                <div className="left-[304px] top-[45px] absolute">
-                    <svg width="840" height="602" viewBox="0 0 840 602" fill="none">
-                        <g filter="url(#filter0_di_auth)">
-                            <path d="M4 20C4 8.95 12.95 0 24 0H816C827.05 0 836 8.95 836 20V574C836 585.05 827.05 594 816 594H24C12.95 594 4 585.05 4 574V20Z" className="fill-white dark:fill-gray-800 transition-colors duration-300" />
-                            <path d="M24 1H816C826.49 1 835 9.5 835 20V574C835 584.49 826.49 593 816 593H24C13.5 593 5 584.49 5 574V20C5 9.5 13.5 1 24 1Z" stroke="url(#paint0_linear_auth)" strokeWidth="2" />
-                        </g>
-                        <defs>
-                            <filter id="filter0_di_auth" x="0" y="0" width="840" height="602" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-                                <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                                <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-                                <feOffset dy="4" /><feGaussianBlur stdDeviation="2" /><feComposite in2="hardAlpha" operator="out" />
-                                <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-                                <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow" />
-                                <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
-                                <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
-                                <feOffset dy="4" /><feGaussianBlur stdDeviation="2" /><feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-                                <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-                                <feBlend mode="normal" in2="shape" result="effect2_innerShadow" />
-                            </filter>
-                            <linearGradient id="paint0_linear_auth" x1="420" y1="0" x2="420" y2="594" gradientUnits="userSpaceOnUse">
-                                <stop stopColor="#4F99CC" /><stop offset="0.23" stopColor="#5FA5B3" /><stop offset="0.42" stopColor="#6FB29B" />
-                                <stop offset="0.63" stopColor="#7DB57D" /><stop offset="0.78" stopColor="#8BB85E" /><stop offset="1" stopColor="#C6A55E" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
+                {/* LADO IZQUIERDO: BRANDING (Visible solo en md+) */}
+                <div className="hidden md:flex md:w-[45%] relative flex-col justify-between p-12 overflow-hidden bg-gradient-to-br from-[#4F99CC] to-[#C6A55E]">
+                    {/* Elementos decorativos de fondo */}
+                    <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
+                    <div className="absolute bottom-[-10%] left-[-10%] w-80 h-80 bg-black/10 rounded-full blur-3xl"></div>
+                    
+                    <div className="relative z-10">
+                        <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 200, damping: 20, delay: 0.2 }}
+                            className="w-20 h-20 bg-white rounded-2xl p-2 shadow-lg mb-8"
+                        >
+                            <img src={logoImproveMe} alt="Logo" className="w-full h-full object-contain" />
+                        </motion.div>
+                        <h1 className="text-white text-4xl font-['Tilt_Warp'] leading-tight mb-4">
+                            Desbloquea tu<br />mejor versión.
+                        </h1>
+                        <p className="text-white/80 text-sm max-w-[80%] font-medium">
+                            Únete a ImproveMe y comienza a transformar tus hábitos, hacer un seguimiento de tu progreso y subir de nivel en la vida real.
+                        </p>
+                    </div>
+
+                    <div className="relative z-10 flex items-center gap-3">
+                        <div className="w-10 h-1 bg-white/30 rounded-full"></div>
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
                 </div>
 
-                {/* Línea Divisoria Vertical con Degradado (Z-index superior para evitar colisiones) */}
-                <div 
-                    className="w-[2px] h-[594px] left-[724px] top-[45px] absolute z-10"
-                    style={{ background: 'linear-gradient(180deg, #4F99CC 0%, #5FA5B3 23%, #6FB29B 42%, #7DB57D 63%, #8BB85E 78%, #C6A55E 100%)' }}
-                ></div>
-
-                {/* Logo Central Animado (Perfectamente redondeado) */}
-                <motion.div 
-                    initial={{ scale: 0 }} animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.3 }}
-                    className="w-24 h-24 left-[676px] top-[297px] absolute rounded-full shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] flex items-center justify-center overflow-hidden z-20 p-[2px]"
-                    style={{ background: 'linear-gradient(90deg, #4F99CC 0%, #C6A55E 100%)' }}
-                >
-                    <div className="w-full h-full bg-white dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden transition-colors duration-300">
-                        <img src={logoImproveMe} alt="Logo" className="w-full h-full object-cover rounded-full" />
+                {/* LADO DERECHO: FORMULARIO */}
+                <div className="w-full md:w-[55%] p-8 sm:p-12 lg:p-16 flex flex-col justify-center relative bg-white dark:bg-gray-800 transition-colors duration-300">
+                    
+                    {/* Cabecera del Formulario con botón Volver */}
+                    <div className="absolute top-8 left-8 right-8 flex justify-between items-center z-20">
+                        <button 
+                            onClick={onVolverALanding}
+                            className="text-gray-400 hover:text-[#4F99CC] transition-colors flex items-center gap-2 text-sm font-bold uppercase tracking-widest"
+                        >
+                            ← Volver
+                        </button>
                     </div>
-                </motion.div>
 
-                {/* --- LADO IZQUIERDO (ANIMACIÓN DE ESCALA Y DESVANECIMIENTO) --- */}
-                <div className="w-[420px] h-[600px] left-[304px] top-[45px] absolute overflow-hidden pointer-events-none">
+                    {/* Versión móvil del logo */}
+                    <div className="md:hidden flex justify-center mb-8">
+                        <div className="w-16 h-16 rounded-full p-[2px] shadow-lg" style={{ background: 'linear-gradient(135deg, #4F99CC 0%, #C6A55E 100%)' }}>
+                            <div className="w-full h-full bg-white dark:bg-gray-800 rounded-full flex items-center justify-center p-2">
+                                <img src={logoImproveMe} alt="Logo" className="w-full h-full object-contain" />
+                            </div>
+                        </div>
+                    </div>
+
                     <AnimatePresence mode="wait">
                         {esLogin ? (
                             <motion.div
-                                key="login-content"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.05 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-full h-full flex flex-col items-center justify-center pointer-events-auto"
+                                key="login-form"
+                                variants={formVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
+                                className="w-full max-w-md mx-auto"
                             >
-                                {/* Título Login */}
-                                <div className="w-80 text-center mb-8">
-                                    <h2 className="text-black dark:text-white text-2xl font-normal font-['Tilt_Warp'] transition-colors duration-300">Bienvenido de nuevo.</h2>
-                                    <p className="text-black dark:text-gray-300 text-[10px] font-normal font-['Inter'] mt-2 px-6 transition-colors duration-300">
-                                        Inicia sesión para retomar tu progreso y seguir avanzando.
-                                    </p>
+                                <div className="mb-8 text-center md:text-left">
+                                    <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white transition-colors duration-300">Bienvenido de nuevo</h2>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-2 transition-colors duration-300">Inicia sesión para continuar tu progreso</p>
                                 </div>
-                                {/* Form Login */}
-                                <form onSubmit={manejarLogin} className="w-72 relative flex flex-col">
-                                    {(errorLocal || error) && (
-                                        <div className="w-full text-red-600 text-[11px] text-center bg-red-100/80 backdrop-blur-sm p-2 rounded-md mb-4 shadow-sm border border-red-200">{errorLocal || error}</div>
-                                    )}
-                                    <div className="mb-6">
-                                        <label className="block text-black dark:text-gray-200 text-sm font-['Advent_Pro'] mb-1 ml-2 transition-colors duration-300">E-Mail</label>
-                                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito dark:outline-gray-600 dark:bg-gray-700 dark:text-white px-4 text-xs focus:outline-Azul-Principal transition-colors duration-300" />
-                                    </div>
-                                    <div className="mb-6">
-                                        <label className="block text-black dark:text-gray-200 text-sm font-['Advent_Pro'] mb-1 ml-2 transition-colors duration-300">Contraseña</label>
-                                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito dark:outline-gray-600 dark:bg-gray-700 dark:text-white px-4 text-xs focus:outline-Azul-Principal transition-colors duration-300" />
-                                    </div>
-                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit" disabled={estaCargando} className="w-full h-9 bg-black dark:bg-white text-white dark:text-black text-xs rounded-full shadow-lg mt-2 transition-colors duration-300">
-                                        {estaCargando ? 'Cargando...' : 'Iniciar Sesión'}
-                                    </motion.button>
-                                </form>
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="login-prompt"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.05 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-full h-full flex flex-col items-center justify-center pointer-events-auto"
-                            >
-                                <div className="w-64 text-center">
-                                    <h2 className="text-black dark:text-white text-2xl font-normal font-['Tilt_Warp'] transition-colors duration-300">¿Ya eres usuario?</h2>
-                                    <p className="text-black dark:text-gray-300 text-[10px] font-normal font-['Inter'] mt-2 transition-colors duration-300">Identificate para acceder a ImproveMe</p>
-                                    <motion.button 
-                                        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                                        onClick={alternarVista}
-                                        className="w-48 h-7 bg-black dark:bg-white text-white dark:text-black text-xs rounded-full shadow-md mt-6 transition-colors duration-300"
-                                    >
-                                        Iniciar Sesión
-                                    </motion.button>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
 
-                {/* --- LADO DERECHO (ANIMACIÓN DE ESCALA Y DESVANECIMIENTO) --- */}
-                <div className="w-[420px] h-[600px] left-[724px] top-[45px] absolute overflow-hidden pointer-events-none">
-                    <AnimatePresence mode="wait">
-                        {!esLogin ? (
-                            <motion.div
-                                key="register-content"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.05 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-full h-full flex flex-col items-center justify-center pointer-events-auto"
-                            >
-                                {/* Título Registro */}
-                                <div className="w-80 text-center mb-6">
-                                    <h2 className="text-black dark:text-white text-2xl font-normal font-['Tilt_Warp'] transition-colors duration-300">Empieza hoy mismo</h2>
-                                    <p className="text-black dark:text-gray-300 text-[10px] font-normal font-['Inter'] mt-2 px-6 transition-colors duration-300">
-                                        Regístrate para guardar tu progreso y mejorar cada día.
+                                {(errorLocal || error) && (
+                                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="w-full text-red-600 bg-red-100/50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-center p-3 rounded-2xl mb-6 font-medium">
+                                        {errorLocal || error}
+                                    </motion.div>
+                                )}
+
+                                <form onSubmit={manejarLogin} className="space-y-5">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-4 uppercase tracking-widest transition-colors duration-300">Correo Electrónico</label>
+                                        <div className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus-within:border-[#4F99CC] transition-all duration-300 px-6 py-3.5 shadow-sm">
+                                            <input 
+                                                type="email" 
+                                                value={email} 
+                                                onChange={(e) => setEmail(e.target.value)} 
+                                                placeholder="tu@email.com"
+                                                className="w-full bg-transparent outline-none text-gray-700 dark:text-gray-200 text-sm font-medium placeholder:text-gray-400"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-4 uppercase tracking-widest transition-colors duration-300">Contraseña</label>
+                                        <div className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus-within:border-[#4F99CC] transition-all duration-300 px-6 py-3.5 shadow-sm">
+                                            <input 
+                                                type="password" 
+                                                value={password} 
+                                                onChange={(e) => setPassword(e.target.value)} 
+                                                placeholder="••••••••"
+                                                className="w-full bg-transparent outline-none text-gray-700 dark:text-gray-200 text-sm font-medium placeholder:text-gray-400"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="pt-4">
+                                        <motion.button 
+                                            whileHover={{ scale: 1.02 }} 
+                                            whileTap={{ scale: 0.98 }} 
+                                            type="submit" 
+                                            disabled={estaCargando} 
+                                            className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-full font-bold shadow-xl hover:shadow-2xl transition-all duration-300"
+                                        >
+                                            {estaCargando ? 'Iniciando sesión...' : 'Entrar a ImproveMe'}
+                                        </motion.button>
+                                    </div>
+                                </form>
+
+                                <div className="mt-8 text-center">
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">
+                                        ¿No tienes una cuenta? {' '}
+                                        <button onClick={alternarVista} className="text-[#4F99CC] font-bold hover:underline transition-all duration-300">
+                                            Regístrate aquí
+                                        </button>
                                     </p>
                                 </div>
-                                {/* Form Registro */}
-                                <form onSubmit={manejarRegistro} className="w-72 relative flex flex-col">
-                                    {(errorLocal || error) && (
-                                        <div className="w-full text-red-600 text-[11px] text-center bg-red-100/80 backdrop-blur-sm p-2 rounded-md mb-4 shadow-sm border border-red-200">{errorLocal || error}</div>
-                                    )}
-                                    <div className="mb-4">
-                                        <label className="block text-black dark:text-gray-200 text-sm font-['Advent_Pro'] mb-1 ml-2 transition-colors duration-300">Usuario</label>
-                                        <input type="text" value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito dark:outline-gray-600 dark:bg-gray-700 dark:text-white px-4 text-xs focus:outline-Azul-Principal transition-colors duration-300" />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block text-black dark:text-gray-200 text-sm font-['Advent_Pro'] mb-1 ml-2 transition-colors duration-300">E-Mail</label>
-                                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito dark:outline-gray-600 dark:bg-gray-700 dark:text-white px-4 text-xs focus:outline-Azul-Principal transition-colors duration-300" />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block text-black dark:text-gray-200 text-sm font-['Advent_Pro'] mb-1 ml-2 transition-colors duration-300">Contraseña</label>
-                                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-7 rounded-full shadow-md outline outline-[0.78px] outline-Gris-Bonito dark:outline-gray-600 dark:bg-gray-700 dark:text-white px-4 text-xs focus:outline-Azul-Principal transition-colors duration-300" />
-                                    </div>
-                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit" disabled={estaCargando} className="w-full h-9 bg-black dark:bg-white text-white dark:text-black text-xs rounded-full shadow-lg mt-2 transition-colors duration-300">
-                                        {estaCargando ? 'Registrando...' : 'Registrarse'}
-                                    </motion.button>
-                                </form>
                             </motion.div>
                         ) : (
                             <motion.div
-                                key="register-prompt"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.05 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-full h-full flex flex-col items-center justify-center pointer-events-auto"
+                                key="register-form"
+                                variants={formVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
+                                className="w-full max-w-md mx-auto"
                             >
-                                <div className="w-64 text-center">
-                                    <h2 className="text-black dark:text-white text-2xl font-normal font-['Tilt_Warp'] transition-colors duration-300">¿No tienes cuenta?</h2>
-                                    <p className="text-black dark:text-gray-300 text-[10px] font-normal font-['Inter'] mt-2 transition-colors duration-300">Registrate para evolucionar con ImproveMe</p>
-                                    <motion.button 
-                                        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                                        onClick={alternarVista}
-                                        className="w-48 h-7 bg-black dark:bg-white text-white dark:text-black text-xs rounded-full shadow-md mt-6 transition-colors duration-300"
-                                    >
-                                        Registrarse
-                                    </motion.button>
+                                <div className="mb-8 text-center md:text-left">
+                                    <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white transition-colors duration-300">Crea tu cuenta</h2>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-2 transition-colors duration-300">Comienza tu viaje de mejora continua</p>
+                                </div>
+
+                                {(errorLocal || error) && (
+                                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="w-full text-red-600 bg-red-100/50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-center p-3 rounded-2xl mb-6 font-medium">
+                                        {errorLocal || error}
+                                    </motion.div>
+                                )}
+
+                                <form onSubmit={manejarRegistro} className="space-y-5">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-4 uppercase tracking-widest transition-colors duration-300">Usuario</label>
+                                        <div className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus-within:border-[#4F99CC] transition-all duration-300 px-6 py-3.5 shadow-sm">
+                                            <input 
+                                                type="text" 
+                                                value={nombreUsuario} 
+                                                onChange={(e) => setNombreUsuario(e.target.value)} 
+                                                placeholder="Tu alias"
+                                                className="w-full bg-transparent outline-none text-gray-700 dark:text-gray-200 text-sm font-medium placeholder:text-gray-400"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-4 uppercase tracking-widest transition-colors duration-300">Correo Electrónico</label>
+                                        <div className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus-within:border-[#4F99CC] transition-all duration-300 px-6 py-3.5 shadow-sm">
+                                            <input 
+                                                type="email" 
+                                                value={email} 
+                                                onChange={(e) => setEmail(e.target.value)} 
+                                                placeholder="tu@email.com"
+                                                className="w-full bg-transparent outline-none text-gray-700 dark:text-gray-200 text-sm font-medium placeholder:text-gray-400"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 ml-4 uppercase tracking-widest transition-colors duration-300">Contraseña</label>
+                                        <div className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus-within:border-[#4F99CC] transition-all duration-300 px-6 py-3.5 shadow-sm">
+                                            <input 
+                                                type="password" 
+                                                value={password} 
+                                                onChange={(e) => setPassword(e.target.value)} 
+                                                placeholder="Mínimo 8 caracteres"
+                                                className="w-full bg-transparent outline-none text-gray-700 dark:text-gray-200 text-sm font-medium placeholder:text-gray-400"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="pt-4">
+                                        <motion.button 
+                                            whileHover={{ scale: 1.02 }} 
+                                            whileTap={{ scale: 0.98 }} 
+                                            type="submit" 
+                                            disabled={estaCargando} 
+                                            className="w-full py-4 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] text-white rounded-full font-bold shadow-xl hover:shadow-2xl transition-all duration-300"
+                                        >
+                                            {estaCargando ? 'Creando cuenta...' : 'Crear Cuenta'}
+                                        </motion.button>
+                                    </div>
+                                </form>
+
+                                <div className="mt-8 text-center">
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">
+                                        ¿Ya eres miembro? {' '}
+                                        <button onClick={alternarVista} className="text-[#4F99CC] font-bold hover:underline transition-all duration-300">
+                                            Inicia Sesión
+                                        </button>
+                                    </p>
                                 </div>
                             </motion.div>
                         )}

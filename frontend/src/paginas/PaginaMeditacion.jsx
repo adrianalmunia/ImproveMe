@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, X, Flower2, Timer, CheckCircle2, ChevronUp, ChevronDown, Settings, Bell, Music, ChevronRight, CloudRain, Moon, Volume2, Trees, Waves, Flame } from 'lucide-react';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import { useIdioma } from '../contextos/ContextoIdioma';
 import { registrarSesionMeditacion } from '../servicios/servicioAPI';
 
 // Audio imports
@@ -16,54 +17,56 @@ const COLOR = '#10B981';
 const COLOR2 = '#C6A55E';
 const PRESETS = [1, 3, 5, 10, 15, 20, 30, 45, 60];
 
-const TECNICAS_RESPIRACION = [
-  { 
-    id: 'equilibrio', 
-    label: 'Equilibrio (4-2-4)', 
-    desc: 'Una técnica sencilla para centrar la mente y calmar el sistema nervioso.',
-    ciclo: [
-      { fase: 'Inhala', duracion: 4 },
-      { fase: 'Mantén', duracion: 2 },
-      { fase: 'Exhala', duracion: 4 },
-    ]
-  },
-  { 
-    id: 'cuadrada', 
-    label: 'Caja (4-4-4-4)', 
-    desc: 'Técnica utilizada para reducir el estrés y mejorar la concentración.',
-    ciclo: [
-      { fase: 'Inhala', duracion: 4 },
-      { fase: 'Mantén', duracion: 4 },
-      { fase: 'Exhala', duracion: 4 },
-      { fase: 'Vacío', duracion: 4 },
-    ]
-  },
-  { 
-    id: 'relajacion', 
-    label: 'Relajación (4-7-8)', 
-    desc: 'Ideal para combatir el insomnio o la ansiedad. Actúa como sedante natural.',
-    ciclo: [
-      { fase: 'Inhala', duracion: 4 },
-      { fase: 'Mantén', duracion: 7 },
-      { fase: 'Exhala', duracion: 8 },
-    ]
-  }
-];
-
-const PISTAS_MUSICA = [
-  { id: 'noche', label: 'Noche Tranquila', src: musicaNoche, icon: Moon },
-  { id: 'tormenta', label: 'Tormenta', src: musicaTormenta, icon: CloudRain },
-  { id: 'bosque', label: 'Bosque', src: musicaBosque, icon: Trees },
-  { id: 'playa', label: 'Playa', src: musicaPlaya, icon: Waves },
-];
 
 export function PaginaMeditacion() {
   const { usuario, token } = useAutenticacion();
+  const { t, idioma } = useIdioma();
+
+  const TECNICAS_RESPIRACION = [
+    { 
+      id: 'equilibrio', 
+      label: idioma === 'es' ? 'Equilibrio (4-2-4)' : 'Balance (4-2-4)', 
+      desc: idioma === 'es' ? 'Una técnica sencilla para centrar la mente y calmar el sistema nervioso.' : 'A simple technique to center the mind and calm the nervous system.',
+      ciclo: [
+        { fase: idioma === 'es' ? 'Inhala' : 'Inhale', duracion: 4 },
+        { fase: idioma === 'es' ? 'Mantén' : 'Hold', duracion: 2 },
+        { fase: idioma === 'es' ? 'Exhala' : 'Exhale', duracion: 4 },
+      ]
+    },
+    { 
+      id: 'cuadrada', 
+      label: idioma === 'es' ? 'Caja (4-4-4-4)' : 'Box (4-4-4-4)', 
+      desc: idioma === 'es' ? 'Técnica utilizada para reducir el estrés y mejorar la concentración.' : 'Technique used to reduce stress and improve concentration.',
+      ciclo: [
+        { fase: idioma === 'es' ? 'Inhala' : 'Inhale', duracion: 4 },
+        { fase: idioma === 'es' ? 'Mantén' : 'Hold', duracion: 4 },
+        { fase: idioma === 'es' ? 'Exhala' : 'Exhale', duracion: 4 },
+        { fase: idioma === 'es' ? 'Vacío' : 'Empty', duracion: 4 },
+      ]
+    },
+    { 
+      id: 'relajacion', 
+      label: idioma === 'es' ? 'Relajación (4-7-8)' : 'Relaxation (4-7-8)', 
+      desc: idioma === 'es' ? 'Ideal para combatir el insomnio o la ansiedad. Actúa como sedante natural.' : 'Ideal for fighting insomnia or anxiety. Acts as a natural sedative.',
+      ciclo: [
+        { fase: idioma === 'es' ? 'Inhala' : 'Inhale', duracion: 4 },
+        { fase: idioma === 'es' ? 'Mantén' : 'Hold', duracion: 7 },
+        { fase: idioma === 'es' ? 'Exhala' : 'Exhale', duracion: 8 },
+      ]
+    }
+  ];
+
+  const PISTAS_MUSICA = [
+    { id: 'noche', label: idioma === 'es' ? 'Noche Tranquila' : 'Quiet Night', src: musicaNoche, icon: Moon },
+    { id: 'tormenta', label: idioma === 'es' ? 'Tormenta' : 'Storm', src: musicaTormenta, icon: CloudRain },
+    { id: 'bosque', label: idioma === 'es' ? 'Bosque' : 'Forest', src: musicaBosque, icon: Trees },
+    { id: 'playa', label: idioma === 'es' ? 'Playa' : 'Beach', src: musicaPlaya, icon: Waves },
+  ];
   const [estaMeditando, setEstaMeditando] = useState(false);
   const [tiempoSeleccionado, setTiempoSeleccionado] = useState(5);
   const [segundosRestantes, setSegundosRestantes] = useState(0);
   const [estaPausado, setEstaPausado] = useState(false);
-  const [faseRespiracion, setFaseRespiracion] = useState('Inhala');
+  const [faseRespiracion, setFaseRespiracion] = useState(idioma === 'es' ? 'Inhala' : 'Inhale');
   const [progreso, setProgreso] = useState(0);
   const [sesionFinalizada, setSesionFinalizada] = useState(false);
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
@@ -79,6 +82,7 @@ export function PaginaMeditacion() {
   const [gongsLanzados, setGongsLanzados] = useState({ mitad: false });
   const [volumenMusica, setVolumenMusica] = useState(0.3);
   const [xpGanada, setXpGanada] = useState(0);
+  const [cargandoRestauracion, setCargandoRestauracion] = useState(true);
 
   const intervalRef = useRef(null);
   const breathingRef = useRef(null);
@@ -169,14 +173,13 @@ export function PaginaMeditacion() {
         setProgreso(((s.tiempoSeleccionado * 60 - s.segundosRestantes) / (s.tiempoSeleccionado * 60)) * 100);
         // Desactivar la marca de restauración tras el primer render
         requestAnimationFrame(() => { esRestauracion.current = false; });
-      } else {
-        esRestauracion.current = false;
       }
     }
+    setCargandoRestauracion(false);
   }, [usuario]);
 
   useEffect(() => {
-    if (!usuario?.id) return;
+    if (!usuario?.id || cargandoRestauracion) return;
     localStorage.setItem(`meditacion_${usuario.id}`, JSON.stringify({
       tiempoSeleccionado, segundosRestantes, estaMeditando, estaPausado, ajustes, volumenMusica, timestamp: Date.now()
     }));
@@ -263,6 +266,8 @@ export function PaginaMeditacion() {
 
   // Temporizador
   useEffect(() => {
+    if (cargandoRestauracion) return;
+    
     if (estaMeditando && !estaPausado && segundosRestantes > 0) {
       intervalRef.current = setInterval(() => {
         setSegundosRestantes(prev => {
@@ -272,7 +277,9 @@ export function PaginaMeditacion() {
           return nuevo;
         });
       }, 1000);
-    } else if (segundosRestantes === 0 && estaMeditando) {
+    } else if (segundosRestantes === 0 && estaMeditando && !estaPausado) {
+      // Solo finalizamos si el tiempo llegó a 0 mientras NO estaba pausado
+      // (Esto evita que se dispare al restaurar en estado de pausa)
       finalizarSesion();
     }
     return () => clearInterval(intervalRef.current);
@@ -377,9 +384,9 @@ export function PaginaMeditacion() {
                 style={{ background: `linear-gradient(135deg, ${COLOR} 0%, ${COLOR2} 100%)` }}>
                 <Flower2 size={40} className="text-white" />
               </div>
-              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-1 transition-colors duration-300">Momento de Calma</h2>
+              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-1 transition-colors duration-300">{t('med_titulo')}</h2>
               <p className="text-gray-400 dark:text-gray-500 text-sm mb-8 text-center transition-colors duration-300">
-                {usuario?.alias ? `${usuario.alias}, elige cuánto tiempo quieres meditar hoy.` : 'Elige cuánto tiempo quieres meditar hoy.'}
+                {usuario?.alias ? `${idioma === 'es' ? 'Hola' : 'Hello'} ${usuario.alias}, ${idioma === 'es' ? 'elige cuánto tiempo quieres meditar hoy.' : 'choose how long you want to meditate today.'}` : t('med_titulo')}
               </p>
 
               {/* Selector de tiempo */}
@@ -395,7 +402,7 @@ export function PaginaMeditacion() {
                     {tiempoSeleccionado}
                     <ChevronRight size={20} className={`mb-2 text-emerald-400 transition-transform ${mostrarDropdown ? 'rotate-90' : ''}`} />
                   </button>
-                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest mt-1">Minutos</span>
+                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest mt-1">{t('med_minutos')}</span>
 
                   <AnimatePresence>
                     {mostrarDropdown && (
@@ -421,7 +428,7 @@ export function PaginaMeditacion() {
               {/* Botón Ajustes */}
               <button onClick={() => setMostrarAjustes(a => !a)}
                 className="flex items-center gap-2 text-emerald-500 text-xs font-bold uppercase tracking-widest mb-6 hover:text-emerald-700 transition-colors">
-                <Settings size={14} /> Ajustes de Sesión
+                <Settings size={14} /> {idioma === 'es' ? 'Ajustes de Sesión' : 'Session Settings'}
                 <ChevronRight size={14} className={`transition-transform ${mostrarAjustes ? 'rotate-90' : ''}`} />
               </button>
 
@@ -431,11 +438,11 @@ export function PaginaMeditacion() {
                     className="w-full bg-emerald-50/60 dark:bg-emerald-900/30 rounded-[24px] border border-emerald-100/60 dark:border-emerald-900/50 p-5 mb-6 space-y-3 overflow-hidden transition-colors duration-300">
                     
                     {/* Gongs */}
-                    <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-2"><Bell size={12}/> Sonidos de Gong</p>
+                    <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-2"><Bell size={12}/> {idioma === 'es' ? 'Sonidos de Gong' : 'Gong Sounds'}</p>
                     {[
-                      { key: 'gongInicio', label: 'Gong al inicio' },
-                      { key: 'gongMitad', label: 'Gong a la mitad' },
-                      { key: 'gongFinal', label: 'Gong al final' },
+                      { key: 'gongInicio', label: idioma === 'es' ? 'Gong al inicio' : 'Starting Gong' },
+                      { key: 'gongMitad', label: idioma === 'es' ? 'Gong a la mitad' : 'Mid-session Gong' },
+                      { key: 'gongFinal', label: idioma === 'es' ? 'Gong al final' : 'Ending Gong' },
                     ].map(({ key, label }) => (
                       <div key={key} className="flex items-center justify-between">
                         <span className="text-sm text-gray-600 dark:text-gray-300 font-medium transition-colors duration-300">{label}</span>
@@ -450,7 +457,7 @@ export function PaginaMeditacion() {
                     {/* Música */}
                     <div className="pt-3 border-t border-emerald-100 dark:border-emerald-900/50 space-y-3 transition-colors duration-300">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2"><Music size={12}/> Música Ambiental</span>
+                        <span className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2"><Music size={12}/> {idioma === 'es' ? 'Música Ambiental' : 'Ambient Music'}</span>
                         <button onClick={() => setAjustes(a => ({ ...a, musica: !a.musica }))}
                           className={`w-11 h-6 rounded-full transition-all relative ${ajustes.musica ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-600'}`}>
                           <motion.div animate={{ x: ajustes.musica ? 22 : 2 }}
@@ -477,7 +484,7 @@ export function PaginaMeditacion() {
 
                     {/* Técnica de Respiración */}
                     <div className="pt-3 border-t border-emerald-100 dark:border-emerald-900/50 space-y-3 transition-colors duration-300">
-                      <span className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">Técnica de Respiración</span>
+                      <span className="text-xs font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">{idioma === 'es' ? 'Técnica de Respiración' : 'Breathing Technique'}</span>
                       <div className="flex flex-col gap-2">
                         {TECNICAS_RESPIRACION.map(t => (
                           <button key={t.id} onClick={() => setAjustes(a => ({ ...a, tecnicaRespiracion: t.id }))}
@@ -495,7 +502,7 @@ export function PaginaMeditacion() {
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={iniciar}
                 className="w-full py-5 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 text-sm"
                 style={{ background: `linear-gradient(135deg, ${COLOR} 0%, ${COLOR2} 100%)` }}>
-                <Play size={18} fill="currentColor" /> Comenzar Sesión
+                <Play size={18} fill="currentColor" /> {t('med_comenzar')}
               </motion.button>
             </motion.div>
           )}
@@ -523,7 +530,7 @@ export function PaginaMeditacion() {
                   <span className="text-5xl font-['Tilt_Warp'] text-gray-800 dark:text-white transition-colors duration-300">{fmt(segundosRestantes)}</span>
                   <div className="flex items-center gap-1 text-emerald-400 mt-1">
                     <Timer size={13} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Restante</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">{idioma === 'es' ? 'Restante' : 'Remaining'}</span>
                   </div>
                 </div>
               </div>
@@ -552,10 +559,10 @@ export function PaginaMeditacion() {
                     {faseRespiracion}
                   </motion.h3>
                   <p className="text-emerald-400 text-sm font-medium mt-1">
-                    {faseRespiracion === 'Inhala' && 'Llena tus pulmones'}
-                    {faseRespiracion === 'Mantén' && 'Sostén el aire'}
-                    {faseRespiracion === 'Exhala' && 'Suelta suavemente'}
-                    {faseRespiracion === 'Vacío' && 'Mantén el vacío'}
+                    {faseRespiracion === (idioma === 'es' ? 'Inhala' : 'Inhale') && (idioma === 'es' ? 'Llena tus pulmones' : 'Fill your lungs')}
+                    {faseRespiracion === (idioma === 'es' ? 'Mantén' : 'Hold') && (idioma === 'es' ? 'Sostén el aire' : 'Hold the air')}
+                    {faseRespiracion === (idioma === 'es' ? 'Exhala' : 'Exhale') && (idioma === 'es' ? 'Suelta suavemente' : 'Exhale gently')}
+                    {faseRespiracion === (idioma === 'es' ? 'Vacío' : 'Empty') && (idioma === 'es' ? 'Mantén el vacío' : 'Keep the emptiness')}
                   </p>
                 </div>
               </div>
@@ -585,7 +592,7 @@ export function PaginaMeditacion() {
                 </button>
                 <button onClick={salir}
                   className="px-8 py-4 bg-white dark:bg-gray-800 text-red-400 rounded-2xl shadow-lg font-bold flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm">
-                  <X size={18} /> Salir
+                  <X size={18} /> {idioma === 'es' ? 'Salir' : 'Exit'}
                 </button>
               </div>
             </motion.div>
@@ -598,8 +605,8 @@ export function PaginaMeditacion() {
               <div className="w-24 h-24 bg-emerald-50 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6 transition-colors duration-300">
                 <CheckCircle2 size={52} className="text-emerald-500" />
               </div>
-              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-3 transition-colors duration-300">¡Sesión Completada!</h2>
-              <p className="text-gray-400 dark:text-gray-500 text-sm mb-6 transition-colors duration-300">Has dedicado {tiempoSeleccionado} minutos a tu bienestar. Tu mente te lo agradecerá.</p>
+              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-3 transition-colors duration-300">{t('med_finalizada')}</h2>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mb-6 transition-colors duration-300">{idioma === 'es' ? `Has dedicado ${tiempoSeleccionado} minutos a tu bienestar.` : `You have dedicated ${tiempoSeleccionado} minutes to your well-being.`}</p>
               
               {xpGanada > 0 && (
                 <motion.div 
@@ -610,7 +617,7 @@ export function PaginaMeditacion() {
                 >
                   <Flame className="text-orange-500 fill-orange-500" size={24} />
                   <div className="text-left">
-                    <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest leading-none">Recompensa</p>
+                    <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest leading-none">{idioma === 'es' ? 'Recompensa' : 'Reward'}</p>
                     <p className="text-xl font-black text-orange-600 leading-tight">+{xpGanada} XP</p>
                   </div>
                 </motion.div>
@@ -618,7 +625,7 @@ export function PaginaMeditacion() {
               <button onClick={salir}
                 className="w-full py-5 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl text-sm"
                 style={{ background: `linear-gradient(135deg, ${COLOR} 0%, ${COLOR2} 100%)` }}>
-                Volver al Inicio
+                {idioma === 'es' ? 'Volver al Inicio' : 'Return Home'}
               </button>
             </motion.div>
           )}

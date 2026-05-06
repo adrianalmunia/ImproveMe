@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 // import { useNavigate } from 'react-router-dom';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import { useIdioma } from '../contextos/ContextoIdioma';
 import * as servicioAPI from '../servicios/servicioAPI';
 import { calcularRangoInfo, RankIcon } from './PaginaRangos';
 import {
@@ -20,6 +21,7 @@ import {
 
 const PaginaHabitos = ({ setVistaActual }) => {
   const { usuario, token, actualizarUsuario, refrescarUsuario } = useAutenticacion();
+  const { t, idioma } = useIdioma();
   // const navigate = useNavigate();
 
   // Puntos de XP guardados en el usuario (o por defecto)
@@ -156,6 +158,10 @@ const PaginaHabitos = ({ setVistaActual }) => {
   }, []);
 
   const [nuevoNombre, setNuevoNombre] = useState('');
+  const getRankName = (name) => {
+    if (idioma === 'es') return name;
+    return name.replace('Bronce', 'Bronze').replace('Plata', 'Silver').replace('Oro', 'Gold').replace('Esmeralda', 'Emerald').replace('Diamante', 'Diamond').replace('Zafiro', 'Sapphire').replace('Amatista', 'Amethyst').replace('Rubí', 'Ruby').replace('Sin Rango', 'Unranked');
+  };
   const [nuevaPrioridad, setNuevaPrioridad] = useState('media');
   const [frecuenciaSeleccionada, setFrecuenciaSeleccionada] = useState(7);
   const [seccionActiva, setSeccionActiva] = useState(null);
@@ -254,10 +260,10 @@ const PaginaHabitos = ({ setVistaActual }) => {
       <header className="mb-8 flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-black text-[#2C4159] dark:text-white tracking-tight mb-1 transition-colors duration-300">
-            Mis <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]">Hábitos</span>
+            {idioma === 'es' ? 'Mis ' : 'My '}<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]">{t('nav_habitos')}</span>
           </h1>
           <p className="text-gray-500 dark:text-gray-400 font-medium transition-colors duration-300">
-            {usuario?.alias ? `${usuario.alias}, forja tu mejor versión día tras día.` : 'Forja tu mejor versión día tras día.'}
+            {usuario?.alias ? `${idioma === 'es' ? 'Hola' : 'Hello'} ${usuario.alias}, ${idioma === 'es' ? 'forja tu mejor versión día tras día.' : 'forge your best version day after day.'}` : (idioma === 'es' ? 'Forja tu mejor versión día tras día.' : 'Forge your best version day after day.')}
           </p>
         </div>
 
@@ -267,13 +273,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <Zap size={24} fill="currentColor" />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">Mejor Racha</p>
+              <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">{idioma === 'es' ? 'Mejor Racha' : 'Best Streak'}</p>
               {(() => {
                 const todos = [...habitos, ...diarias];
                 const rachaMax = Math.max(0, ...todos.map(i => Math.max(i.racha || 0, i.rachaAnterior || 0)));
                 
                 if (rachaMax === 0) {
-                  return <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">0 Días</p>;
+                  return <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">0 {idioma === 'es' ? 'Días' : 'Days'}</p>;
                 }
 
                 const mejores = todos.filter(i => Math.max(i.racha || 0, i.rachaAnterior || 0) === rachaMax);
@@ -283,7 +289,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
 
                 return (
                   <div className="relative group cursor-help">
-                    <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{rachaMax} Días</p>
+                    <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{rachaMax} {idioma === 'es' ? 'Días' : 'Days'}</p>
                     <p className="text-[10px] font-bold text-[#4F99CC] truncate max-w-[120px]">
                       {nombresStr}
                     </p>
@@ -291,7 +297,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                     {/* Tooltip Custom Visual */}
                     <div className="absolute left-0 top-full mt-1 hidden group-hover:block z-[100]">
                       <div className="bg-[#2C4159] text-white text-[10px] px-3 py-2 rounded-xl shadow-xl border border-white/10 backdrop-blur-sm min-w-[150px]">
-                        <p className="font-bold border-b border-white/10 pb-1 mb-1 opacity-60 uppercase text-[8px]">En racha:</p>
+                        <p className="font-bold border-b border-white/10 pb-1 mb-1 opacity-60 uppercase text-[8px]">{idioma === 'es' ? 'En racha:' : 'On streak:'}</p>
                         {mejores.map((i, idx) => (
                           <div key={idx} className="flex items-center gap-2 py-0.5">
                             <div className="w-1 h-1 rounded-full bg-orange-400" />
@@ -314,14 +320,14 @@ const PaginaHabitos = ({ setVistaActual }) => {
                   <RankIcon rankData={rankInfo.category} tier={rankInfo.tier} size="track" />
                 </div>
                 <div className="text-center">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Rango Actual</p>
-                  <p className={`text-xl font-black uppercase tracking-tighter ${rankInfo.category.color}`}>{rankInfo.fullName}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">{idioma === 'es' ? 'Rango Actual' : 'Current Rank'}</p>
+                  <p className={`text-xl font-black uppercase tracking-tighter ${rankInfo.category.color}`}>{getRankName(rankInfo.fullName)}</p>
                 </div>
                 <div className="w-full h-1 bg-gray-100 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
                    <div className={`h-full bg-gradient-to-r ${rankInfo.category.gradient}`} style={{ width: `${rankInfo.progressPercentage}%` }} />
                 </div>
                 <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">
-                   {rankInfo.isMaxRank ? '¡Máximo Rango!' : `Faltan ${rankInfo.xpRemaining} XP para subir`}
+                   {rankInfo.isMaxRank ? (idioma === 'es' ? '¡Máximo Rango!' : 'Max Rank!') : (idioma === 'es' ? `Faltan ${rankInfo.xpRemaining} XP para subir` : `${rankInfo.xpRemaining} XP left to rank up`)}
                 </p>
               </div>
               {/* Flecha del Tooltip */}
@@ -332,7 +338,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <Trophy size={24} />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">Nivel {nivelActual}</p>
+              <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">{idioma === 'es' ? 'Nivel' : 'Level'} {nivelActual}</p>
               <p className="text-xl font-black text-[#2C4159] dark:text-white transition-colors duration-300">{xpActual} XP</p>
               <div className="w-full bg-gray-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
                 <div
@@ -352,7 +358,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-lg font-bold text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
-              <Flame size={18} className="text-orange-500" /> Hábitos
+              <Flame size={18} className="text-orange-500" /> {t('nav_habitos')}
             </h2>
             <button
               onClick={() => setSeccionActiva('habito')}
@@ -372,14 +378,14 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 <input
                   autoFocus
                   type="text"
-                  placeholder="Nuevo hábito..."
+                  placeholder={idioma === 'es' ? 'Nuevo hábito...' : 'New habit...'}
                   className="w-full bg-neutral-50 dark:bg-gray-700 p-2 rounded-xl border-none focus:ring-2 focus:ring-[#4F99CC] outline-none text-sm mb-2 text-gray-800 dark:text-white transition-colors duration-300"
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && agregarItem('habito')}
                 />
                 <div className="flex justify-between items-center mb-3">
-                   <p className="text-[10px] font-bold text-gray-400 uppercase">Días/Semana:</p>
+                   <p className="text-[10px] font-bold text-gray-400 uppercase">{idioma === 'es' ? 'Días/Semana:' : 'Days/Week:'}</p>
                    <div className="flex gap-1">
                      {[1, 2, 3, 4, 5, 6, 7].map(d => (
                        <button
@@ -393,8 +399,8 @@ const PaginaHabitos = ({ setVistaActual }) => {
                    </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setSeccionActiva(null)} className="text-xs font-bold text-gray-400 px-2 py-1">Cancelar</button>
-                  <button onClick={() => agregarItem('habito')} className="text-xs font-bold bg-[#4F99CC] text-white px-3 py-1 rounded-lg">Añadir</button>
+                  <button onClick={() => setSeccionActiva(null)} className="text-xs font-bold text-gray-400 px-2 py-1">{t('cancelar')}</button>
+                  <button onClick={() => agregarItem('habito')} className="text-xs font-bold bg-[#4F99CC] text-white px-3 py-1 rounded-lg">{t('guardar')}</button>
                 </div>
               </motion.div>
             )}
@@ -422,7 +428,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                     <div className="flex items-center gap-3 mt-0.5">
                          <div className="flex items-center gap-1">
                            <Flame size={12} className={h.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
-                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{h.racha} días</p>
+                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{h.racha} {idioma === 'es' ? 'días' : 'days'}</p>
                          </div>
                          {h.frecuenciaSemanal < 7 && (
                            <div className="flex items-center gap-1">
@@ -478,7 +484,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-lg font-bold text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
-              <Calendar size={18} className="text-[#C6A55E]" /> Diarias
+              <Calendar size={18} className="text-[#C6A55E]" /> {idioma === 'es' ? 'Diarias' : 'Dailies'}
             </h2>
             <button
               onClick={() => setSeccionActiva('diaria')}
@@ -498,15 +504,15 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 <input
                   autoFocus
                   type="text"
-                  placeholder="Nueva diaria..."
+                  placeholder={idioma === 'es' ? 'Nueva diaria...' : 'New daily...'}
                   className="w-full bg-neutral-50 dark:bg-gray-700 p-2 rounded-xl border-none focus:ring-2 focus:ring-[#C6A55E] outline-none text-sm mb-2 text-gray-800 dark:text-white transition-colors duration-300"
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && agregarItem('diaria')}
                 />
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setSeccionActiva(null)} className="text-xs font-bold text-gray-400 px-2 py-1">Cancelar</button>
-                  <button onClick={() => agregarItem('diaria')} className="text-xs font-bold bg-[#C6A55E] text-white px-3 py-1 rounded-lg">Añadir</button>
+                  <button onClick={() => setSeccionActiva(null)} className="text-xs font-bold text-gray-400 px-2 py-1">{t('cancelar')}</button>
+                  <button onClick={() => agregarItem('diaria')} className="text-xs font-bold bg-[#C6A55E] text-white px-3 py-1 rounded-lg">{t('guardar')}</button>
                 </div>
               </motion.div>
             )}
@@ -537,7 +543,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                   <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${d.completada ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{d.nombre}</p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <Flame size={12} className={d.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{d.racha} días</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{d.racha} {idioma === 'es' ? 'días' : 'days'}</p>
                   </div>
                 </div>
                 <button 
@@ -555,7 +561,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-lg font-bold text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
-              <CheckSquare size={18} className="text-indigo-500" /> Pendientes
+              <CheckSquare size={18} className="text-indigo-500" /> {idioma === 'es' ? 'Pendientes' : 'To-Do'}
             </h2>
             <button
               onClick={() => setSeccionActiva('tarea')}
@@ -575,61 +581,61 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 <input
                   autoFocus
                   type="text"
-                  placeholder="Nueva tarea..."
+                  placeholder={idioma === 'es' ? 'Nueva tarea...' : 'New task...'}
                   className="w-full bg-neutral-50 dark:bg-gray-700 p-2 rounded-xl border-none focus:ring-2 focus:ring-indigo-500 outline-none text-sm mb-2 text-gray-800 dark:text-white transition-colors duration-300"
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && agregarItem('tarea')}
                 />
                 <div className="flex gap-2 mb-3">
-                  <button onClick={() => setNuevaPrioridad('alta')} className={`flex-1 py-1 rounded-lg text-[10px] font-bold uppercase transition-colors ${nuevaPrioridad === 'alta' ? 'bg-red-100 text-red-600 border border-red-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}>Alta</button>
-                  <button onClick={() => setNuevaPrioridad('media')} className={`flex-1 py-1 rounded-lg text-[10px] font-bold uppercase transition-colors ${nuevaPrioridad === 'media' ? 'bg-orange-100 text-orange-600 border border-orange-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}>Media</button>
-                  <button onClick={() => setNuevaPrioridad('baja')} className={`flex-1 py-1 rounded-lg text-[10px] font-bold uppercase transition-colors ${nuevaPrioridad === 'baja' ? 'bg-blue-100 text-blue-600 border border-blue-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}>Baja</button>
+                  <button onClick={() => setNuevaPrioridad('alta')} className={`flex-1 py-1 rounded-lg text-[10px] font-bold uppercase transition-colors ${nuevaPrioridad === 'alta' ? 'bg-red-100 text-red-600 border border-red-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}>{idioma === 'es' ? 'Alta' : 'High'}</button>
+                  <button onClick={() => setNuevaPrioridad('media')} className={`flex-1 py-1 rounded-lg text-[10px] font-bold uppercase transition-colors ${nuevaPrioridad === 'media' ? 'bg-orange-100 text-orange-600 border border-orange-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}>{idioma === 'es' ? 'Media' : 'Medium'}</button>
+                  <button onClick={() => setNuevaPrioridad('baja')} className={`flex-1 py-1 rounded-lg text-[10px] font-bold uppercase transition-colors ${nuevaPrioridad === 'baja' ? 'bg-blue-100 text-blue-600 border border-blue-200' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}>{idioma === 'es' ? 'Baja' : 'Low'}</button>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setSeccionActiva(null)} className="text-xs font-bold text-gray-400 px-2 py-1">Cancelar</button>
-                  <button onClick={() => agregarItem('tarea')} className="text-xs font-bold bg-indigo-500 text-white px-3 py-1 rounded-lg">Añadir</button>
+                  <button onClick={() => setSeccionActiva(null)} className="text-xs font-bold text-gray-400 px-2 py-1">{t('cancelar')}</button>
+                  <button onClick={() => agregarItem('tarea')} className="text-xs font-bold bg-indigo-500 text-white px-3 py-1 rounded-lg">{t('guardar')}</button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
           <div className="flex flex-col gap-3">
-            {tareas.map(t => (
+            {tareas.map(tarea => (
               <motion.div
                 layout
-                key={t.id}
-                className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-all border-l-4 hover:shadow-md ${t.completada ? 'border-l-green-400 opacity-60' : 'border-l-indigo-500'}`}
+                key={tarea.id}
+                className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-all border-l-4 hover:shadow-md ${tarea.completada ? 'border-l-green-400 opacity-60' : 'border-l-indigo-500'}`}
               >
                 <button
                   onClick={(e) => {
-                    const completando = !t.completada;
+                    const completando = !tarea.completada;
                     if (completando) {
                       ganarXP(30, e);
                       // Borrar tarea al completarla
                       setTimeout(() => {
-                        setTareas(prev => prev.filter(item => item.id !== t.id));
+                        setTareas(prev => prev.filter(item => item.id !== tarea.id));
                       }, 500);
                     } else {
-                      setTareas(tareas.map(item => item.id === t.id ? { ...item, completada: false } : item));
+                      setTareas(tareas.map(item => item.id === tarea.id ? { ...item, completada: false } : item));
                       ganarXP(-30, e);
                     }
                   }}
-                  className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${t.completada ? 'bg-green-500 border-green-500 text-white scale-90' : 'border-gray-300 text-transparent hover:border-indigo-500'}`}
+                  className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${tarea.completada ? 'bg-green-500 border-green-500 text-white scale-90' : 'border-gray-300 text-transparent hover:border-indigo-500'}`}
                 >
                   <CheckCircle2 size={16} />
                 </button>
                 <div className="flex-1">
-                  <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${t.completada ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{t.nombre}</p>
-                  <span className={`inline-block mt-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${t.prioridad === 'alta' ? 'bg-red-100 text-red-600' :
-                      t.prioridad === 'media' ? 'bg-orange-100 text-orange-600' :
+                  <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${tarea.completada ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{tarea.nombre}</p>
+                  <span className={`inline-block mt-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${tarea.prioridad === 'alta' ? 'bg-red-100 text-red-600' :
+                      tarea.prioridad === 'media' ? 'bg-orange-100 text-orange-600' :
                         'bg-blue-100 text-blue-600'
                     }`}>
-                    {t.prioridad}
+                    {idioma === 'es' ? tarea.prioridad : (tarea.prioridad === 'alta' ? 'High' : tarea.prioridad === 'media' ? 'Medium' : 'Low')}
                   </span>
                 </div>
                 <button 
-                  onClick={() => eliminarItem(t.id, 'tarea')}
+                  onClick={() => eliminarItem(tarea.id, 'tarea')}
                   className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 size={16} />
@@ -645,8 +651,12 @@ const PaginaHabitos = ({ setVistaActual }) => {
       <section className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-gradient-to-br from-[#4F99CC] to-[#2C4159] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg">
           <div className="relative z-10">
-            <h3 className="text-2xl font-black mb-2">Progreso hacia Lvl {nivelActual + 1}</h3>
-            <p className="text-white/70 text-sm mb-6 max-w-xs">Te faltan {xpParaSiguienteNivel} XP para alcanzar el siguiente nivel. ¡Completa más tareas!</p>
+            <h3 className="text-2xl font-black mb-2">{idioma === 'es' ? `Progreso hacia Lvl ${nivelActual + 1}` : `Progress to Lvl ${nivelActual + 1}`}</h3>
+            <p className="text-white/70 text-sm mb-6 max-w-xs">
+              {idioma === 'es' 
+                ? `Te faltan ${xpParaSiguienteNivel} XP para alcanzar el siguiente nivel. ¡Completa más tareas!` 
+                : `${xpParaSiguienteNivel} XP left to reach the next level. Complete more tasks!`}
+            </p>
             <div className="w-full bg-white/20 h-3 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
@@ -666,14 +676,14 @@ const PaginaHabitos = ({ setVistaActual }) => {
             </div>
             <div>
               <h3 className="text-xl font-black text-[#2C4159] dark:text-white transition-colors duration-300">Ranked Mode</h3>
-              <p className="text-gray-400 text-sm font-medium leading-tight mt-1">Acumula XP para competir en la tabla de clasificación semanal.</p>
+              <p className="text-gray-400 text-sm font-medium leading-tight mt-1">{idioma === 'es' ? 'Acumula XP para competir en la tabla de clasificación semanal.' : 'Earn XP to compete in the weekly leaderboard.'}</p>
             </div>
           </div>
           <button 
             onClick={() => setVistaActual('ranked')}
             className="w-full py-3 bg-[#2C4159] text-white rounded-2xl font-black text-sm hover:bg-[#1A2836] transition-colors shadow-md"
           >
-            VER CLASIFICACIÓN
+            {idioma === 'es' ? 'VER CLASIFICACIÓN' : 'VIEW RANKING'}
           </button>
         </div>
       </section>

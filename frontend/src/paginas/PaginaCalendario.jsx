@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import { useIdioma } from '../contextos/ContextoIdioma';
 import * as servicioAPI from '../servicios/servicioAPI';
 import { 
   ChevronLeft, 
@@ -34,7 +35,7 @@ const humores = [
   { id: 5, imagen: moodGenial, color: '#4D908E', label: 'Genial' },
 ];
 
-const DATOS_CURIOSOS = [
+const DATOS_CURIOSOS_ES = [
   "Los días que meditas sueles reportar un 20% más de felicidad. ¡Sigue así!",
   "Registrar tus emociones te ayuda a identificar patrones y mejorar tu bienestar a largo plazo.",
   "¿Sabías que beber agua al despertar activa tu metabolismo y mejora tu enfoque diario?",
@@ -57,8 +58,32 @@ const DATOS_CURIOSOS = [
   "Un pequeño progreso diario se suma para obtener resultados masivos a largo plazo."
 ];
 
+const DATOS_CURIOSOS_EN = [
+  "Days you meditate, you usually report 20% more happiness. Keep it up!",
+  "Tracking your emotions helps you identify patterns and improve long-term well-being.",
+  "Did you know drinking water upon waking activates your metabolism and improves focus?",
+  "The longest streak recorded in ImproveMe is 365 days. You can beat it!",
+  "Sleeping 7-8 hours increases your productivity by 30% the next day.",
+  "Writing three things you are grateful for reduces cortisol levels.",
+  "People who plan their day the night before are 40% more successful in their tasks.",
+  "Exercising in the morning releases endorphins that keep you positive all day.",
+  "The human brain takes about 21 days to start automating a new habit.",
+  "Taking 5-minute breaks every hour prevents mental burnout and improves creativity.",
+  "Ambient music without lyrics helps maintain focus on complex tasks.",
+  "Keeping your workspace tidy reduces anxiety and visual stress.",
+  "Avoiding screens 30 minutes before sleep significantly improves sleep quality.",
+  "The hardest tasks should be done first; that's when your willpower is at its peak.",
+  "Smiling, even if forced, sends signals to the brain to reduce stress.",
+  "Contact with nature, even just a plant on your desk, improves mood.",
+  "Learning something new every day keeps the brain young and prevents cognitive decline.",
+  "The Pomodoro technique (25 min work / 5 min break) is ideal for beating procrastination.",
+  "Talking to a friend or loved one raises oxytocin levels and calms nerves.",
+  "Small daily progress adds up to massive results over time."
+];
+
 const PaginaCalendario = () => {
   const { usuario, token } = useAutenticacion();
+  const { t, idioma } = useIdioma();
   
   const [fechaActual, setFechaActual] = useState(new Date());
   const [datosMes, setDatosMes] = useState({});
@@ -69,10 +94,11 @@ const PaginaCalendario = () => {
   // Cambiar el dato curioso aleatoriamente cada vez que cambia el día seleccionado
   useEffect(() => {
     if (diaSeleccionado) {
-      const indice = Math.floor(Math.random() * DATOS_CURIOSOS.length);
-      setDatoAleatorio(DATOS_CURIOSOS[indice]);
+      const lista = idioma === 'es' ? DATOS_CURIOSOS_ES : DATOS_CURIOSOS_EN;
+      const indice = Math.floor(Math.random() * lista.length);
+      setDatoAleatorio(lista[indice]);
     }
-  }, [diaSeleccionado]);
+  }, [diaSeleccionado, idioma]);
 
   // Cargar datos del mes actual
   useEffect(() => {
@@ -161,9 +187,11 @@ const PaginaCalendario = () => {
           <div>
             <h1 className="text-2xl font-black text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
               <CalendarIcon className="text-[#4F99CC]" />
-              {fechaActual.toLocaleString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase()}
+              {fechaActual.toLocaleString(idioma === 'es' ? 'es-ES' : 'en-US', { month: 'long', year: 'numeric' }).toUpperCase()}
             </h1>
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">Tu viaje personal en el tiempo</p>
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">
+              {idioma === 'es' ? 'Tu viaje personal en el tiempo' : 'Your personal journey through time'}
+            </p>
           </div>
           
           <div className="flex gap-2">
@@ -171,7 +199,7 @@ const PaginaCalendario = () => {
               <ChevronLeft size={24} />
             </button>
             <button onClick={() => setFechaActual(new Date())} className="px-4 py-2 hover:bg-gray-50 rounded-xl text-xs font-black text-[#4F99CC] transition-colors uppercase">
-              Hoy
+              {idioma === 'es' ? 'Hoy' : 'Today'}
             </button>
             <button onClick={() => cambiarMes(1)} className="p-2 hover:bg-gray-50 rounded-xl text-gray-400 transition-colors">
               <ChevronRight size={24} />
@@ -181,7 +209,7 @@ const PaginaCalendario = () => {
 
         {/* Grid de Días de la Semana */}
         <div className="grid grid-cols-7 border-b border-gray-50 dark:border-gray-700 transition-colors duration-300">
-          {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(d => (
+          {(idioma === 'es' ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']).map(d => (
             <div key={d} className="py-3 text-center text-[10px] font-black text-gray-400 uppercase tracking-tighter">
               {d}
             </div>
@@ -251,23 +279,23 @@ const PaginaCalendario = () => {
               {/* Card de Resumen Diario */}
               <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-300">
                 <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-1 transition-colors duration-300">
-                  {new Date(diaSeleccionado + "T00:00:00").toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
+                  {new Date(diaSeleccionado + "T00:00:00").toLocaleDateString(idioma === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long' })}
                 </h2>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Resumen de actividad</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">{idioma === 'es' ? 'Resumen de actividad' : 'Activity Summary'}</p>
 
                 {infoDia ? (
                   <div className="space-y-6">
                     {/* Animo y Sueño */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-neutral-50 dark:bg-gray-700/50 p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-colors duration-300">
-                        <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-1">Ánimo</p>
+                        <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-1">{idioma === 'es' ? 'Ánimo' : 'Mood'}</p>
                         <div className="text-[#2C4159] dark:text-white flex items-center gap-1 transition-colors duration-300">
                           {renderIconoAnimo(infoDia.diario?.animo, 16) || <div className="w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-600" />}
                           <span className="font-black">{infoDia.diario?.animo || '--'}/5</span>
                         </div>
                       </div>
                       <div className="bg-neutral-50 dark:bg-gray-700/50 p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-colors duration-300">
-                        <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-1">Sueño</p>
+                        <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-1">{idioma === 'es' ? 'Sueño' : 'Sleep'}</p>
                         <div className="text-[#2C4159] dark:text-white flex items-center gap-1 transition-colors duration-300">
                           <Moon size={14} className="text-blue-400" />
                           <span className="font-black">{infoDia.diario?.sueno || '--'}h</span>
@@ -280,7 +308,7 @@ const PaginaCalendario = () => {
                       {infoDia.habitos?.some(h => h.estado === 'positivo') && (
                         <div>
                           <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 flex items-center gap-1">
-                            <Flame size={12} className="text-orange-500" /> Hábitos cumplidos
+                            <Flame size={12} className="text-orange-500" /> {idioma === 'es' ? 'Hábitos cumplidos' : 'Habits completed'}
                           </p>
                           <div className="flex flex-wrap gap-1.5">
                             {infoDia.habitos.filter(h => h.estado === 'positivo').map(h => (
@@ -295,7 +323,7 @@ const PaginaCalendario = () => {
                       {infoDia.diarias?.some(d => d.completada) && (
                         <div>
                           <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 flex items-center gap-1">
-                            <CheckCircle2 size={12} className="text-yellow-500" /> Tareas completadas
+                            <CheckCircle2 size={12} className="text-yellow-500" /> {idioma === 'es' ? 'Tareas completadas' : 'Tasks completed'}
                           </p>
                           <div className="flex flex-wrap gap-1.5">
                             {infoDia.diarias.filter(d => d.completada).map(d => (
@@ -310,7 +338,7 @@ const PaginaCalendario = () => {
                       {infoDia.meditación?.length > 0 && (
                         <div>
                           <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 flex items-center gap-1">
-                            <Wind size={12} className="text-blue-500" /> Meditación
+                            <Wind size={12} className="text-blue-500" /> {idioma === 'es' ? 'Meditación' : 'Meditation'}
                           </p>
                           {infoDia.meditación.map(m => (
                             <div key={m.id} className="bg-blue-50/50 dark:bg-blue-900/20 p-2 rounded-xl flex items-center gap-2 mb-1 transition-colors duration-300">
@@ -326,11 +354,11 @@ const PaginaCalendario = () => {
                     {infoDia.diario?.contenido && (
                       <div className="pt-4 border-t border-gray-50 dark:border-gray-700 transition-colors duration-300">
                         <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 flex items-center gap-1">
-                          <FileText size={12} /> Reflexión del día
+                          <FileText size={12} /> {idioma === 'es' ? 'Reflexión del día' : 'Day Reflection'}
                         </p>
                         <div className="max-h-60 overflow-y-auto custom-scrollbar bg-neutral-50 dark:bg-gray-700/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-600 transition-colors duration-300">
                           <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed italic">
-                            "{infoDia.diario.contenido}"
+                            "{infoDia.diario.contenido || (idioma === 'es' ? "Sin contenido escrito..." : "No written content...")}"
                           </p>
                         </div>
                       </div>
@@ -339,14 +367,14 @@ const PaginaCalendario = () => {
                 ) : (
                   <div className="py-12 flex flex-col items-center justify-center text-center opacity-30">
                     <Zap size={48} className="mb-4 text-gray-300" />
-                    <p className="text-sm font-bold text-gray-400">Sin actividad registrada</p>
+                    <p className="text-sm font-bold text-gray-400">{idioma === 'es' ? 'Sin actividad registrada' : 'No activity recorded'}</p>
                   </div>
                 )}
               </div>
               
               <div className="bg-gradient-to-br from-[#4F99CC] to-[#2C4159] rounded-3xl p-6 text-white shadow-md relative overflow-hidden">
-                <h3 className="text-lg font-black mb-1">Dato curioso</h3>
-                <p className="text-[10px] text-white/70 mb-4 uppercase font-bold tracking-widest">Basado en tus registros</p>
+                <h3 className="text-lg font-black mb-1">{idioma === 'es' ? 'Dato curioso' : 'Fun Fact'}</h3>
+                <p className="text-[10px] text-white/70 mb-4 uppercase font-bold tracking-widest">{idioma === 'es' ? 'Basado en tus registros' : 'Based on your records'}</p>
                 <p className="text-[11px] font-medium leading-tight z-10 relative pr-4">
                   {datoAleatorio}
                 </p>
@@ -356,7 +384,7 @@ const PaginaCalendario = () => {
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-white dark:bg-gray-800 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700 transition-colors duration-300">
               <CalendarIcon size={48} className="text-gray-200 dark:text-gray-600 mb-4" />
-              <p className="text-gray-400 dark:text-gray-500 font-bold text-sm">Selecciona un día para ver los detalles de tu progreso</p>
+              <p className="text-gray-400 dark:text-gray-500 font-bold text-sm">{idioma === 'es' ? 'Selecciona un día para ver los detalles de tu progreso' : 'Select a day to view your progress details'}</p>
             </div>
           )}
         </AnimatePresence>

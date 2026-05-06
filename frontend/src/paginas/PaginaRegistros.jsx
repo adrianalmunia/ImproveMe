@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import { useIdioma } from '../contextos/ContextoIdioma';
 import { obtenerEntradasPorMes } from '../servicios/servicioAPI';
 import { ReproductorAudio } from '../componentes/ReproductorAudio';
 import logoCompleto from '../assets/logo_completo.png';
@@ -13,20 +14,26 @@ import moodBien from '../assets/estados_animo/bien.png';
 import moodGenial from '../assets/estados_animo/genial.png';
 
 const humores = [
-  { id: 1, imagen: moodFatal, color: '#EF4444', label: 'Fatal' },
-  { id: 2, imagen: moodMal, color: '#F97316', label: 'Mal' },
-  { id: 3, imagen: moodDecente, color: '#FACC15', label: 'Decente' },
-  { id: 4, imagen: moodBien, color: '#90BE6D', label: 'Bien' },
-  { id: 5, imagen: moodGenial, color: '#4D908E', label: 'Genial' },
+  { id: 1, imagen: moodFatal, color: '#EF4444', label: 'Fatal', labelEn: 'Fatal' },
+  { id: 2, imagen: moodMal, color: '#F97316', label: 'Mal', labelEn: 'Bad' },
+  { id: 3, imagen: moodDecente, color: '#FACC15', label: 'Decente', labelEn: 'Decent' },
+  { id: 4, imagen: moodBien, color: '#90BE6D', label: 'Bien', labelEn: 'Good' },
+  { id: 5, imagen: moodGenial, color: '#4D908E', label: 'Genial', labelEn: 'Great' },
 ];
 
-const meses = [
+const mesesEs = [
   'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
   'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
 ];
 
+const mesesEn = [
+  'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+  'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+];
+
 // Componente Tarjeta 3D
 const TarjetaMiniatura = ({ entrada, onClick }) => {
+  const { idioma, t } = useIdioma();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -53,12 +60,12 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
 
   const humorInfo = humores.find(h => h.id === entrada.puntuacion_animo) || humores[2];
   const fechaObj = new Date(entrada.fecha);
-  const fechaStr = `${fechaObj.getUTCDate()} de ${meses[fechaObj.getUTCMonth()].charAt(0).toUpperCase() + meses[fechaObj.getUTCMonth()].slice(1).toLowerCase()} de ${fechaObj.getUTCFullYear()}`;
+  const fechaStr = fechaObj.toLocaleDateString(idioma === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
   // Extraer un fragmento del texto
   const extracto = entrada.contenido_texto && entrada.contenido_texto.length > 100 
     ? entrada.contenido_texto.substring(0, 100) + '...' 
-    : entrada.contenido_texto || "Sin contenido escrito para este día.";
+    : entrada.contenido_texto || (idioma === 'es' ? "Sin contenido escrito para este día." : "No written content for this day.");
 
   return (
     <div className="relative cursor-pointer" style={{ perspective: 1200 }} onClick={() => onClick(entrada)}>
@@ -85,7 +92,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
             
             <div className="bg-[#4F99CC]/5 border border-[#4F99CC]/10 px-2 py-0.5 rounded-full shadow-sm">
               <p className="text-[9px] font-bold text-[#4F99CC] leading-none">
-                {entrada.horas_sueno >= 10 ? '+10' : entrada.horas_sueno}h de sueño
+                {entrada.horas_sueno >= 10 ? '+10' : entrada.horas_sueno}h {idioma === 'es' ? 'de sueño' : 'sleep'}
               </p>
             </div>
           </div>
@@ -137,6 +144,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
 
 export function PaginaRegistros() {
   const { usuario } = useAutenticacion();
+  const { t, idioma } = useIdioma();
   const [fechaFiltro, setFechaFiltro] = useState(new Date());
   const [entradas, setEntradas] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -161,11 +169,12 @@ export function PaginaRegistros() {
   }, [usuario, fechaFiltro]);
 
   const cambiarMes = (incremento) => {
-    // Seteamos el día 1 antes de cambiar de mes para evitar saltos por meses de distinta duración (ej: de 31 de marzo a 28 de febrero)
+    // Seteamos el día 1 antes de cambiar de mes para evitar saltos por meses de distinta duración
     const nuevaFecha = new Date(fechaFiltro.getFullYear(), fechaFiltro.getMonth() + incremento, 1);
     setFechaFiltro(nuevaFecha);
   };
 
+  const meses = idioma === 'es' ? mesesEs : mesesEn;
   const nombreMesAnio = `${meses[fechaFiltro.getMonth()]} ${fechaFiltro.getFullYear()}`;
 
   return (
@@ -180,6 +189,7 @@ export function PaginaRegistros() {
           alt="ImproveMe Logo" 
           className="h-16 lg:h-20 object-contain" 
         />
+        <h2 className="text-3xl font-['Tilt_Warp'] text-center mt-4 text-gray-800 dark:text-white uppercase tracking-widest">{t('nav_registros')}</h2>
       </div>
 
       <div className="max-w-6xl mx-auto">
@@ -227,8 +237,8 @@ export function PaginaRegistros() {
           </div>
         ) : entradas.length === 0 ? (
           <div className="text-center py-20 text-gray-400 dark:text-gray-500 transition-colors duration-300">
-            <p className="text-xl font-['Tilt_Warp']">No hay registros en {nombreMesAnio.toLowerCase()}.</p>
-            <p className="mt-2 text-sm">Empieza a escribir en tu diario para verlos aquí.</p>
+            <p className="text-xl font-['Tilt_Warp']">{idioma === 'es' ? `No hay registros en ${nombreMesAnio.toLowerCase()}.` : `No records in ${nombreMesAnio.toLowerCase()}.`}</p>
+            <p className="mt-2 text-sm">{idioma === 'es' ? 'Empieza a escribir en tu diario para verlos aquí.' : 'Start writing in your journal to see them here.'}</p>
           </div>
         ) : (
           <motion.div 
@@ -278,13 +288,13 @@ export function PaginaRegistros() {
 
                   <div className="mb-2 relative z-10 shrink-0 text-center">
                     <p className="text-xs font-black text-[#4F99CC] uppercase tracking-[0.2em]">
-                      {new Date(entradaSeleccionada.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}
+                      {new Date(entradaSeleccionada.fecha).toLocaleDateString(idioma === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}
                     </p>
                     <div className="w-12 h-0.5 bg-[#4F99CC]/30 mx-auto mt-1 rounded-full"></div>
                   </div>
 
                   <div className="mb-4 flex items-center gap-2 bg-[#4F99CC]/10 px-4 py-1.5 rounded-full border border-[#4F99CC]/20 shrink-0">
-                    <span className="text-xs font-bold text-[#4F99CC]">{entradaSeleccionada.horas_sueno >= 10 ? '+10' : entradaSeleccionada.horas_sueno}h de sueño</span>
+                    <span className="text-xs font-bold text-[#4F99CC]">{entradaSeleccionada.horas_sueno >= 10 ? '+10' : entradaSeleccionada.horas_sueno}h {idioma === 'es' ? 'de sueño' : 'sleep'}</span>
                   </div>
 
                   {/* Mostrar Imagen si existe */}
@@ -311,7 +321,7 @@ export function PaginaRegistros() {
 
                   <div className="flex-1 w-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-start py-4 px-2">
                     <p className="text-xl font-['Tilt_Warp'] text-gray-800 dark:text-white leading-snug text-center w-full break-words transition-colors duration-300">
-                      {entradaSeleccionada.contenido_texto || "Sin contenido..."}
+                      {entradaSeleccionada.contenido_texto || (idioma === 'es' ? "Sin contenido..." : "No content...")}
                     </p>
                   </div>
                 </div>

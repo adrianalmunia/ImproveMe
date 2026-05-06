@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import { useIdioma } from '../contextos/ContextoIdioma';
 import { 
   Trophy,
   ChevronRight
@@ -21,43 +22,43 @@ const IconMap = {
 };
 
 export const RANK_CATEGORIES = [
-  { id: 'sin-rango', name: 'Sin Rango', iconName: 'SinRango', color: 'text-gray-400', bg: 'bg-gray-400', glow: 'shadow-gray-400/50', gradient: 'from-gray-300 to-gray-500', desc: 'Tu camino aún no ha comenzado. Da el primer paso.' },
-  { id: 'bronce', name: 'Bronce', iconName: 'Bronce', color: 'text-amber-700', bg: 'bg-amber-700', glow: 'shadow-amber-700/50', gradient: 'from-amber-600 to-amber-800', desc: 'La consistencia empieza a dar sus frutos.' },
-  { id: 'plata', name: 'Plata', iconName: 'Plata', color: 'text-slate-400', bg: 'bg-slate-400', glow: 'shadow-slate-400/50', gradient: 'from-slate-300 to-slate-500', desc: 'Un reflejo de tu disciplina diaria.' },
-  { id: 'oro', name: 'Oro', iconName: 'Oro', color: 'text-yellow-500', bg: 'bg-yellow-500', glow: 'shadow-yellow-500/50', gradient: 'from-yellow-400 to-yellow-600', desc: 'Brillas con luz propia entre los mejores.' },
-  { id: 'esmeralda', name: 'Esmeralda', iconName: 'Esmeralda', color: 'text-emerald-500', bg: 'bg-emerald-500', glow: 'shadow-emerald-500/50', gradient: 'from-emerald-400 to-emerald-600', desc: 'Tu crecimiento es imparable y natural.' },
-  { id: 'diamante', name: 'Diamante', iconName: 'Diamante', color: 'text-blue-400', bg: 'bg-blue-400', glow: 'shadow-blue-400/50', gradient: 'from-blue-300 to-blue-500', desc: 'Dureza y claridad inquebrantables.' },
-  { id: 'zafiro', name: 'Zafiro', iconName: 'Zafiro', color: 'text-blue-600', bg: 'bg-blue-600', glow: 'shadow-blue-600/50', gradient: 'from-blue-500 to-blue-700', desc: 'Sabiduría y profundidad en cada acción.' },
-  { id: 'amatista', name: 'Amatista', iconName: 'Amatista', color: 'text-purple-500', bg: 'bg-purple-500', glow: 'shadow-purple-500/50', gradient: 'from-purple-400 to-purple-600', desc: 'Dominio absoluto de tu mente y cuerpo.' },
-  { id: 'rubi', name: 'Rubí', iconName: 'Rubi', color: 'text-red-500', bg: 'bg-red-500', glow: 'shadow-red-500/50', gradient: 'from-red-400 to-red-600', desc: 'La leyenda máxima. Has alcanzado la cima.' }
+  { id: 'sin-rango', name: 'Sin Rango', iconName: 'SinRango', color: 'text-gray-400', bg: 'bg-gray-400', glow: 'shadow-gray-400/50', gradient: 'from-gray-300 to-gray-500', desc: 'Tu camino aún no ha comenzado. Da el primer paso.', descEn: 'Your path has not yet begun. Take the first step.' },
+  { id: 'bronce', name: 'Bronce', iconName: 'Bronce', color: 'text-amber-700', bg: 'bg-amber-700', glow: 'shadow-amber-700/50', gradient: 'from-amber-600 to-amber-800', desc: 'La consistencia empieza a dar sus frutos.', descEn: 'Consistency starts to pay off.' },
+  { id: 'plata', name: 'Plata', iconName: 'Plata', color: 'text-slate-400', bg: 'bg-slate-400', glow: 'shadow-slate-400/50', gradient: 'from-slate-300 to-slate-500', desc: 'Un reflejo de tu disciplina diaria.', descEn: 'A reflection of your daily discipline.' },
+  { id: 'oro', name: 'Oro', iconName: 'Oro', color: 'text-yellow-500', bg: 'bg-yellow-500', glow: 'shadow-yellow-500/50', gradient: 'from-yellow-400 to-yellow-600', desc: 'Brillas con luz propia entre los mejores.', descEn: 'You shine with your own light among the best.' },
+  { id: 'esmeralda', name: 'Esmeralda', iconName: 'Esmeralda', color: 'text-emerald-500', bg: 'bg-emerald-500', glow: 'shadow-emerald-500/50', gradient: 'from-emerald-400 to-emerald-600', desc: 'Tu crecimiento es imparable y natural.', descEn: 'Your growth is unstoppable and natural.' },
+  { id: 'diamante', name: 'Diamante', iconName: 'Diamante', color: 'text-blue-400', bg: 'bg-blue-400', glow: 'shadow-blue-400/50', gradient: 'from-blue-300 to-blue-500', desc: 'Dureza y claridad inquebrantables.', descEn: 'Unbreakable hardness and clarity.' },
+  { id: 'zafiro', name: 'Zafiro', iconName: 'Zafiro', color: 'text-blue-600', bg: 'bg-blue-600', glow: 'shadow-blue-600/50', gradient: 'from-blue-500 to-blue-700', desc: 'Sabiduría y profundidad en cada acción.', descEn: 'Wisdom and depth in every action.' },
+  { id: 'amatista', name: 'Amatista', iconName: 'Amatista', color: 'text-purple-500', bg: 'bg-purple-500', glow: 'shadow-purple-500/50', gradient: 'from-purple-400 to-purple-600', desc: 'Dominio absoluto de tu mente y cuerpo.', descEn: 'Absolute mastery of your mind and body.' },
+  { id: 'rubi', name: 'Rubí', iconName: 'Rubi', color: 'text-red-500', bg: 'bg-red-500', glow: 'shadow-red-500/50', gradient: 'from-red-400 to-red-600', desc: 'La leyenda máxima. Has alcanzado la cima.', descEn: 'The ultimate legend. You have reached the top.' }
 ];
 
 export const RANK_TIERS = [
-  { xp: 0, name: 'Sin Rango', tier: '', categoryId: 'sin-rango', desc: 'Tu camino aún no ha comenzado. Da el primer paso.' },
-  { xp: 1, name: 'Bronce III', tier: 'III', categoryId: 'bronce', desc: 'Has despertado. La chispa del cambio se ha encendido.' },
-  { xp: 400, name: 'Bronce II', tier: 'II', categoryId: 'bronce', desc: 'La inercia se rompe. Tu voluntad empieza a endurecerse.' },
-  { xp: 1000, name: 'Bronce I', tier: 'I', categoryId: 'bronce', desc: 'Dominas lo básico. Estás listo para desafíos mayores.' },
-  { xp: 2000, name: 'Plata III', tier: 'III', categoryId: 'plata', desc: 'Tu brillo es tenue pero constante. Sigue puliendo.' },
-  { xp: 3500, name: 'Plata II', tier: 'II', categoryId: 'plata', desc: 'La disciplina ya no es un esfuerzo, es parte de ti.' },
-  { xp: 5500, name: 'Plata I', tier: 'I', categoryId: 'plata', desc: 'Eres un ejemplo de constancia. La excelencia se acerca.' },
-  { xp: 8000, name: 'Oro III', tier: 'III', categoryId: 'oro', desc: 'Brillas con luz propia. El éxito te reconoce.' },
-  { xp: 11000, name: 'Oro II', tier: 'II', categoryId: 'oro', desc: 'Tu valor es innegable. Has forjado un carácter dorado.' },
-  { xp: 15000, name: 'Oro I', tier: 'I', categoryId: 'oro', desc: 'Casi una leyenda. Tu presencia inspira a otros.' },
-  { xp: 20000, name: 'Esmeralda III', tier: 'III', categoryId: 'esmeralda', desc: 'Crecimiento puro. Tu potencial florece sin límites.' },
-  { xp: 26000, name: 'Esmeralda II', tier: 'II', categoryId: 'esmeralda', desc: 'Vitalidad extrema. Eres una fuerza de la naturaleza.' },
-  { xp: 33000, name: 'Esmeralda I', tier: 'I', categoryId: 'esmeralda', desc: 'Maestro de la adaptación. Nada detiene tu avance.' },
-  { xp: 41000, name: 'Diamante III', tier: 'III', categoryId: 'diamante', desc: 'Presión y tiempo. Te has vuelto inquebrantable.' },
-  { xp: 50000, name: 'Diamante II', tier: 'II', categoryId: 'diamante', desc: 'Claridad absoluta. Ves el camino donde otros ven dudas.' },
-  { xp: 60000, name: 'Diamante I', tier: 'I', categoryId: 'diamante', desc: 'Dureza máxima. Eres el estándar de la perfección.' },
-  { xp: 72000, name: 'Zafiro III', tier: 'III', categoryId: 'zafiro', desc: 'Sabiduría profunda. Actúas con calma y precisión.' },
-  { xp: 85000, name: 'Zafiro II', tier: 'II', categoryId: 'zafiro', desc: 'Tus acciones fluyen como el agua, imparables.' },
-  { xp: 100000, name: 'Zafiro I', tier: 'I', categoryId: 'zafiro', desc: 'Mente cristalina. Has alcanzado la paz en el esfuerzo.' },
-  { xp: 120000, name: 'Amatista III', tier: 'III', categoryId: 'amatista', desc: 'Energía pura. Tu espíritu vibra con intensidad.' },
-  { xp: 145000, name: 'Amatista II', tier: 'II', categoryId: 'amatista', desc: 'Intuición superior. Sabes qué hacer antes de pensarlo.' },
-  { xp: 175000, name: 'Amatista I', tier: 'I', categoryId: 'amatista', desc: 'Trascendencia. Has superado tus propios límites.' },
-  { xp: 210000, name: 'Rubí III', tier: 'III', categoryId: 'rubi', desc: 'Pasión ardiente. Tu fuego interno lo consume todo.' },
-  { xp: 260000, name: 'Rubí II', tier: 'II', categoryId: 'rubi', desc: 'Poder absoluto. Cada paso que das deja huella.' },
-  { xp: 350000, name: 'Rubí I', tier: 'I', categoryId: 'rubi', desc: 'La cima del mundo. Eres la definición de ImproveMe.' }
+  { xp: 0, name: 'Sin Rango', tier: '', categoryId: 'sin-rango', desc: 'Tu camino aún no ha comenzado. Da el primer paso.', descEn: 'Your path has not yet begun. Take the first step.' },
+  { xp: 1, name: 'Bronce III', tier: 'III', categoryId: 'bronce', desc: 'Has despertado. La chispa del cambio se ha encendido.', descEn: 'You have awakened. The spark of change has been lit.' },
+  { xp: 400, name: 'Bronce II', tier: 'II', categoryId: 'bronce', desc: 'La inercia se rompe. Tu voluntad empieza a endurecerse.', descEn: 'Inertia breaks. Your will begins to harden.' },
+  { xp: 1000, name: 'Bronce I', tier: 'I', categoryId: 'bronce', desc: 'Dominas lo básico. Estás listo para desafíos mayores.', descEn: 'You master the basics. You are ready for greater challenges.' },
+  { xp: 2000, name: 'Plata III', tier: 'III', categoryId: 'plata', desc: 'Tu brillo es tenue pero constante. Sigue puliendo.', descEn: 'Your glow is faint but constant. Keep polishing.' },
+  { xp: 3500, name: 'Plata II', tier: 'II', categoryId: 'plata', desc: 'La disciplina ya no es un esfuerzo, es parte de ti.', descEn: 'Discipline is no longer an effort, it is part of you.' },
+  { xp: 5500, name: 'Plata I', tier: 'I', categoryId: 'plata', desc: 'Eres un ejemplo de constancia. La excelencia se acerca.', descEn: 'You are an example of constancy. Excellence is approaching.' },
+  { xp: 8000, name: 'Oro III', tier: 'III', categoryId: 'oro', desc: 'Brillas con luz propia. El éxito te reconoce.', descEn: 'You shine with your own light. Success recognizes you.' },
+  { xp: 11000, name: 'Oro II', tier: 'II', categoryId: 'oro', desc: 'Tu valor es innegable. Has forjado un carácter dorado.', descEn: 'Your value is undeniable. You have forged a golden character.' },
+  { xp: 15000, name: 'Oro I', tier: 'I', categoryId: 'oro', desc: 'Casi una leyenda. Tu presencia inspira a otros.', descEn: 'Almost a legend. Your presence inspires others.' },
+  { xp: 20000, name: 'Esmeralda III', tier: 'III', categoryId: 'esmeralda', desc: 'Crecimiento puro. Tu potencial florece sin límites.', descEn: 'Pure growth. Your potential blooms without limits.' },
+  { xp: 26000, name: 'Esmeralda II', tier: 'II', categoryId: 'esmeralda', desc: 'Vitalidad extrema. Eres una fuerza de la naturaleza.', descEn: 'Extreme vitality. You are a force of nature.' },
+  { xp: 33000, name: 'Esmeralda I', tier: 'I', categoryId: 'esmeralda', desc: 'Maestro de la adaptación. Nada detiene tu avance.', descEn: 'Master of adaptation. Nothing stops your advance.' },
+  { xp: 41000, name: 'Diamante III', tier: 'III', categoryId: 'diamante', desc: 'Presión y tiempo. Te has vuelto inquebrantable.', descEn: 'Pressure and time. You have become unbreakable.' },
+  { xp: 50000, name: 'Diamante II', tier: 'II', categoryId: 'diamante', desc: 'Claridad absoluta. Ves el camino donde otros ven dudas.', descEn: 'Absolute clarity. You see the path where others see doubt.' },
+  { xp: 60000, name: 'Diamante I', tier: 'I', categoryId: 'diamante', desc: 'Dureza máxima. Eres el estándar de la perfección.', descEn: 'Maximum hardness. You are the standard of perfection.' },
+  { xp: 72000, name: 'Zafiro III', tier: 'III', categoryId: 'zafiro', desc: 'Sabiduría profunda. Actúas con calma y precisión.', descEn: 'Deep wisdom. You act with calm and precision.' },
+  { xp: 85000, name: 'Zafiro II', tier: 'II', categoryId: 'zafiro', desc: 'Tus acciones fluyen como el agua, imparables.', descEn: 'Your actions flow like water, unstoppable.' },
+  { xp: 100000, name: 'Zafiro I', tier: 'I', categoryId: 'zafiro', desc: 'Mente cristalina. Has alcanzado la paz en el esfuerzo.', descEn: 'Crystalline mind. You have reached peace in effort.' },
+  { xp: 120000, name: 'Amatista III', tier: 'III', categoryId: 'amatista', desc: 'Energía pura. Tu espíritu vibra con intensidad.', descEn: 'Pure energy. Your spirit vibrates with intensity.' },
+  { xp: 145000, name: 'Amatista II', tier: 'II', categoryId: 'amatista', desc: 'Intuición superior. Sabes qué hacer antes de pensarlo.', descEn: 'Superior intuition. You know what to do before you think it.' },
+  { xp: 175000, name: 'Amatista I', tier: 'I', categoryId: 'amatista', desc: 'Trascendencia. Has superado tus propios límites.', descEn: 'Transcendence. You have surpassed your own limits.' },
+  { xp: 210000, name: 'Rubí III', tier: 'III', categoryId: 'rubi', desc: 'Pasión ardiente. Tu fuego interno lo consume todo.', descEn: 'Burning passion. Your inner fire consumes everything.' },
+  { xp: 260000, name: 'Rubí II', tier: 'II', categoryId: 'rubi', desc: 'Poder absoluto. Cada paso que das deja huella.', descEn: 'Absolute power. Every step you take leaves a mark.' },
+  { xp: 350000, name: 'Rubí I', tier: 'I', categoryId: 'rubi', desc: 'La cima del mundo. Eres la definición de ImproveMe.', descEn: 'The top of the world. You are the definition of ImproveMe.' }
 ];
 
 export function calcularRangoInfo(xp) {
@@ -130,9 +131,31 @@ export const RankIcon = ({ rankData, tier = 'III', size = 'md', className = '', 
 
 const PaginaRangos = () => {
   const { usuario, refrescarUsuario } = useAutenticacion();
+  const { t, idioma } = useIdioma();
   const [xp, setXp] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [mostrarModalLigas, setMostrarModalLigas] = useState(false);
+
+  const getRankName = (name) => {
+    if (idioma === 'es') return name;
+    return name.replace('Bronce', 'Bronze').replace('Plata', 'Silver').replace('Oro', 'Gold').replace('Esmeralda', 'Emerald').replace('Diamante', 'Diamond').replace('Zafiro', 'Sapphire').replace('Amatista', 'Amethyst').replace('Rubí', 'Ruby').replace('Sin Rango', 'Unranked');
+  };
+
+  const getRankDesc = (desc, id) => {
+    if (idioma === 'es') return desc;
+    const descs = {
+      'sin-rango': 'Your path has not yet begun. Take the first step.',
+      'bronce': 'Consistency starts to pay off.',
+      'plata': 'A reflection of your daily discipline.',
+      'oro': 'You shine with your own light among the best.',
+      'esmeralda': 'Your growth is unstoppable and natural.',
+      'diamante': 'Unbreakable hardness and clarity.',
+      'zafiro': 'Wisdom and depth in every action.',
+      'amatista': 'Absolute mastery of your mind and body.',
+      'rubi': 'The ultimate legend. You have reached the top.'
+    };
+    return descs[id] || desc;
+  };
 
   useEffect(() => {
     const init = async () => {
@@ -169,10 +192,10 @@ const PaginaRangos = () => {
       {/* Encabezado */}
       <header className="text-center space-y-4">
         <h1 className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] uppercase tracking-tighter transition-colors duration-300">
-          Clasificación Ranked
+          {idioma === 'es' ? 'Clasificación Ranked' : 'Ranked Leaderboard'}
         </h1>
         <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium transition-colors duration-300">
-          Tu disciplina se convierte en poder. Asciende en las ligas completando tus metas diarias.
+          {idioma === 'es' ? 'Tu disciplina se convierte en poder. Asciende en las ligas completando tus metas diarias.' : 'Your discipline becomes power. Rise through the leagues by completing your daily goals.'}
         </p>
       </header>
 
@@ -185,10 +208,10 @@ const PaginaRangos = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-[#4F99CC]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 transition-colors duration-300">
-            Ligas Disponibles
+            {idioma === 'es' ? 'Ligas Disponibles' : 'Available Leagues'}
           </h3>
           <span className="text-[10px] font-black text-[#4F99CC] uppercase tracking-widest flex items-center gap-1">
-            Explorar todas <ChevronRight size={12} />
+            {idioma === 'es' ? 'Explorar todas' : 'Explore all'} <ChevronRight size={12} />
           </span>
         </div>
         <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8 max-w-2xl mx-auto relative z-10">
@@ -216,13 +239,13 @@ const PaginaRangos = () => {
               <>
                 <RankIcon rankData={rankInfo.prevRank} tier={rankInfo.prevRank.tier} size="sm" />
                 <div className="text-center">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Anterior</p>
-                  <p className={`text-xs font-bold ${rankInfo.prevRank.color}`}>{rankInfo.prevRank.fullName}</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">{idioma === 'es' ? 'Anterior' : 'Previous'}</p>
+                  <p className={`text-xs font-bold ${rankInfo.prevRank.color}`}>{getRankName(rankInfo.prevRank.fullName)}</p>
                 </div>
               </>
             ) : (
               <div className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-3xl transition-colors duration-300">
-                <p className="text-[8px] font-black uppercase text-gray-200 dark:text-gray-600">Inicio</p>
+                <p className="text-[8px] font-black uppercase text-gray-200 dark:text-gray-600">{idioma === 'es' ? 'Inicio' : 'Start'}</p>
               </div>
             )}
           </div>
@@ -242,13 +265,16 @@ const PaginaRangos = () => {
               />
             </div>
             <div className="text-center space-y-3">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 mb-1">
+                {idioma === 'es' ? 'Rango Actual' : 'Current Rank'}
+              </p>
               <h2 className={`text-6xl md:text-7xl font-black tracking-tighter uppercase ${rankInfo.category.color} transition-colors duration-300`}>
-                {rankInfo.fullName}
+                {getRankName(rankInfo.fullName)}
               </h2>
               <div className="inline-flex items-center gap-3 bg-neutral-50 dark:bg-gray-900 px-6 py-2 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm transition-colors duration-300">
                 <span className={`w-2 h-2 rounded-full ${rankInfo.category.bg} animate-pulse`}></span>
                 <p className="text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.1em] transition-colors duration-300">
-                  {xp} XP Acumulados
+                  {xp} {idioma === 'es' ? 'XP Acumulados' : 'Accumulated XP'}
                 </p>
               </div>
             </div>
@@ -260,8 +286,8 @@ const PaginaRangos = () => {
               <>
                 <RankIcon rankData={rankInfo.nextRank} tier={rankInfo.nextRank.tier} size="sm" />
                 <div className="text-center">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Siguiente</p>
-                  <p className={`text-xs font-bold ${rankInfo.nextRank.color}`}>{rankInfo.nextRank.fullName}</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">{idioma === 'es' ? 'Siguiente' : 'Next'}</p>
+                  <p className={`text-xs font-bold ${rankInfo.nextRank.color}`}>{getRankName(rankInfo.nextRank.fullName)}</p>
                 </div>
               </>
             ) : (
@@ -275,7 +301,7 @@ const PaginaRangos = () => {
         {/* Barra de Progreso Mejorada */}
         <div className="relative z-10 max-w-2xl mx-auto mt-20 space-y-6">
           <div className="flex justify-between items-end px-2">
-            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest transition-colors duration-300">Progreso del Nivel</p>
+            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest transition-colors duration-300">{idioma === 'es' ? 'Progreso del Nivel' : 'Level Progress'}</p>
             <p className="text-sm font-black text-gray-700 dark:text-gray-200 transition-colors duration-300">
               <span className={rankInfo.category.color}>{rankInfo.xpInCurrentTier}</span>
               <span className="text-gray-300 dark:text-gray-600 mx-1">/</span>
@@ -298,13 +324,13 @@ const PaginaRangos = () => {
             {rankInfo.isMaxRank ? (
               <p className="text-xl font-black text-[#C6A55E] uppercase tracking-tight flex items-center justify-center gap-3">
                 <Trophy size={24} />
-                ¡Has alcanzado la gloria máxima!
+                {idioma === 'es' ? '¡Has alcanzado la gloria máxima!' : 'You have reached the ultimate glory!'}
               </p>
             ) : (
               <div className="flex flex-col items-center gap-1">
-                <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300">Ascenso en camino</p>
+                <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300">{idioma === 'es' ? 'Ascenso en camino' : 'Promotion on the way'}</p>
                 <p className="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300">
-                  Te faltan <span className={`${rankInfo.nextRank?.color || 'text-[#4F99CC]'} font-black`}>{rankInfo.xpRemaining}</span> puntos para <span className="uppercase">{rankInfo.nextRank?.fullName}</span>
+                  {idioma === 'es' ? 'Te faltan ' : 'You need '}<span className={`${rankInfo.nextRank?.color || 'text-[#4F99CC]'} font-black`}>{rankInfo.xpRemaining}</span> {idioma === 'es' ? 'puntos para ' : 'points for '}<span className="uppercase">{getRankName(rankInfo.nextRank?.fullName)}</span>
                 </p>
               </div>
             )}
@@ -330,8 +356,8 @@ const PaginaRangos = () => {
               onClick={e => e.stopPropagation()}
             >
               <div className="p-8 border-b border-gray-100 dark:border-gray-700 shrink-0 transition-colors duration-300">
-                <h2 className="text-3xl font-black text-[#2C4159] dark:text-white uppercase tracking-tighter transition-colors duration-300">Jerarquía de Ligas</h2>
-                <p className="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">Descubre el camino hacia la maestría absoluta en ImproveMe.</p>
+                <h2 className="text-3xl font-black text-[#2C4159] dark:text-white uppercase tracking-tighter transition-colors duration-300">{idioma === 'es' ? 'Jerarquía de Ligas' : 'Leagues Hierarchy'}</h2>
+                <p className="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">{idioma === 'es' ? 'Descubre el camino hacia la maestría absoluta en ImproveMe.' : 'Discover the path to absolute mastery in ImproveMe.'}</p>
               </div>
               
               <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
@@ -350,10 +376,10 @@ const PaginaRangos = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-center mb-1">
-                            <h4 className={`text-xl font-black uppercase tracking-tight ${cat.color}`}>{tierData.name}</h4>
+                            <h4 className={`text-xl font-black uppercase tracking-tight ${cat.color}`}>{getRankName(tierData.name)}</h4>
                             <span className="text-[10px] font-black text-gray-400 dark:text-gray-500">MIN. {tierData.xp} XP</span>
                           </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed italic">"{tierData.desc}"</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed italic">"{idioma === 'es' ? tierData.desc : tierData.descEn}"</p>
                         </div>
                       </div>
                     );
@@ -366,7 +392,7 @@ const PaginaRangos = () => {
                   onClick={() => setMostrarModalLigas(false)}
                   className="w-full py-4 bg-[#2C4159] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-black transition-colors"
                 >
-                  Cerrar Explorador
+                  {idioma === 'es' ? 'Cerrar Explorador' : 'Close Explorer'}
                 </button>
               </div>
             </motion.div>

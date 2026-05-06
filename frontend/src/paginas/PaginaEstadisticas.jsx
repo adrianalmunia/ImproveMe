@@ -22,6 +22,7 @@ import {
   ArcElement
 } from 'chart.js';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import { useIdioma } from '../contextos/ContextoIdioma';
 import * as servicioAPI from '../servicios/servicioAPI';
 import { 
   TrendingUp, 
@@ -73,16 +74,17 @@ const obtenerColorSueno = (horas) => {
 
 const PaginaEstadisticas = () => {
   const { usuario, token } = useAutenticacion();
+  const { t, idioma } = useIdioma();
   const [stats, setStats] = useState(null);
   const [estaCargando, setEstaCargando] = useState(true);
   const [rangoDias, setRangoDias] = useState(30);
 
   const opcionesRango = [
-    { label: '15 Días', value: 15 },
-    { label: 'Mes', value: 30 },
-    { label: '3 Meses', value: 90 },
-    { label: '6 Meses', value: 180 },
-    { label: 'Año', value: 365 },
+    { label: idioma === 'es' ? '15 Días' : '15 Days', value: 15 },
+    { label: idioma === 'es' ? 'Mes' : 'Month', value: 30 },
+    { label: idioma === 'es' ? '3 Meses' : '3 Months', value: 90 },
+    { label: idioma === 'es' ? '6 Meses' : '6 Months', value: 180 },
+    { label: idioma === 'es' ? 'Año' : 'Year', value: 365 },
   ];
 
   useEffect(() => {
@@ -270,9 +272,11 @@ const PaginaEstadisticas = () => {
       <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h1 className="text-4xl font-black text-[#2C4159] dark:text-white tracking-tight transition-colors duration-300">
-            Tu <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]">Evolución</span>
+            {idioma === 'es' ? 'Tu ' : 'Your '}<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]">{idioma === 'es' ? 'Evolución' : 'Evolution'}</span>
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 font-medium mt-1 transition-colors duration-300">Análisis detallado de tus hábitos y bienestar emocional.</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium mt-1 transition-colors duration-300">
+            {idioma === 'es' ? 'Análisis detallado de tus hábitos y bienestar emocional.' : 'Detailed analysis of your habits and emotional well-being.'}
+          </p>
         </div>
 
         {/* Selector de Rango Temporal */}
@@ -303,7 +307,7 @@ const PaginaEstadisticas = () => {
               <Smile size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Ánimo Promedio</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('stats_animo_medio')}</p>
               <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">
                 {(stats?.animoEvolucion.reduce((acc, curr) => acc + curr.valor, 0) / (stats?.animoEvolucion.length || 1)).toFixed(1)}
               </p>
@@ -315,7 +319,7 @@ const PaginaEstadisticas = () => {
               <Moon size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Sueño Promedio</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('stats_sueno_medio')}</p>
               <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">
                 {(stats?.animoEvolucion.reduce((acc, curr) => acc + curr.sueno, 0) / (stats?.animoEvolucion.length || 1)).toFixed(1)}h
               </p>
@@ -327,7 +331,7 @@ const PaginaEstadisticas = () => {
               <Target size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Hábitos Activos</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{idioma === 'es' ? 'Hábitos Activos' : 'Active Habits'}</p>
               <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats?.cumplimientoHabitos.length}</p>
             </div>
           </div>
@@ -347,8 +351,8 @@ const PaginaEstadisticas = () => {
               <Flower2 size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Racha Zen</p>
-              <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats?.meditacion?.rachaActual || 0} días</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{idioma === 'es' ? 'Racha Zen' : 'Zen Streak'}</p>
+              <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats?.meditacion?.rachaActual || 0} {idioma === 'es' ? 'días' : 'days'}</p>
             </div>
           </div>
 
@@ -357,7 +361,7 @@ const PaginaEstadisticas = () => {
               <Zap size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Total Meditado</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{idioma === 'es' ? 'Total Meditado' : 'Total Meditated'}</p>
               <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats?.meditacion?.totalMinutos || 0} min</p>
             </div>
           </div>
@@ -367,14 +371,14 @@ const PaginaEstadisticas = () => {
         <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-[450px] transition-colors duration-300">
           <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-6 flex items-center gap-2 shrink-0 transition-colors duration-300">
             <Calendar size={20} className="text-[#4F99CC]" />
-            Comparativa
+            {idioma === 'es' ? 'Comparativa' : 'Comparison'}
           </h2>
           
           {/* Info Superior */}
           <div className="space-y-4 shrink-0">
             <div className="flex justify-between items-end">
               <div>
-                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Este Periodo</p>
+                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{idioma === 'es' ? 'Este Periodo' : 'This Period'}</p>
                 <p className="text-3xl font-black text-[#4F99CC]">
                   {(stats?.animoEvolucion.reduce((acc, curr) => acc + curr.valor, 0) / (stats?.animoEvolucion.length || 1)).toFixed(1)}
                 </p>
@@ -382,10 +386,10 @@ const PaginaEstadisticas = () => {
               <div className="text-right">
                 {stats?.comparacionTemporal !== null && stats?.comparacionTemporal !== undefined ? (
                   <p className={`text-[10px] font-black uppercase tracking-widest ${stats.comparacionTemporal >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {stats.comparacionTemporal >= 0 ? '+' : ''}{stats.comparacionTemporal}% vs anterior
+                    {stats.comparacionTemporal >= 0 ? '+' : ''}{stats.comparacionTemporal}% {idioma === 'es' ? 'vs anterior' : 'vs previous'}
                   </p>
                 ) : (
-                  <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Sin datos previos</p>
+                  <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">{idioma === 'es' ? 'Sin datos previos' : 'No previous data'}</p>
                 )}
               </div>
             </div>
@@ -403,7 +407,7 @@ const PaginaEstadisticas = () => {
 
           {/* Sección Deslizable de Rachas */}
           <div className="flex-1 flex flex-col min-h-0 pt-6 mt-4 border-t border-gray-50 dark:border-gray-700 transition-colors duration-300">
-            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 shrink-0">Rachas más consistentes</p>
+            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 shrink-0">{idioma === 'es' ? 'Rachas más consistentes' : 'Most consistent streaks'}</p>
             <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
               {(stats?.rachasActuales || []).filter(r => r.racha > 0).length > 0 ? (
                 (stats?.rachasActuales || []).filter(r => r.racha > 0).map(r => (
@@ -413,12 +417,12 @@ const PaginaEstadisticas = () => {
                      </div>
                      <div className="flex-1 min-w-0">
                         <p className="text-[12px] font-black text-[#2C4159] dark:text-white truncate">{r.nombre}</p>
-                        <p className="text-[9px] font-bold text-orange-500">{r.racha} {r.racha === 1 ? 'día' : 'días'} seguidos</p>
+                        <p className="text-[9px] font-bold text-orange-500">{r.racha} {idioma === 'es' ? (r.racha === 1 ? 'día' : 'días') : (r.racha === 1 ? 'day' : 'days')} {idioma === 'es' ? 'seguidos' : 'streak'}</p>
                      </div>
                   </div>
                 ))
               ) : (
-                <p className="text-[10px] text-gray-300 font-bold">Aún no hay rachas activas</p>
+                <p className="text-[10px] text-gray-300 font-bold">{idioma === 'es' ? 'Aún no hay rachas activas' : 'No active streaks yet'}</p>
               )}
             </div>
           </div>
@@ -426,14 +430,14 @@ const PaginaEstadisticas = () => {
           {/* Bloque Fijo Inferior */}
           {stats?.mejorHabitoHistorico && (
             <div className="pt-4 border-t border-gray-50 dark:border-gray-700 mt-auto shrink-0 transition-colors duration-300">
-              <p className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#C6A55E] to-[#4F99CC] uppercase tracking-widest mb-2">Tu récord histórico</p>
+              <p className="text-[10px] font-black text-transparent bg-clip-text bg-gradient-to-r from-[#C6A55E] to-[#4F99CC] uppercase tracking-widest mb-2">{idioma === 'es' ? 'Tu récord histórico' : 'Your all-time record'}</p>
               <div className="bg-gradient-to-br from-neutral-50 dark:from-gray-800 to-white dark:to-gray-800 p-3 rounded-2xl border border-[#C6A55E]/20 shadow-sm flex items-center gap-3 transition-colors duration-300">
                 <div className="w-10 h-10 rounded-xl bg-yellow-50 dark:bg-yellow-900/30 flex items-center justify-center text-[#C6A55E]">
                   <Award size={20} />
                 </div>
                 <div>
                   <p className="text-sm font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats.mejorHabitoHistorico.nombre}</p>
-                  <p className="text-[10px] font-bold text-[#C6A55E] uppercase">Racha: {stats.mejorHabitoHistorico.racha} días</p>
+                  <p className="text-[10px] font-bold text-[#C6A55E] uppercase">{idioma === 'es' ? 'Racha' : 'Streak'}: {stats.mejorHabitoHistorico.racha} {idioma === 'es' ? 'días' : 'days'}</p>
                 </div>
               </div>
             </div>
@@ -444,9 +448,9 @@ const PaginaEstadisticas = () => {
         <div className="bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 h-[450px] transition-colors duration-300">
           <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
             <Target size={20} className="text-[#C6A55E]" />
-            Consistencia
+            {idioma === 'es' ? 'Consistencia' : 'Consistency'}
           </h2>
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-4">Días completados en los últimos {rangoDias}</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-4">{idioma === 'es' ? `Días completados en los últimos ${rangoDias}` : `Days completed in last ${rangoDias}`}</p>
           <div className="h-[310px]">
             <Bar 
               data={dataHabitos} 
@@ -458,7 +462,7 @@ const PaginaEstadisticas = () => {
                   x: {
                     ...chartOptions.scales.x,
                     ticks: { ...chartOptions.scales.x.ticks, stepSize: 1 },
-                    title: { display: true, text: 'Días', font: { size: 10, weight: 'bold' }, color: '#94a3b8' }
+                    title: { display: true, text: idioma === 'es' ? 'Días' : 'Days', font: { size: 10, weight: 'bold' }, color: '#94a3b8' }
                   }
                 },
                 plugins: { ...chartOptions.plugins, tooltip: { ...chartOptions.plugins.tooltip, displayColors: true } }
@@ -471,9 +475,9 @@ const PaginaEstadisticas = () => {
         <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-[450px] transition-colors duration-300">
           <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
             <Flower2 size={20} className="text-teal-500" />
-            Paz Mental
+            {idioma === 'es' ? 'Paz Mental' : 'Mind Peace'}
           </h2>
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-4">Tu compromiso con el mindfulness</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-4">{idioma === 'es' ? 'Tu compromiso con el mindfulness' : 'Your commitment to mindfulness'}</p>
           <div className="h-[230px] mb-4">
             <Bar 
               data={dataMeditacion} 
@@ -485,7 +489,7 @@ const PaginaEstadisticas = () => {
           </div>
           <div className="mt-auto">
             <div className="bg-teal-50/50 dark:bg-teal-900/20 rounded-3xl border border-teal-100 dark:border-teal-900/50 p-5 flex flex-col items-center justify-center gap-1 transition-colors duration-300">
-              <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.2em] text-center">Meditación hoy</span>
+              <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-[0.2em] text-center">{idioma === 'es' ? 'Meditación hoy' : 'Meditation today'}</span>
               <div className="flex items-center gap-2">
                 <Flower2 size={16} className="text-teal-500 dark:text-teal-400" />
                 <span className="text-3xl font-black text-teal-900 dark:text-teal-100 leading-none transition-colors duration-300">
@@ -506,11 +510,11 @@ const PaginaEstadisticas = () => {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-black text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
               <TrendingUp size={20} className="text-[#4F99CC]" />
-              Bienestar Emocional
+              {idioma === 'es' ? 'Bienestar Emocional' : 'Emotional Well-being'}
             </h2>
             <div className="flex gap-2">
               <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400 dark:text-gray-500">
-                <div className="w-2 h-2 rounded-full bg-[#4F99CC]" /> Ánimo
+                <div className="w-2 h-2 rounded-full bg-[#4F99CC]" /> {idioma === 'es' ? 'Ánimo' : 'Mood'}
               </span>
             </div>
           </div>
@@ -523,9 +527,9 @@ const PaginaEstadisticas = () => {
         <div className="bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 h-[450px] transition-colors duration-300">
           <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
             <Zap size={20} className="text-yellow-500" />
-            Impacto Vital
+            {idioma === 'es' ? 'Impacto Vital' : 'Life Impact'}
           </h2>
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">¿Cómo afectan tus hábitos a tu humor?</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">{idioma === 'es' ? '¿Cómo afectan tus hábitos a tu humor?' : 'How do your habits affect your mood?'}</p>
           <div className="h-[280px] flex items-center justify-center">
             <Radar 
               data={dataRadar} 
@@ -544,10 +548,10 @@ const PaginaEstadisticas = () => {
           </div>
           <div className="flex justify-center gap-4 mt-4">
             <span className="flex items-center gap-1 text-[10px] font-bold text-[#4F99CC]">
-              <div className="w-2 h-2 rounded-full bg-[#4F99CC]" /> Días CON hábito
+              <div className="w-2 h-2 rounded-full bg-[#4F99CC]" /> {idioma === 'es' ? 'Días CON hábito' : 'Days WITH habit'}
             </span>
             <span className="flex items-center gap-1 text-[10px] font-bold text-[#C6A55E]">
-              <div className="w-2 h-2 rounded-full bg-[#C6A55E]" /> Días SIN hábito
+              <div className="w-2 h-2 rounded-full bg-[#C6A55E]" /> {idioma === 'es' ? 'Días SIN hábito' : 'Days WITHOUT habit'}
             </span>
           </div>
         </div>
@@ -556,9 +560,9 @@ const PaginaEstadisticas = () => {
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 h-[450px] transition-colors duration-300">
           <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
             <Moon size={20} className="text-indigo-500" />
-            Descanso vs Ánimo
+            {idioma === 'es' ? 'Descanso vs Ánimo' : 'Rest vs Mood'}
           </h2>
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">Relación entre horas dormidas y bienestar</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">{idioma === 'es' ? 'Relación entre horas dormidas y bienestar' : 'Relationship between sleep hours and well-being'}</p>
           <div className="h-[300px]">
             <Scatter 
               data={{
@@ -577,11 +581,11 @@ const PaginaEstadisticas = () => {
                 scales: {
                   x: {
                     ...chartOptions.scales.x,
-                    title: { display: true, text: 'Horas de sueño', font: { size: 10, weight: 'bold' } }
+                    title: { display: true, text: idioma === 'es' ? 'Horas de sueño' : 'Sleep hours', font: { size: 10, weight: 'bold' } }
                   },
                   y: {
                     ...chartOptions.scales.y,
-                    title: { display: true, text: 'Puntos de ánimo', font: { size: 10, weight: 'bold' } }
+                    title: { display: true, text: idioma === 'es' ? 'Puntos de ánimo' : 'Mood points', font: { size: 10, weight: 'bold' } }
                   }
                 }
               }} 

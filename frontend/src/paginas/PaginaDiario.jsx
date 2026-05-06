@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import { useIdioma } from '../contextos/ContextoIdioma';
 import { guardarEntradaDiaria, obtenerEntradaHoy } from '../servicios/servicioAPI';
 import logoImproveMe from '../assets/logo_improveme.png';
 import logoCompleto from '../assets/logo_completo.png';
@@ -20,6 +21,7 @@ import moodGenial from '../assets/estados_animo/genial.png';
 
 export function PaginaDiario() {
   const { usuario, token, actualizarUsuario } = useAutenticacion();
+  const { idioma, t } = useIdioma();
   const [humor, setHumor] = useState(3); // 1-5
   const [sueno, setSueno] = useState(8); // Horas de sueño (0-16)
   const [texto, setTexto] = useState('');
@@ -27,7 +29,7 @@ export function PaginaDiario() {
   const [audio, setAudio] = useState(null); // URL local para preview o URL del backend
   const [archivoImagen, setArchivoImagen] = useState(null); // Objeto File real
   const [archivoAudio, setArchivoAudio] = useState(null); // Objeto File real
-  const [fecha] = useState(new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }));
+  const fecha = new Date().toLocaleDateString(idioma === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
   const [mensajeStatus, setMensajeStatus] = useState({ texto: '', tipo: '' }); // { texto, tipo: 'exito' | 'error' }
   const [estaGuardando, setEstaGuardando] = useState(false);
 
@@ -342,11 +344,11 @@ export function PaginaDiario() {
   };
 
   const humores = [
-    { id: 1, imagen: moodFatal, color: '#EF4444', label: 'Fatal' },
-    { id: 2, imagen: moodMal, color: '#F97316', label: 'Mal' },
-    { id: 3, imagen: moodDecente, color: '#FACC15', label: 'Decente' },
-    { id: 4, imagen: moodBien, color: '#90BE6D', label: 'Bien' },
-    { id: 5, imagen: moodGenial, color: '#4D908E', label: 'Genial' },
+    { id: 1, imagen: moodFatal, color: '#EF4444', label: idioma === 'es' ? 'Fatal' : 'Fatal' },
+    { id: 2, imagen: moodMal, color: '#F97316', label: idioma === 'es' ? 'Mal' : 'Bad' },
+    { id: 3, imagen: moodDecente, color: '#FACC15', label: idioma === 'es' ? 'Decente' : 'Decent' },
+    { id: 4, imagen: moodBien, color: '#90BE6D', label: idioma === 'es' ? 'Bien' : 'Good' },
+    { id: 5, imagen: moodGenial, color: '#4D908E', label: idioma === 'es' ? 'Genial' : 'Great' },
   ];
 
   return (
@@ -372,9 +374,9 @@ export function PaginaDiario() {
 
             {/* Título y Fecha */}
             <div>
-              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white tracking-tight transition-colors duration-300">Entrada del {fecha}</h2>
+              <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white tracking-tight transition-colors duration-300">{t('nav_diario')} - {fecha}</h2>
               <p className="text-md text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">
-                {usuario?.alias ? `Hola ${usuario.alias}, ¿cómo te sientes hoy?` : '¿Cómo te sientes hoy?'}
+                {usuario?.alias ? `${idioma === 'es' ? 'Hola' : 'Hello'} ${usuario.alias}, ${t('diario_titulo').toLowerCase()}` : t('diario_titulo')}
               </p>
             </div>
 
@@ -400,12 +402,12 @@ export function PaginaDiario() {
 
             {/* Área de Texto */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 dark:text-gray-500 ml-4 uppercase tracking-widest">Tu Diario</label>
+              <label className="text-xs font-bold text-gray-400 dark:text-gray-500 ml-4 uppercase tracking-widest">{t('nav_diario')}</label>
               <div className="w-full h-96 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-[40px] shadow-inner border-2 border-white dark:border-gray-700 focus-within:border-[#4F99CC] transition-all py-6 px-4">
                 <textarea
                   value={texto}
                   onChange={(e) => setTexto(e.target.value)}
-                  placeholder="Escribe aquí tus pensamientos..."
+                  placeholder={t('diario_placeholder')}
                   className="w-full h-full bg-transparent outline-none resize-none text-gray-700 dark:text-gray-200 leading-relaxed custom-scrollbar overflow-y-auto pr-4 transition-colors duration-300"
                 ></textarea>
               </div>
@@ -414,8 +416,8 @@ export function PaginaDiario() {
             {/* Slider de Sueño (Custom) */}
             <div className="space-y-4 px-4">
               <div className="flex justify-between items-end">
-                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Calidad del Sueño</label>
-                <span className="text-[#4F99CC] font-bold">{sueno >= 10 ? '+10' : sueno} horas</span>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('diario_sueno')}</label>
+                <span className="text-[#4F99CC] font-bold">{sueno >= 10 ? '+10' : sueno} {idioma === 'es' ? 'horas' : 'hours'}</span>
               </div>
               <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-visible">
                 <div
@@ -452,7 +454,7 @@ export function PaginaDiario() {
                 onClick={() => inputImagenRef.current.click()}
                 className={`flex-1 relative py-3 px-6 bg-white dark:bg-gray-800 border rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${imagen ? 'border-[#4F99CC] text-[#4F99CC]' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
               >
-                {imagen ? 'Imagen Lista' : 'Añadir Imagen'}
+                {imagen ? (idioma === 'es' ? 'Imagen Lista' : 'Image Ready') : (idioma === 'es' ? 'Añadir Imagen' : 'Add Image')}
                 {imagen && (
                   <motion.div
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
@@ -473,7 +475,7 @@ export function PaginaDiario() {
                       : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
               >
-                {estaGrabando ? 'Grabando...' : audio ? 'Audio Listo' : 'Grabar Audio'}
+                {estaGrabando ? (idioma === 'es' ? 'Grabando...' : 'Recording...') : audio ? (idioma === 'es' ? 'Audio Listo' : 'Audio Ready') : (idioma === 'es' ? 'Grabar Audio' : 'Record Audio')}
                 {audio && !estaGrabando && (
                   <motion.div
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
@@ -493,7 +495,7 @@ export function PaginaDiario() {
               disabled={estaGuardando}
               className={`w-full py-4 rounded-full font-bold shadow-xl transition-all ${estaGuardando ? 'bg-gray-400 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-900'}`}
             >
-              {estaGuardando ? 'Guardando...' : 'Guardar Entrada'}
+              {estaGuardando ? t('cargando') : t('guardar')}
             </motion.button>
 
             <AnimatePresence>
@@ -541,7 +543,7 @@ export function PaginaDiario() {
 
                     {/* Indicador de Sueño en la Tarjeta */}
                     <div className="mb-4 flex items-center gap-2 bg-[#4F99CC]/10 px-4 py-1.5 rounded-full border border-[#4F99CC]/20 shrink-0">
-                      <span className="text-xs font-bold text-[#4F99CC]">{sueno >= 10 ? '+10' : sueno}h de sueño</span>
+                      <span className="text-xs font-bold text-[#4F99CC]">{sueno >= 10 ? '+10' : sueno}{idioma === 'es' ? 'h de sueño' : 'h sleep'}</span>
                     </div>
 
                     {/* Vista previa de Imagen */}
@@ -602,7 +604,7 @@ export function PaginaDiario() {
                     {/* Contenedor de Texto con Scroll Independiente */}
                     <div className="flex-1 w-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-start py-2" style={{ transform: "translateZ(0)" }}>
                       <p className="text-lg font-['Tilt_Warp'] text-gray-800 dark:text-white leading-tight text-center w-full break-words transition-colors duration-300">
-                        {texto || "Aquí se muestra cómo queda la entrada..."}
+                        {texto || (idioma === 'es' ? 'Aquí se muestra cómo queda la entrada...' : 'This is how your entry will look...')}
                       </p>
                     </div>
 
