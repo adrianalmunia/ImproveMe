@@ -86,7 +86,7 @@ export function Autenticacion({
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-neutral-100 dark:bg-gray-900 overflow-hidden font-['Inter'] transition-colors duration-300 p-4 lg:p-8">
+        <div className="flex items-center justify-center min-h-screen bg-neutral-100 dark:bg-gray-900 overflow-y-auto font-['Inter'] transition-colors duration-300 p-4 lg:p-8">
             <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -112,7 +112,7 @@ export function Autenticacion({
                             Desbloquea tu<br />mejor versión.
                         </h1>
                         <p className="text-white/80 text-sm max-w-[80%] font-medium">
-                            Únete a ImproveMe y comienza a transformar tus hábitos, hacer un seguimiento de tu progreso y subir de nivel en la vida real.
+                            Únete a ImproveMe y comienza a transformar tus hábitos, hacer un seguimiento de tu progreso y subir de rango en la vida real.
                         </p>
                     </div>
 

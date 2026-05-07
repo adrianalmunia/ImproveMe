@@ -48,7 +48,7 @@ const LandingPage = ({ onIrAAutenticacion }) => {
     {
       icon: <Target className="text-amber-500" size={24} />,
       title: "Hábitos Gamificados",
-      description: "Gana XP, sube de nivel y compite en el ranking global mientras forjas tu disciplina."
+      description: "Gana XP, asciende de rango y compite en el ranking global mientras forjas tu disciplina."
     },
     {
       icon: <BarChart2 className="text-indigo-500" size={24} />,
@@ -270,7 +270,7 @@ const LandingPage = ({ onIrAAutenticacion }) => {
                   <Zap size={20} />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">¡Nivel Superado!</p>
+                  <p className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">¡Rango Superado!</p>
                   <p className="text-sm font-bold text-[#2C4159] dark:text-white leading-tight">Has ganado 250 XP esta semana</p>
                 </div>
               </div>
@@ -299,8 +299,8 @@ const LandingPage = ({ onIrAAutenticacion }) => {
           >
             <h2 className="text-4xl md:text-6xl font-['Tilt_Warp'] mb-8">Mejora en la <span className="text-amber-500">Vida Real</span></h2>
             <p className="text-gray-400 text-lg max-w-3xl mx-auto font-medium">
-              Trata tu vida como un RPG. Completa tus hábitos diarios, sube de nivel y desbloquea rangos. 
-              Desde "Novato" hasta "Maestro de Vida", el camino es tuyo.
+              Trata tu vida como un RPG. Completa tus hábitos diarios, acumula XP y asciende de rango. 
+              Desde "Sin Rango" hasta "Rubí", el camino es tuyo.
             </p>
           </motion.div>
           

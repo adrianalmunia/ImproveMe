@@ -26,8 +26,6 @@ const PaginaHabitos = ({ setVistaActual }) => {
 
   // Puntos de XP guardados en el usuario (o por defecto)
   const xpActual = usuario?.puntos_experiencia || 0;
-  const nivelActual = Math.floor(xpActual / 100) + 1; // Cada 100 XP es un nivel (por simplificar)
-  const xpParaSiguienteNivel = 100 - (xpActual % 100);
   
   const rankInfo = calcularRangoInfo(xpActual);
 
@@ -334,16 +332,16 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <div className="w-4 h-4 bg-white dark:bg-gray-800 rotate-45 absolute -top-2 left-1/2 -translate-x-1/2 border-l border-t border-gray-100 dark:border-gray-700" />
             </div>
 
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4F99CC] to-[#C6A55E] flex items-center justify-center text-white shadow-md">
-              <Trophy size={24} />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md">
+              <RankIcon rankData={rankInfo.category} tier={rankInfo.tier} size="sm" showGlow={false} />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">{idioma === 'es' ? 'Nivel' : 'Level'} {nivelActual}</p>
+              <p className={`text-[10px] uppercase font-bold leading-none ${rankInfo.category.color}`}>{getRankName(rankInfo.fullName)}</p>
               <p className="text-xl font-black text-[#2C4159] dark:text-white transition-colors duration-300">{xpActual} XP</p>
               <div className="w-full bg-gray-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] rounded-full"
-                  style={{ width: `${(xpActual % 100)}%` }}
+                  className={`h-full bg-gradient-to-r ${rankInfo.category.gradient} rounded-full`}
+                  style={{ width: `${rankInfo.progressPercentage}%` }}
                 />
               </div>
             </div>
@@ -651,16 +649,22 @@ const PaginaHabitos = ({ setVistaActual }) => {
       <section className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-gradient-to-br from-[#4F99CC] to-[#2C4159] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg">
           <div className="relative z-10">
-            <h3 className="text-2xl font-black mb-2">{idioma === 'es' ? `Progreso hacia Lvl ${nivelActual + 1}` : `Progress to Lvl ${nivelActual + 1}`}</h3>
+            <h3 className="text-2xl font-black mb-2">
+              {rankInfo.isMaxRank 
+                ? (idioma === 'es' ? '¡Rango Máximo Alcanzado!' : 'Max Rank Achieved!')
+                : (idioma === 'es' ? `Progreso hacia ${getRankName(rankInfo.nextRank?.fullName)}` : `Progress to ${getRankName(rankInfo.nextRank?.fullName)}`)}
+            </h3>
             <p className="text-white/70 text-sm mb-6 max-w-xs">
-              {idioma === 'es' 
-                ? `Te faltan ${xpParaSiguienteNivel} XP para alcanzar el siguiente nivel. ¡Completa más tareas!` 
-                : `${xpParaSiguienteNivel} XP left to reach the next level. Complete more tasks!`}
+              {rankInfo.isMaxRank
+                ? (idioma === 'es' ? 'Has alcanzado la cima. Eres la definición de ImproveMe.' : 'You have reached the top. You are the definition of ImproveMe.')
+                : (idioma === 'es' 
+                  ? `Te faltan ${rankInfo.xpRemaining} XP para ascender. ¡Completa más tareas!` 
+                  : `${rankInfo.xpRemaining} XP left to rank up. Complete more tasks!`)}
             </p>
             <div className="w-full bg-white/20 h-3 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${(xpActual % 100)}%` }}
+                animate={{ width: `${rankInfo.progressPercentage}%` }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
                 className="h-full bg-white"
               />

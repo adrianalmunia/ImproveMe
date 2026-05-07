@@ -301,7 +301,7 @@ const PaginaRangos = () => {
         {/* Barra de Progreso Mejorada */}
         <div className="relative z-10 max-w-2xl mx-auto mt-20 space-y-6">
           <div className="flex justify-between items-end px-2">
-            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest transition-colors duration-300">{idioma === 'es' ? 'Progreso del Nivel' : 'Level Progress'}</p>
+            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest transition-colors duration-300">{idioma === 'es' ? 'Progreso del Rango' : 'Rank Progress'}</p>
             <p className="text-sm font-black text-gray-700 dark:text-gray-200 transition-colors duration-300">
               <span className={rankInfo.category.color}>{rankInfo.xpInCurrentTier}</span>
               <span className="text-gray-300 dark:text-gray-600 mx-1">/</span>
