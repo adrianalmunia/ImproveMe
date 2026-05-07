@@ -26,7 +26,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
 
   // Puntos de XP guardados en el usuario (o por defecto)
   const xpActual = usuario?.puntos_experiencia || 0;
-  
+
   const rankInfo = calcularRangoInfo(xpActual);
 
   // IDs temporales (timestamps) para que el backend los trate como nuevos
@@ -75,7 +75,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
       if (!token) return;
       try {
         setEstaCargandoDatos(true);
-        
+
         // 1. Refrescar datos del usuario (XP, nivel)
         await refrescarUsuario();
 
@@ -123,7 +123,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
       try {
         necesitaSincronizar.current = false;
         const nuevosDatos = await servicioAPI.sincronizarGamificacion(datosRef.current, tokenRef.current);
-        
+
         // Actualizar estado con IDs reales de la BD (reemplazando IDs temporales)
         // Marcar 1 skip para que el efecto no vuelva a disparar un nuevo sync
         if (nuevosDatos) {
@@ -171,8 +171,8 @@ const PaginaHabitos = ({ setVistaActual }) => {
   const ganarXP = (cantidad, e) => {
     // 1. Actualizar XP global
     if (usuario) {
-      actualizarUsuario(prev => ({ 
-        puntos_experiencia: (prev.puntos_experiencia || 0) + cantidad 
+      actualizarUsuario(prev => ({
+        puntos_experiencia: (prev.puntos_experiencia || 0) + cantidad
       }));
     }
 
@@ -210,8 +210,8 @@ const PaginaHabitos = ({ setVistaActual }) => {
     const hoy = new Date();
     const fechaItem = new Date(fecha);
     return fechaItem.getDate() === hoy.getDate() &&
-           fechaItem.getMonth() === hoy.getMonth() &&
-           fechaItem.getFullYear() === hoy.getFullYear();
+      fechaItem.getMonth() === hoy.getMonth() &&
+      fechaItem.getFullYear() === hoy.getFullYear();
   };
 
   const eliminarItem = (id, tipo) => {
@@ -275,14 +275,14 @@ const PaginaHabitos = ({ setVistaActual }) => {
               {(() => {
                 const todos = [...habitos, ...diarias];
                 const rachaMax = Math.max(0, ...todos.map(i => Math.max(i.racha || 0, i.rachaAnterior || 0)));
-                
+
                 if (rachaMax === 0) {
                   return <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">0 {idioma === 'es' ? 'Días' : 'Days'}</p>;
                 }
 
                 const mejores = todos.filter(i => Math.max(i.racha || 0, i.rachaAnterior || 0) === rachaMax);
-                const nombresStr = mejores.length > 2 
-                  ? `${mejores[0].nombre} y ${mejores.length - 1} más` 
+                const nombresStr = mejores.length > 2
+                  ? `${mejores[0].nombre} y ${mejores.length - 1} más`
                   : mejores.map(i => i.nombre).join(', ');
 
                 return (
@@ -291,7 +291,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                     <p className="text-[10px] font-bold text-[#4F99CC] truncate max-w-[120px]">
                       {nombresStr}
                     </p>
-                    
+
                     {/* Tooltip Custom Visual */}
                     <div className="absolute left-0 top-full mt-1 hidden group-hover:block z-[100]">
                       <div className="bg-[#2C4159] text-white text-[10px] px-3 py-2 rounded-xl shadow-xl border border-white/10 backdrop-blur-sm min-w-[150px]">
@@ -322,18 +322,18 @@ const PaginaHabitos = ({ setVistaActual }) => {
                   <p className={`text-xl font-black uppercase tracking-tighter ${rankInfo.category.color}`}>{getRankName(rankInfo.fullName)}</p>
                 </div>
                 <div className="w-full h-1 bg-gray-100 dark:bg-gray-700 rounded-full mt-2 overflow-hidden">
-                   <div className={`h-full bg-gradient-to-r ${rankInfo.category.gradient}`} style={{ width: `${rankInfo.progressPercentage}%` }} />
+                  <div className={`h-full bg-gradient-to-r ${rankInfo.category.gradient}`} style={{ width: `${rankInfo.progressPercentage}%` }} />
                 </div>
                 <p className="text-[9px] font-bold text-gray-400 mt-1 uppercase">
-                   {rankInfo.isMaxRank ? (idioma === 'es' ? '¡Máximo Rango!' : 'Max Rank!') : (idioma === 'es' ? `Faltan ${rankInfo.xpRemaining} XP para subir` : `${rankInfo.xpRemaining} XP left to rank up`)}
+                  {rankInfo.isMaxRank ? (idioma === 'es' ? '¡Máximo Rango!' : 'Max Rank!') : (idioma === 'es' ? `Faltan ${rankInfo.xpRemaining} XP para subir` : `${rankInfo.xpRemaining} XP left to rank up`)}
                 </p>
               </div>
               {/* Flecha del Tooltip */}
               <div className="w-4 h-4 bg-white dark:bg-gray-800 rotate-45 absolute -top-2 left-1/2 -translate-x-1/2 border-l border-t border-gray-100 dark:border-gray-700" />
             </div>
 
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md">
-              <RankIcon rankData={rankInfo.category} tier={rankInfo.tier} size="sm" showGlow={false} />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4F99CC] to-[#C6A55E] flex items-center justify-center text-white shadow-md">
+              <Trophy size={24} />
             </div>
             <div>
               <p className={`text-[10px] uppercase font-bold leading-none ${rankInfo.category.color}`}>{getRankName(rankInfo.fullName)}</p>
@@ -383,18 +383,18 @@ const PaginaHabitos = ({ setVistaActual }) => {
                   onKeyDown={(e) => e.key === 'Enter' && agregarItem('habito')}
                 />
                 <div className="flex justify-between items-center mb-3">
-                   <p className="text-[10px] font-bold text-gray-400 uppercase">{idioma === 'es' ? 'Días/Semana:' : 'Days/Week:'}</p>
-                   <div className="flex gap-1">
-                     {[1, 2, 3, 4, 5, 6, 7].map(d => (
-                       <button
-                         key={d}
-                         onClick={() => setFrecuenciaSeleccionada(d)}
-                         className={`w-6 h-6 rounded-md text-[10px] font-bold transition-colors ${frecuenciaSeleccionada === d ? 'bg-[#4F99CC] text-white' : 'bg-gray-100 text-gray-400'}`}
-                       >
-                         {d}
-                       </button>
-                     ))}
-                   </div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase">{idioma === 'es' ? 'Días/Semana:' : 'Days/Week:'}</p>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5, 6, 7].map(d => (
+                      <button
+                        key={d}
+                        onClick={() => setFrecuenciaSeleccionada(d)}
+                        className={`w-6 h-6 rounded-md text-[10px] font-bold transition-colors ${frecuenciaSeleccionada === d ? 'bg-[#4F99CC] text-white' : 'bg-gray-100 text-gray-400'}`}
+                      >
+                        {d}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <button onClick={() => setSeccionActiva(null)} className="text-xs font-bold text-gray-400 px-2 py-1">{t('cancelar')}</button>
@@ -412,7 +412,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border dark:border-gray-700 flex items-center justify-between hover:shadow-md transition-all border-l-4 ${h.estado === 'positivo' ? 'border-l-green-400 opacity-80' : h.estado === 'negativo' ? 'border-l-red-400 opacity-80' : 'border-l-[#4F99CC]'}`}
               >
                 <div className="flex items-center gap-3">
-                  <button 
+                  <button
                     onClick={() => eliminarItem(h.id, 'habito')}
                     className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                   >
@@ -424,54 +424,54 @@ const PaginaHabitos = ({ setVistaActual }) => {
                   <div>
                     <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${h.estado ? 'text-gray-500 line-through' : ''}`}>{h.nombre}</p>
                     <div className="flex items-center gap-3 mt-0.5">
-                         <div className="flex items-center gap-1">
-                           <Flame size={12} className={h.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
-                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{h.racha} {idioma === 'es' ? 'días' : 'days'}</p>
-                         </div>
-                         {h.frecuenciaSemanal < 7 && (
-                           <div className="flex items-center gap-1">
-                             <Calendar size={12} className="text-[#4F99CC]" />
-                             <p className="text-[10px] text-[#4F99CC] font-bold uppercase tracking-wider">{h.frecuenciaSemanal} d/sem</p>
-                           </div>
-                         )}
+                      <div className="flex items-center gap-1">
+                        <Flame size={12} className={h.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{h.racha} {idioma === 'es' ? 'días' : 'days'}</p>
+                      </div>
+                      {h.frecuenciaSemanal < 7 && (
+                        <div className="flex items-center gap-1">
+                          <Calendar size={12} className="text-[#4F99CC]" />
+                          <p className="text-[10px] text-[#4F99CC] font-bold uppercase tracking-wider">{h.frecuenciaSemanal} d/sem</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={(e) => {
-                        if (h.estado === 'positivo') {
-                            // Deshacer positivo: volver a neutro y bajar racha
-                            setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: Math.max(0, item.racha - 1) } : item));
-                            ganarXP(-10, e);
-                        } else {
-                            // Marcar positivo: si estaba en negativo, restauramos rachaAnterior antes de sumar
-                            const rachaBase = h.estado === 'negativo' ? h.rachaAnterior : h.racha;
-                            setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'positivo', racha: rachaBase + 1 } : item));
-                            ganarXP(10, e);
-                        }
-                      }}
-                      className={`p-1.5 rounded-lg transition-transform active:scale-90 ${h.estado === 'positivo' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
-                    >
-                      <Plus size={16} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        if (h.estado === 'negativo') {
-                            // Deshacer negativo: restaurar la racha que teníamos
-                            setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: item.rachaAnterior || 0 } : item));
-                            ganarXP(10, e);
-                        } else {
-                            // Marcar negativo: guardar racha actual solo si venimos de neutro
-                            const nuevaRachaAnterior = h.estado === 'positivo' ? Math.max(0, h.racha - 1) : h.racha;
-                            setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'negativo', rachaAnterior: nuevaRachaAnterior, racha: 0 } : item));
-                            ganarXP(-10, e);
-                        }
-                      }}
-                      className={`p-1.5 rounded-lg transition-transform active:scale-90 ${h.estado === 'negativo' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600 hover:bg-red-100'}`}
-                    >
-                      <Minus size={16} />
-                    </button>
+                  <button
+                    onClick={(e) => {
+                      if (h.estado === 'positivo') {
+                        // Deshacer positivo: volver a neutro y bajar racha
+                        setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: Math.max(0, item.racha - 1) } : item));
+                        ganarXP(-10, e);
+                      } else {
+                        // Marcar positivo: si estaba en negativo, restauramos rachaAnterior antes de sumar
+                        const rachaBase = h.estado === 'negativo' ? h.rachaAnterior : h.racha;
+                        setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'positivo', racha: rachaBase + 1 } : item));
+                        ganarXP(10, e);
+                      }
+                    }}
+                    className={`p-1.5 rounded-lg transition-transform active:scale-90 ${h.estado === 'positivo' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      if (h.estado === 'negativo') {
+                        // Deshacer negativo: restaurar la racha que teníamos
+                        setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: item.rachaAnterior || 0 } : item));
+                        ganarXP(10, e);
+                      } else {
+                        // Marcar negativo: guardar racha actual solo si venimos de neutro
+                        const nuevaRachaAnterior = h.estado === 'positivo' ? Math.max(0, h.racha - 1) : h.racha;
+                        setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'negativo', rachaAnterior: nuevaRachaAnterior, racha: 0 } : item));
+                        ganarXP(-10, e);
+                      }
+                    }}
+                    className={`p-1.5 rounded-lg transition-transform active:scale-90 ${h.estado === 'negativo' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600 hover:bg-red-100'}`}
+                  >
+                    <Minus size={16} />
+                  </button>
                 </div>
               </motion.div>
             ))}
@@ -544,7 +544,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                     <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{d.racha} {idioma === 'es' ? 'días' : 'days'}</p>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => eliminarItem(d.id, 'diaria')}
                   className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                 >
@@ -626,13 +626,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 <div className="flex-1">
                   <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${tarea.completada ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{tarea.nombre}</p>
                   <span className={`inline-block mt-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${tarea.prioridad === 'alta' ? 'bg-red-100 text-red-600' :
-                      tarea.prioridad === 'media' ? 'bg-orange-100 text-orange-600' :
-                        'bg-blue-100 text-blue-600'
+                    tarea.prioridad === 'media' ? 'bg-orange-100 text-orange-600' :
+                      'bg-blue-100 text-blue-600'
                     }`}>
                     {idioma === 'es' ? tarea.prioridad : (tarea.prioridad === 'alta' ? 'High' : tarea.prioridad === 'media' ? 'Medium' : 'Low')}
                   </span>
                 </div>
-                <button 
+                <button
                   onClick={() => eliminarItem(tarea.id, 'tarea')}
                   className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                 >
@@ -650,15 +650,15 @@ const PaginaHabitos = ({ setVistaActual }) => {
         <div className="bg-gradient-to-br from-[#4F99CC] to-[#2C4159] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg">
           <div className="relative z-10">
             <h3 className="text-2xl font-black mb-2">
-              {rankInfo.isMaxRank 
+              {rankInfo.isMaxRank
                 ? (idioma === 'es' ? '¡Rango Máximo Alcanzado!' : 'Max Rank Achieved!')
                 : (idioma === 'es' ? `Progreso hacia ${getRankName(rankInfo.nextRank?.fullName)}` : `Progress to ${getRankName(rankInfo.nextRank?.fullName)}`)}
             </h3>
             <p className="text-white/70 text-sm mb-6 max-w-xs">
               {rankInfo.isMaxRank
                 ? (idioma === 'es' ? 'Has alcanzado la cima. Eres la definición de ImproveMe.' : 'You have reached the top. You are the definition of ImproveMe.')
-                : (idioma === 'es' 
-                  ? `Te faltan ${rankInfo.xpRemaining} XP para ascender. ¡Completa más tareas!` 
+                : (idioma === 'es'
+                  ? `Te faltan ${rankInfo.xpRemaining} XP para ascender. ¡Completa más tareas!`
                   : `${rankInfo.xpRemaining} XP left to rank up. Complete more tasks!`)}
             </p>
             <div className="w-full bg-white/20 h-3 rounded-full overflow-hidden">
@@ -683,7 +683,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
               <p className="text-gray-400 text-sm font-medium leading-tight mt-1">{idioma === 'es' ? 'Acumula XP para competir en la tabla de clasificación semanal.' : 'Earn XP to compete in the weekly leaderboard.'}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => setVistaActual('ranked')}
             className="w-full py-3 bg-[#2C4159] text-white rounded-2xl font-black text-sm hover:bg-[#1A2836] transition-colors shadow-md"
           >
