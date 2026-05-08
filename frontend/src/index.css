@@ -25,19 +25,19 @@ html, body {
 }
 
 /* Scrollbar Personalizado */
-.custom-scrollbar::-webkit-scrollbar {
+.scroll-personalizado::-webkit-scrollbar {
   width: 5px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
+.scroll-personalizado::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
+.scroll-personalizado::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 20px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+.scroll-personalizado::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
