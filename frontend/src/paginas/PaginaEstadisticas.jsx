@@ -107,13 +107,23 @@ const PaginaEstadisticas = () => {
     cargarStats();
   }, [usuario, token, rangoDias]);
 
+  // Helper para truncar texto con elipsis
+  const truncarLabel = (label, limite = 12) => {
+    if (typeof label === 'string' && label.length > limite) {
+      return label.substring(0, limite) + '...';
+    }
+    return label;
+  };
+
   // Si no hay datos, mostramos el estado de carga o el mensaje de error
   if (estaCargando) {
     return (
       <div className="h-full w-full flex items-center justify-center bg-neutral-50 dark:bg-gray-900 transition-colors duration-300">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-[#4F99CC] border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-black text-[#2C4159] dark:text-gray-300 uppercase tracking-widest transition-colors duration-300">Analizando tu progreso...</p>
+          <p className="text-sm font-black text-[#2C4159] dark:text-gray-300 uppercase tracking-widest transition-colors duration-300">
+            {idioma === 'es' ? 'Analizando tu progreso...' : 'Analyzing your progress...'}
+          </p>
         </div>
       </div>
     );
@@ -126,16 +136,19 @@ const PaginaEstadisticas = () => {
         <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-[32px] shadow-sm flex items-center justify-center mb-6 border border-dashed border-gray-200 dark:border-gray-700 transition-colors duration-300">
           <Activity size={48} className="text-gray-200 dark:text-gray-600" />
         </div>
-        <h2 className="text-2xl font-black text-[#2C4159] dark:text-white mb-2 uppercase tracking-tight transition-colors duration-300">Faltan datos para el análisis</h2>
+        <h2 className="text-2xl font-black text-[#2C4159] dark:text-white mb-2 uppercase tracking-tight transition-colors duration-300">
+          {idioma === 'es' ? 'Faltan datos para el análisis' : 'Insufficient data for analysis'}
+        </h2>
         <p className="text-gray-400 dark:text-gray-500 max-w-sm font-medium transition-colors duration-300">
-          Necesitamos al menos 2 registros diarios para empezar a generar tus estadísticas. 
-          ¡Sigue escribiendo en tu diario y vuelve pronto!
+          {idioma === 'es' 
+            ? 'Necesitamos al menos 2 registros diarios para empezar a generar tus estadísticas. ¡Sigue escribiendo en tu diario y vuelve pronto!' 
+            : 'We need at least 2 daily logs to start generating your statistics. Keep writing in your journal and come back soon!'}
         </p>
         <button 
           onClick={() => window.location.reload()}
           className="mt-8 bg-[#4F99CC] text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-100 hover:scale-105 transition-transform"
         >
-          Actualizar
+          {idioma === 'es' ? 'Actualizar' : 'Refresh'}
         </button>
       </div>
     );
@@ -162,7 +175,14 @@ const PaginaEstadisticas = () => {
       y: {
         beginAtZero: true,
         grid: { display: false },
-        ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' }
+        ticks: { 
+          font: { size: 10, weight: 'bold' }, 
+          color: '#94a3b8',
+          callback: function(value) {
+            const label = this.getLabelForValue(value);
+            return truncarLabel(label, 15);
+          }
+        }
       },
       x: {
         grid: { display: false },
@@ -176,7 +196,7 @@ const PaginaEstadisticas = () => {
     labels: stats?.animoEvolucion.map(e => new Date(e.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })),
     datasets: [
       {
-        label: 'Estado de Ánimo',
+        label: idioma === 'es' ? 'Estado de Ánimo' : 'Mood Level',
         data: stats?.animoEvolucion.map(e => e.valor),
         borderColor: '#4F99CC',
         segment: {
@@ -217,7 +237,7 @@ const PaginaEstadisticas = () => {
     labels: stats?.cumplimientoHabitos.map(h => h.nombre),
     datasets: [
       {
-        label: `Días completados (últimos ${rangoDias}d)`,
+        label: idioma === 'es' ? `Días completados (últimos ${rangoDias}d)` : `Days completed (last ${rangoDias}d)`,
         data: stats?.cumplimientoHabitos.map(h => h.total),
         backgroundColor: [
           '#4F99CC', '#C6A55E', '#2C4159', '#F97316', '#10B981', '#6366F1'
@@ -234,14 +254,14 @@ const PaginaEstadisticas = () => {
     labels: habitosNombres,
     datasets: [
       {
-        label: 'Con Hábito',
+        label: idioma === 'es' ? 'Con Hábito' : 'With Habit',
         data: habitosNombres.map(n => stats.correlacionHabitoAnimo[n].con),
         backgroundColor: 'rgba(79, 153, 204, 0.2)',
         borderColor: '#4F99CC',
         pointBackgroundColor: '#4F99CC',
       },
       {
-        label: 'Sin Hábito',
+        label: idioma === 'es' ? 'Sin Hábito' : 'Without Habit',
         data: habitosNombres.map(n => stats.correlacionHabitoAnimo[n].sin),
         backgroundColor: 'rgba(198, 165, 94, 0.2)',
         borderColor: '#C6A55E',
@@ -255,7 +275,7 @@ const PaginaEstadisticas = () => {
     labels: stats?.meditacion?.evolucion?.map(e => new Date(e.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })) || [],
     datasets: [
       {
-        label: 'Minutos Meditados',
+        label: idioma === 'es' ? 'Minutos Meditados' : 'Minutes Meditated',
         data: stats?.meditacion?.evolucion?.map(e => e.minutos) || [],
         backgroundColor: 'rgba(16, 185, 129, 0.6)',
         borderColor: '#10B981',
@@ -341,7 +361,7 @@ const PaginaEstadisticas = () => {
               <Activity size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Registros ({rangoDias}d)</p>
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{idioma === 'es' ? 'Registros' : 'Logs'} ({rangoDias}d)</p>
               <p className="text-2xl font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats?.animoEvolucion.length}</p>
             </div>
           </div>
@@ -416,7 +436,7 @@ const PaginaEstadisticas = () => {
                         <Flame size={16} />
                      </div>
                      <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-black text-[#2C4159] dark:text-white truncate">{r.nombre}</p>
+                        <p className="text-[12px] font-black text-[#2C4159] dark:text-white truncate" title={r.nombre}>{r.nombre}</p>
                         <p className="text-[9px] font-bold text-orange-500">{r.racha} {idioma === 'es' ? (r.racha === 1 ? 'día' : 'días') : (r.racha === 1 ? 'day' : 'days')} {idioma === 'es' ? 'seguidos' : 'streak'}</p>
                      </div>
                   </div>
@@ -436,7 +456,7 @@ const PaginaEstadisticas = () => {
                   <Award size={20} />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300">{stats.mejorHabitoHistorico.nombre}</p>
+                  <p className="text-sm font-black text-[#2C4159] dark:text-white leading-tight transition-colors duration-300 truncate" title={stats.mejorHabitoHistorico.nombre}>{stats.mejorHabitoHistorico.nombre}</p>
                   <p className="text-[10px] font-bold text-[#C6A55E] uppercase">{idioma === 'es' ? 'Racha' : 'Streak'}: {stats.mejorHabitoHistorico.racha} {idioma === 'es' ? 'días' : 'days'}</p>
                 </div>
               </div>
@@ -539,7 +559,10 @@ const PaginaEstadisticas = () => {
                   r: {
                     angleLines: { color: 'rgba(0,0,0,0.05)' },
                     grid: { color: 'rgba(0,0,0,0.05)' },
-                    pointLabels: { font: { size: 10, weight: 'bold' } },
+                    pointLabels: { 
+                      font: { size: 10, weight: 'bold' },
+                      callback: (label) => truncarLabel(label, 10)
+                    },
                     ticks: { display: false }
                   }
                 }
@@ -567,7 +590,7 @@ const PaginaEstadisticas = () => {
             <Scatter 
               data={{
                 datasets: [{
-                  label: 'Días',
+                  label: idioma === 'es' ? 'Días' : 'Days',
                   data: stats?.correlacionSuenoAnimo,
                   backgroundColor: stats?.correlacionSuenoAnimo.map(d => obtenerColorSueno(d.x)),
                   pointRadius: 8,

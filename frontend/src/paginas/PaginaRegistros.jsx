@@ -181,7 +181,7 @@ export function PaginaRegistros() {
     <main className="flex-1 relative overflow-y-auto h-full p-8 lg:p-12 pb-24 font-['Inter'] dark:bg-gray-900 transition-colors duration-300">
       
       {/* HEADER / LOGO COMPLETO */}
-      <div className="flex justify-center mb-8">
+      <div className="flex flex-col items-center justify-center mb-8">
         <motion.img 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -189,7 +189,6 @@ export function PaginaRegistros() {
           alt="ImproveMe Logo" 
           className="h-16 lg:h-20 object-contain" 
         />
-        <h2 className="text-3xl font-['Tilt_Warp'] text-center mt-4 text-gray-800 dark:text-white uppercase tracking-widest">{t('nav_registros')}</h2>
       </div>
 
       <div className="max-w-6xl mx-auto">

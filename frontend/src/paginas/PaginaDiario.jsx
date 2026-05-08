@@ -434,7 +434,7 @@ export function PaginaDiario() {
                   className="absolute -top-1 w-full h-4 opacity-0 cursor-pointer z-10"
                 />
                 <motion.div
-                  animate={{ left: `${(sueno / 10) * 100}%` }}
+                  style={{ left: `${(sueno / 10) * 100}%` }}
                   className="absolute top-1/2 -translate-y-1/2 -ml-3 w-6 h-6 bg-white dark:bg-gray-800 rounded-full shadow-lg border-2 border-[#4F99CC] pointer-events-none"
                 />
               </div>
