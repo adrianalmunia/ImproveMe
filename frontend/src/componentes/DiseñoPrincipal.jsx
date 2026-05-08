@@ -35,7 +35,7 @@ export function DiseñoPrincipal({ children, vistaActual, setVistaActual }) {
           style={{ background: 'linear-gradient(135deg, #4F99CC 0%, #C6A55E 100%)' }}
           onClick={() => setVistaActual('diario')}
         >
-          <div className="w-full h-full bg-white dark:bg-gray-800 rounded-full overflow-hidden flex items-center justify-center p-1.5 transition-colors duration-300">
+          <div className="w-full h-full bg-white rounded-full overflow-hidden flex items-center justify-center p-1.5 transition-colors duration-300">
             <img src={logoImproveMe} alt="Logo" className="w-full h-full object-contain" />
           </div>
         </div>
