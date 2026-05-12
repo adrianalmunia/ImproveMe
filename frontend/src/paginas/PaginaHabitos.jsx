@@ -236,7 +236,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
   };
 
   return (
-    <div className="h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-y-auto custom-scrollbar p-6 relative transition-colors duration-300">
+    <div className="h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-y-auto custom-scrollbar p-4 md:p-6 relative transition-colors duration-300">
 
       {/* Notificaciones Flotantes de XP */}
       <AnimatePresence>
@@ -255,9 +255,9 @@ const PaginaHabitos = ({ setVistaActual }) => {
       </AnimatePresence>
 
       {/* Header */}
-      <header className="mb-8 flex justify-between items-end">
+      <header className="mb-6 md:mb-8 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
         <div>
-          <h1 className="text-4xl font-black text-[#2C4159] dark:text-white tracking-tight mb-1 transition-colors duration-300">
+          <h1 className="text-3xl md:text-4xl font-black text-[#2C4159] dark:text-white tracking-tight mb-1 transition-colors duration-300">
             {idioma === 'es' ? 'Mis ' : 'My '}<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]">{t('nav_habitos')}</span>
           </h1>
           <p className="text-gray-500 dark:text-gray-400 font-medium transition-colors duration-300">
@@ -265,7 +265,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
           </p>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-3 md:gap-4 self-start md:self-auto">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors duration-300">
             <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600">
               <Zap size={24} fill="currentColor" />
@@ -311,7 +311,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 relative overflow-visible group transition-colors duration-300">
             {/* Tooltip de Rango */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 -translate-y-2 group-hover:translate-y-0 z-[100]">
+            <div className="absolute top-full right-0 md:right-auto md:left-1/2 md:-translate-x-1/2 mt-4 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 -translate-y-2 group-hover:translate-y-0 z-[100]">
               <div className="bg-white dark:bg-gray-800 rounded-[32px] p-6 shadow-2xl border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-3 min-w-[200px]">
                 <div className="relative">
                   <div className={`absolute inset-0 blur-xl opacity-20 ${rankInfo.category.bg} rounded-full`} />
@@ -329,7 +329,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 </p>
               </div>
               {/* Flecha del Tooltip */}
-              <div className="w-4 h-4 bg-white dark:bg-gray-800 rotate-45 absolute -top-2 left-1/2 -translate-x-1/2 border-l border-t border-gray-100 dark:border-gray-700" />
+              <div className="w-4 h-4 bg-white dark:bg-gray-800 rotate-45 absolute -top-2 right-4 md:right-auto md:left-1/2 md:-translate-x-1/2 border-l border-t border-gray-100 dark:border-gray-700" />
             </div>
 
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4F99CC] to-[#C6A55E] flex items-center justify-center text-white shadow-md">
@@ -350,7 +350,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
       </header>
 
       {/* Grid de 3 Columnas (Estilo Habitica) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
 
         {/* COLUMNA 1: HÁBITOS */}
         <div className="flex flex-col gap-4">
@@ -412,76 +412,76 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 return 0;
               })
               .map(h => (
-              <motion.div
-                layout
-                key={h.id}
-                className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border dark:border-gray-700 flex items-center justify-between hover:shadow-md transition-all border-l-4 ${h.estado === 'positivo' ? 'border-l-green-400 opacity-80' : h.estado === 'negativo' ? 'border-l-red-400 opacity-80' : 'border-l-[#4F99CC]'}`}
-              >
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => eliminarItem(h.id, 'habito')}
-                    aria-label={idioma === 'es' ? 'Eliminar hábito' : 'Delete habit'}
-                    className="p-1.5 text-gray-300 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 outline-none"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                  <div className={`p-2 rounded-lg ${h.estado === 'positivo' ? 'bg-green-50 text-green-500' : h.estado === 'negativo' ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-500'}`}>
-                    <Target size={18} />
-                  </div>
-                  <div>
-                    <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${h.estado ? 'text-gray-500 line-through' : ''}`}>{h.nombre}</p>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <div className="flex items-center gap-1">
-                        <Flame size={12} className={h.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{h.racha} {idioma === 'es' ? 'días' : 'days'}</p>
-                      </div>
-                      {h.frecuenciaSemanal < 7 && (
+                <motion.div
+                  layout
+                  key={h.id}
+                  className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border dark:border-gray-700 flex items-center justify-between hover:shadow-md transition-all border-l-4 ${h.estado === 'positivo' ? 'border-l-green-400 opacity-80' : h.estado === 'negativo' ? 'border-l-red-400 opacity-80' : 'border-l-[#4F99CC]'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => eliminarItem(h.id, 'habito')}
+                      aria-label={idioma === 'es' ? 'Eliminar hábito' : 'Delete habit'}
+                      className="p-1.5 text-gray-300 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 outline-none"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                    <div className={`p-2 rounded-lg ${h.estado === 'positivo' ? 'bg-green-50 text-green-500' : h.estado === 'negativo' ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-500'}`}>
+                      <Target size={18} />
+                    </div>
+                    <div>
+                      <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${h.estado ? 'text-gray-500 line-through' : ''}`}>{h.nombre}</p>
+                      <div className="flex items-center gap-3 mt-0.5">
                         <div className="flex items-center gap-1">
-                          <Calendar size={12} className="text-[#4F99CC]" />
-                          <p className="text-[10px] text-[#4F99CC] font-bold uppercase tracking-wider">{h.frecuenciaSemanal} d/sem</p>
+                          <Flame size={12} className={h.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{h.racha} {idioma === 'es' ? 'días' : 'days'}</p>
                         </div>
-                      )}
+                        {h.frecuenciaSemanal < 7 && (
+                          <div className="flex items-center gap-1">
+                            <Calendar size={12} className="text-[#4F99CC]" />
+                            <p className="text-[10px] text-[#4F99CC] font-bold uppercase tracking-wider">{h.frecuenciaSemanal} d/sem</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-                  <button
-                    onClick={(e) => {
-                      if (h.estado === 'positivo') {
-                        // Deshacer positivo: volver a neutro y bajar racha
-                        setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: Math.max(0, item.racha - 1) } : item));
-                        ganarXP(-10, e);
-                      } else {
-                        // Marcar positivo: si estaba en negativo, restauramos rachaAnterior antes de sumar
-                        const rachaBase = h.estado === 'negativo' ? h.rachaAnterior : h.racha;
-                        setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'positivo', racha: rachaBase + 1 } : item));
-                        ganarXP(10, e);
-                      }
-                    }}
-                    aria-label={idioma === 'es' ? 'Marcar como positivo' : 'Mark as positive'}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-green-400 ${h.estado === 'positivo' ? 'bg-green-500 text-white shadow-lg' : 'bg-green-50 text-green-500 hover:bg-green-500 hover:text-white'}`}
-                  >
-                    <Plus size={16} />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      if (h.estado === 'negativo') {
-                        setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: item.rachaAnterior || 0 } : item));
-                        ganarXP(10, e);
-                      } else {
-                        const nuevaRachaAnterior = h.estado === 'positivo' ? Math.max(0, h.racha - 1) : h.racha;
-                        setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'negativo', rachaAnterior: nuevaRachaAnterior, racha: 0 } : item));
-                        ganarXP(-10, e);
-                      }
-                    }}
-                    aria-label={idioma === 'es' ? 'Marcar como negativo' : 'Mark as negative'}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-red-400 ${h.estado === 'negativo' ? 'bg-red-500 text-white shadow-lg' : 'bg-red-50 text-red-500 hover:bg-red-500 hover:text-white'}`}
-                  >
-                    <Minus size={16} />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => {
+                        if (h.estado === 'positivo') {
+                          // Deshacer positivo: volver a neutro y bajar racha
+                          setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: Math.max(0, item.racha - 1) } : item));
+                          ganarXP(-10, e);
+                        } else {
+                          // Marcar positivo: si estaba en negativo, restauramos rachaAnterior antes de sumar
+                          const rachaBase = h.estado === 'negativo' ? h.rachaAnterior : h.racha;
+                          setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'positivo', racha: rachaBase + 1 } : item));
+                          ganarXP(10, e);
+                        }
+                      }}
+                      aria-label={idioma === 'es' ? 'Marcar como positivo' : 'Mark as positive'}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-green-400 ${h.estado === 'positivo' ? 'bg-green-500 text-white shadow-lg' : 'bg-green-50 text-green-500 hover:bg-green-500 hover:text-white'}`}
+                    >
+                      <Plus size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        if (h.estado === 'negativo') {
+                          setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: item.rachaAnterior || 0 } : item));
+                          ganarXP(10, e);
+                        } else {
+                          const nuevaRachaAnterior = h.estado === 'positivo' ? Math.max(0, h.racha - 1) : h.racha;
+                          setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'negativo', rachaAnterior: nuevaRachaAnterior, racha: 0 } : item));
+                          ganarXP(-10, e);
+                        }
+                      }}
+                      aria-label={idioma === 'es' ? 'Marcar como negativo' : 'Mark as negative'}
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-red-400 ${h.estado === 'negativo' ? 'bg-red-500 text-white shadow-lg' : 'bg-red-50 text-red-500 hover:bg-red-500 hover:text-white'}`}
+                    >
+                      <Minus size={16} />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
           </div>
         </div>
 
@@ -531,42 +531,42 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 return 0;
               })
               .map(d => (
-              <motion.div
-                layout
-                key={d.id}
-                className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-all border-l-4 hover:shadow-md ${d.completada ? 'border-l-green-400 opacity-60' : 'border-l-[#C6A55E]'}`}
-              >
-                <button
-                  onClick={(e) => {
-                    const completando = !d.completada;
-                    setDiarias(diarias.map(item => item.id === d.id ? { ...item, completada: completando, racha: completando ? (item.racha || 0) + 1 : Math.max(0, (item.racha || 0) - 1) } : item));
-                    if (completando) {
-                      ganarXP(20, e);
-                    } else {
-                      ganarXP(-20, e);
-                    }
-                  }}
-                  aria-label={d.completada ? (idioma === 'es' ? 'Marcar como pendiente' : 'Mark as pending') : (idioma === 'es' ? 'Marcar como completada' : 'Mark as completed')}
-                  className={`shrink-0 w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-green-400 ${d.completada ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 text-transparent hover:border-[#C6A55E] hover:text-[#C6A55E]'}`}
+                <motion.div
+                  layout
+                  key={d.id}
+                  className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-all border-l-4 hover:shadow-md ${d.completada ? 'border-l-green-400 opacity-60' : 'border-l-[#C6A55E]'}`}
                 >
-                  <CheckCircle2 size={16} />
-                </button>
-                <div className="flex-1">
-                  <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${d.completada ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{d.nombre}</p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <Flame size={12} className={d.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{d.racha} {idioma === 'es' ? 'días' : 'days'}</p>
+                  <button
+                    onClick={(e) => {
+                      const completando = !d.completada;
+                      setDiarias(diarias.map(item => item.id === d.id ? { ...item, completada: completando, racha: completando ? (item.racha || 0) + 1 : Math.max(0, (item.racha || 0) - 1) } : item));
+                      if (completando) {
+                        ganarXP(20, e);
+                      } else {
+                        ganarXP(-20, e);
+                      }
+                    }}
+                    aria-label={d.completada ? (idioma === 'es' ? 'Marcar como pendiente' : 'Mark as pending') : (idioma === 'es' ? 'Marcar como completada' : 'Mark as completed')}
+                    className={`shrink-0 w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-green-400 ${d.completada ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 text-transparent hover:border-[#C6A55E] hover:text-[#C6A55E]'}`}
+                  >
+                    <CheckCircle2 size={16} />
+                  </button>
+                  <div className="flex-1">
+                    <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${d.completada ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{d.nombre}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <Flame size={12} className={d.racha > 0 ? 'text-orange-500' : 'text-gray-300'} />
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{d.racha} {idioma === 'es' ? 'días' : 'days'}</p>
+                    </div>
                   </div>
-                </div>
-                <button
-                  onClick={() => eliminarItem(d.id, 'diaria')}
-                  aria-label={idioma === 'es' ? 'Eliminar tarea diaria' : 'Delete daily task'}
-                  className="p-1.5 text-gray-300 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 outline-none"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </motion.div>
-            ))}
+                  <button
+                    onClick={() => eliminarItem(d.id, 'diaria')}
+                    aria-label={idioma === 'es' ? 'Eliminar tarea diaria' : 'Delete daily task'}
+                    className="p-1.5 text-gray-300 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 outline-none"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </motion.div>
+              ))}
           </div>
         </div>
 
@@ -621,47 +621,47 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 return 0;
               })
               .map(tarea => (
-              <motion.div
-                layout
-                key={tarea.id}
-                className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-all border-l-4 hover:shadow-md ${tarea.completada ? 'border-l-green-400 opacity-60' : 'border-l-indigo-500'}`}
-              >
-                <button
-                  onClick={(e) => {
-                    const completando = !tarea.completada;
-                    if (completando) {
-                      ganarXP(30, e);
-                      setTimeout(() => {
-                        setTareas(prev => prev.filter(item => item.id !== tarea.id));
-                      }, 500);
-                    } else {
-                      setTareas(tareas.map(item => item.id === tarea.id ? { ...item, completada: false } : item));
-                      ganarXP(-30, e);
-                    }
-                  }}
-                  aria-label={tarea.completada ? (idioma === 'es' ? 'Marcar como pendiente' : 'Mark as pending') : (idioma === 'es' ? 'Marcar como completada' : 'Mark as completed')}
-                  className={`shrink-0 w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-green-400 ${tarea.completada ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 text-transparent hover:border-indigo-500 hover:text-indigo-500'}`}
+                <motion.div
+                  layout
+                  key={tarea.id}
+                  className={`bg-white dark:bg-gray-800 group p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-all border-l-4 hover:shadow-md ${tarea.completada ? 'border-l-green-400 opacity-60' : 'border-l-indigo-500'}`}
                 >
-                  <CheckCircle2 size={16} />
-                </button>
-                <div className="flex-1">
-                  <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${tarea.completada ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{tarea.nombre}</p>
-                  <span className={`inline-block mt-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${tarea.prioridad === 'alta' ? 'bg-red-100 text-red-600' :
-                    tarea.prioridad === 'media' ? 'bg-orange-100 text-orange-600' :
-                      'bg-blue-100 text-blue-600'
-                    }`}>
-                    {idioma === 'es' ? tarea.prioridad : (tarea.prioridad === 'alta' ? 'High' : tarea.prioridad === 'media' ? 'Medium' : 'Low')}
-                  </span>
-                </div>
-                <button
-                  onClick={() => eliminarItem(tarea.id, 'tarea')}
-                  aria-label={idioma === 'es' ? 'Eliminar tarea' : 'Delete task'}
-                  className="p-1.5 text-gray-300 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 outline-none"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </motion.div>
-            ))}
+                  <button
+                    onClick={(e) => {
+                      const completando = !tarea.completada;
+                      if (completando) {
+                        ganarXP(30, e);
+                        setTimeout(() => {
+                          setTareas(prev => prev.filter(item => item.id !== tarea.id));
+                        }, 500);
+                      } else {
+                        setTareas(tareas.map(item => item.id === tarea.id ? { ...item, completada: false } : item));
+                        ganarXP(-30, e);
+                      }
+                    }}
+                    aria-label={tarea.completada ? (idioma === 'es' ? 'Marcar como pendiente' : 'Mark as pending') : (idioma === 'es' ? 'Marcar como completada' : 'Mark as completed')}
+                    className={`shrink-0 w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-green-400 ${tarea.completada ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 text-transparent hover:border-indigo-500 hover:text-indigo-500'}`}
+                  >
+                    <CheckCircle2 size={16} />
+                  </button>
+                  <div className="flex-1">
+                    <p className={`font-bold text-[#2C4159] dark:text-white transition-colors duration-300 leading-tight ${tarea.completada ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>{tarea.nombre}</p>
+                    <span className={`inline-block mt-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${tarea.prioridad === 'alta' ? 'bg-red-100 text-red-600' :
+                      tarea.prioridad === 'media' ? 'bg-orange-100 text-orange-600' :
+                        'bg-blue-100 text-blue-600'
+                      }`}>
+                      {idioma === 'es' ? tarea.prioridad : (tarea.prioridad === 'alta' ? 'High' : tarea.prioridad === 'media' ? 'Medium' : 'Low')}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => eliminarItem(tarea.id, 'tarea')}
+                    aria-label={idioma === 'es' ? 'Eliminar tarea' : 'Delete task'}
+                    className="p-1.5 text-gray-300 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 outline-none"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </motion.div>
+              ))}
           </div>
         </div>
 

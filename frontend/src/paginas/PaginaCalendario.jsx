@@ -3,14 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { useIdioma } from '../contextos/ContextoIdioma';
 import * as servicioAPI from '../servicios/servicioAPI';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Calendar as CalendarIcon, 
-  Moon, 
-  Sun, 
-  Wind, 
-  Flame, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  Moon,
+  Sun,
+  Wind,
+  Flame,
   CheckCircle2,
   FileText,
   Smile,
@@ -84,7 +84,7 @@ const DATOS_CURIOSOS_EN = [
 const PaginaCalendario = () => {
   const { usuario, token } = useAutenticacion();
   const { t, idioma } = useIdioma();
-  
+
   const [fechaActual, setFechaActual] = useState(new Date());
   const [datosMes, setDatosMes] = useState({});
   const [estaCargando, setEstaCargando] = useState(true);
@@ -110,7 +110,7 @@ const PaginaCalendario = () => {
         const anio = fechaActual.getFullYear();
         const data = await servicioAPI.obtenerResumenCalendario(usuario.id, mes, anio, token);
         setDatosMes(data);
-        
+
         // Seleccionar automáticamente hoy si es el mes actual
         const hoy = new Date();
         if (hoy.getMonth() === fechaActual.getMonth() && hoy.getFullYear() === fechaActual.getFullYear()) {
@@ -137,27 +137,27 @@ const PaginaCalendario = () => {
   const generarCalendario = () => {
     const primerDia = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
     const ultimoDia = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 1, 0);
-    
+
     const dias = [];
-    
+
     // Rellenar días del mes anterior
     const diaSemanaInicio = primerDia.getDay() === 0 ? 6 : primerDia.getDay() - 1; // Ajustar a Lunes inicio
     for (let i = 0; i < diaSemanaInicio; i++) {
       dias.push({ fecha: null, tipo: 'vacio' });
     }
-    
+
     // Rellenar días del mes actual
     for (let d = 1; d <= ultimoDia.getDate(); d++) {
       const fecha = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), d);
       const clave = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
-      dias.push({ 
-        fecha, 
-        clave, 
+      dias.push({
+        fecha,
+        clave,
         datos: datosMes[clave] || null,
         esHoy: new Date().toDateString() === fecha.toDateString()
       });
     }
-    
+
     return dias;
   };
 
@@ -177,39 +177,39 @@ const PaginaCalendario = () => {
   const infoDia = diaSeleccionado ? datosMes[diaSeleccionado] : null;
 
   return (
-    <div className="h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-hidden flex flex-col md:flex-row p-6 gap-6 transition-colors duration-300">
-      
+    <div className="h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-y-auto md:overflow-hidden flex flex-col md:flex-row p-3 md:p-6 gap-3 md:gap-6 transition-colors duration-300">
+
       {/* SECCIÓN IZQUIERDA: CALENDARIO */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
-        
+      <div className="flex-none md:flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+
         {/* Header Calendario */}
-        <header className="p-6 border-b border-gray-50 dark:border-gray-700 flex items-center justify-between transition-colors duration-300">
+        <header className="p-3 md:p-6 border-b border-gray-50 dark:border-gray-700 flex items-center justify-between transition-colors duration-300">
           <div>
-            <h1 className="text-2xl font-black text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
+            <h1 className="text-base md:text-2xl font-black text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
               <CalendarIcon className="text-[#4F99CC]" />
               {fechaActual.toLocaleString(idioma === 'es' ? 'es-ES' : 'en-US', { month: 'long', year: 'numeric' }).toUpperCase()}
             </h1>
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">
+            <p className="hidden sm:block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">
               {idioma === 'es' ? 'Tu viaje personal en el tiempo' : 'Your personal journey through time'}
             </p>
           </div>
-          
+
           <div className="flex gap-2">
-            <button 
-              onClick={() => cambiarMes(-1)} 
+            <button
+              onClick={() => cambiarMes(-1)}
               aria-label={idioma === 'es' ? 'Mes anterior' : 'Previous month'}
               className="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl text-gray-400 transition-colors outline-none focus:ring-2 focus:ring-[#4F99CC]"
             >
               <ChevronLeft size={24} />
             </button>
-            <button 
-              onClick={() => setFechaActual(new Date())} 
+            <button
+              onClick={() => setFechaActual(new Date())}
               className="px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl text-xs font-black text-[#4F99CC] transition-colors uppercase outline-none focus:ring-2 focus:ring-[#4F99CC]"
             >
               {idioma === 'es' ? 'Hoy' : 'Today'}
             </button>
-            <button 
-              onClick={() => cambiarMes(1)} 
+            <button
+              onClick={() => cambiarMes(1)}
               aria-label={idioma === 'es' ? 'Mes siguiente' : 'Next month'}
               className="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl text-gray-400 transition-colors outline-none focus:ring-2 focus:ring-[#4F99CC]"
             >
@@ -234,15 +234,15 @@ const PaginaCalendario = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4F99CC]" />
             </div>
           )}
-          
+
           {dias.map((dia, idx) => (
-            <button 
-              key={idx} 
+            <button
+              key={idx}
               onClick={() => dia.clave && setDiaSeleccionado(dia.clave)}
               disabled={!dia.fecha}
               aria-label={dia.fecha ? (idioma === 'es' ? `Ver detalles del ${dia.fecha.getDate()} de ${fechaActual.toLocaleString('es-ES', { month: 'long' })}` : `View details for ${dia.fecha.getDate()} ${fechaActual.toLocaleString('en-US', { month: 'long' })}`) : undefined}
               className={`
-                border-r border-b border-gray-50 dark:border-gray-700 p-2 min-h-[80px] transition-all group text-left items-start flex flex-col
+                border-r border-b border-gray-50 dark:border-gray-700 p-1 md:p-2 min-h-[52px] md:min-h-[80px] transition-all group text-left items-start flex flex-col
                 ${!dia.fecha ? 'bg-gray-50/50 dark:bg-gray-800/50 cursor-default' : 'hover:bg-[#4F99CC]/5 dark:hover:bg-[#4F99CC]/20 cursor-pointer outline-none focus:ring-2 focus:ring-inset focus:ring-[#4F99CC]'}
                 ${diaSeleccionado === dia.clave ? 'bg-[#4F99CC]/10 ring-2 ring-inset ring-[#4F99CC]' : ''}
               `}
@@ -250,12 +250,12 @@ const PaginaCalendario = () => {
               {dia.fecha && (
                 <div className="h-full w-full flex flex-col justify-between">
                   <div className="flex justify-between items-start w-full">
-                    <span className={`text-xs font-black ${dia.esHoy ? 'bg-[#4F99CC] text-white w-6 h-6 flex items-center justify-center rounded-lg shadow-sm' : 'text-[#2C4159] dark:text-gray-300'}`}>
+                    <span className={`text-[10px] md:text-xs font-black ${dia.esHoy ? 'bg-[#4F99CC] text-white w-5 h-5 md:w-6 md:h-6 flex items-center justify-center rounded-md md:rounded-lg shadow-sm' : 'text-[#2C4159] dark:text-gray-300'}`}>
                       {dia.fecha.getDate()}
                     </span>
                     {dia.datos?.diario && (
-                      <div className="w-5 h-5 rounded-md overflow-hidden flex items-center justify-center border border-gray-100 dark:border-gray-700 shadow-sm transition-colors duration-300">
-                        {renderIconoAnimo(dia.datos.diario.animo, 20)}
+                      <div className="w-4 h-4 md:w-5 md:h-5 rounded-md overflow-hidden flex items-center justify-center border border-gray-100 dark:border-gray-700 shadow-sm transition-colors duration-300">
+                        {renderIconoAnimo(dia.datos.diario.animo, 16)}
                       </div>
                     )}
                   </div>
@@ -279,10 +279,10 @@ const PaginaCalendario = () => {
       </div>
 
       {/* SECCIÓN DERECHA: DETALLES DEL DÍA */}
-      <div className="w-full md:w-80 flex flex-col gap-6 overflow-y-auto custom-scrollbar pr-1">
+      <div className="w-full md:w-80 flex flex-col gap-4 md:gap-6 md:overflow-y-auto custom-scrollbar pr-1 shrink-0 md:shrink">
         <AnimatePresence mode="wait">
           {diaSeleccionado ? (
-            <motion.div 
+            <motion.div
               key={diaSeleccionado}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -301,17 +301,17 @@ const PaginaCalendario = () => {
                     {/* Animo y Sueño */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-neutral-50 dark:bg-gray-700/50 p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-colors duration-300">
-                        <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-1">{idioma === 'es' ? 'Ánimo' : 'Mood'}</p>
+                        <p className="text-[10px] md:text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-1">{idioma === 'es' ? 'Ánimo' : 'Mood'}</p>
                         <div className="text-[#2C4159] dark:text-white flex items-center gap-1 transition-colors duration-300">
-                          {renderIconoAnimo(infoDia.diario?.animo, 16) || <div className="w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-600" />}
-                          <span className="font-black">{infoDia.diario?.animo || '--'}/5</span>
+                          {renderIconoAnimo(infoDia.diario?.animo, 18) || <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-600" />}
+                          <span className="font-black text-sm md:text-base">{infoDia.diario?.animo || '--'}/5</span>
                         </div>
                       </div>
-                      <div className="bg-neutral-50 dark:bg-gray-700/50 p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-colors duration-300">
-                        <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-1">{idioma === 'es' ? 'Sueño' : 'Sleep'}</p>
+                      <div className="bg-neutral-50 dark:bg-gray-700/50 p-4 md:p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-colors duration-300">
+                        <p className="text-[10px] md:text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-1">{idioma === 'es' ? 'Sueño' : 'Sleep'}</p>
                         <div className="text-[#2C4159] dark:text-white flex items-center gap-1 transition-colors duration-300">
-                          <Moon size={14} className="text-blue-400" />
-                          <span className="font-black">{infoDia.diario?.sueno || '--'}h</span>
+                          <Moon size={18} className="text-blue-400" />
+                          <span className="font-black text-sm md:text-base">{infoDia.diario?.sueno || '--'}h</span>
                         </div>
                       </div>
                     </div>
@@ -369,8 +369,8 @@ const PaginaCalendario = () => {
                         <p className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase mb-2 flex items-center gap-1">
                           <FileText size={12} /> {idioma === 'es' ? 'Reflexión del día' : 'Day Reflection'}
                         </p>
-                        <div className="max-h-60 overflow-y-auto custom-scrollbar bg-neutral-50 dark:bg-gray-700/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-600 transition-colors duration-300">
-                          <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed italic">
+                        <div className="max-h-60 overflow-y-auto custom-scrollbar bg-neutral-50 dark:bg-gray-700/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-600 transition-colors duration-300">
+                          <p className="text-sm md:text-xs text-gray-600 dark:text-gray-300 leading-relaxed italic">
                             "{infoDia.diario.contenido || (idioma === 'es' ? "Sin contenido escrito..." : "No written content...")}"
                           </p>
                         </div>
@@ -384,7 +384,7 @@ const PaginaCalendario = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="bg-gradient-to-br from-[#4F99CC] to-[#2C4159] rounded-3xl p-6 text-white shadow-md relative overflow-hidden">
                 <h3 className="text-lg font-black mb-1">{idioma === 'es' ? 'Dato curioso' : 'Fun Fact'}</h3>
                 <p className="text-[10px] text-white/70 mb-4 uppercase font-bold tracking-widest">{idioma === 'es' ? 'Basado en tus registros' : 'Based on your records'}</p>

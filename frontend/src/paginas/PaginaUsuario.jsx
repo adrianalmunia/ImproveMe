@@ -517,11 +517,18 @@ export function PaginaUsuario() {
             <AlertTriangle className="text-red-500" size={24} />
             <h3 className="text-xl font-['Tilt_Warp'] text-red-600 dark:text-red-400">{t('zona_peligro')}</h3>
           </div>
-          {!mostrarConfirmarBorrado ? (
-            <button onClick={() => setMostrarConfirmarBorrado(true)} className="px-6 py-3 bg-red-500 dark:bg-red-600/80 text-white rounded-2xl font-bold hover:bg-red-600 dark:hover:bg-red-500 transition-colors">
-              {t('eliminar_cuenta')}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            {!mostrarConfirmarBorrado && (
+              <button onClick={() => setMostrarConfirmarBorrado(true)} className="w-full sm:flex-1 max-w-xs px-6 py-4 bg-red-500 dark:bg-red-600/80 text-white rounded-2xl font-bold hover:bg-red-600 dark:hover:bg-red-500 transition-colors shadow-lg shadow-red-500/20">
+                {t('eliminar_cuenta')}
+              </button>
+            )}
+            <button onClick={logout} className="w-full sm:flex-1 max-w-xs flex items-center justify-center gap-2 px-6 py-4 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-2xl font-bold hover:bg-red-500 dark:hover:bg-red-500 hover:text-white dark:hover:text-white transition-all duration-300 border border-red-200 dark:border-red-900/50">
+              <LogOut size={20} /> {t('cerrar_sesion')}
             </button>
-          ) : (
+          </div>
+
+          {mostrarConfirmarBorrado && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-red-200 dark:border-red-900/50 shadow-xl transition-colors duration-300">
               <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{idioma === 'es' ? 'Paso 1: Confirma tu contraseña:' : 'Step 1: Confirm your password:'}</p>
               <div className="relative mb-4">
@@ -555,12 +562,7 @@ export function PaginaUsuario() {
           )}
         </div>
 
-        {/* CERRAR SESIÓN */}
-        <div className="flex justify-center pt-4">
-          <button onClick={logout} className="flex items-center gap-3 px-8 py-4 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-full font-black uppercase tracking-widest hover:bg-red-500 dark:hover:bg-red-500 hover:text-white dark:hover:text-white transition-all duration-300">
-            <LogOut size={20} /> {t('cerrar_sesion')}
-          </button>
-        </div>
+
 
       </div>
 

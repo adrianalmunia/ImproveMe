@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Bar, 
-  Line, 
-  Radar, 
+import {
+  Bar,
+  Line,
+  Radar,
   Doughnut,
   Scatter
 } from 'react-chartjs-2';
@@ -24,12 +24,12 @@ import {
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { useIdioma } from '../contextos/ContextoIdioma';
 import * as servicioAPI from '../servicios/servicioAPI';
-import { 
-  TrendingUp, 
-  Target, 
-  Activity, 
-  Moon, 
-  Smile, 
+import {
+  TrendingUp,
+  Target,
+  Activity,
+  Moon,
+  Smile,
   Calendar,
   ChevronRight,
   Zap,
@@ -66,7 +66,7 @@ const obtenerColorSueno = (horas) => {
   const h = parseFloat(horas);
   // Días de muy poco sueño se muestran rojos
   if (h < 4) return '#EF4444';
-  
+
   // Interpolar entre Azul (#4F99CC) y Lila (#A855F7)
   // De 4 horas (azul) a 10 horas (lila)
   const ratio = Math.min(Math.max((h - 4) / 6, 0), 1);
@@ -81,7 +81,7 @@ const TooltipInfo = ({ texto }) => {
 
   return (
     <div className="relative inline-block ml-auto">
-      <button 
+      <button
         onMouseEnter={() => setVisible(true)}
         onMouseLeave={() => setVisible(false)}
         onFocus={() => setVisible(true)}
@@ -177,11 +177,11 @@ const PaginaEstadisticas = () => {
           {idioma === 'es' ? 'Faltan datos para el análisis' : 'Insufficient data for analysis'}
         </h2>
         <p className="text-gray-400 dark:text-gray-500 max-w-sm font-medium transition-colors duration-300">
-          {idioma === 'es' 
-            ? 'Necesitamos al menos 2 registros diarios para empezar a generar tus estadísticas. ¡Sigue escribiendo en tu diario y vuelve pronto!' 
+          {idioma === 'es'
+            ? 'Necesitamos al menos 2 registros diarios para empezar a generar tus estadísticas. ¡Sigue escribiendo en tu diario y vuelve pronto!'
             : 'We need at least 2 daily logs to start generating your statistics. Keep writing in your journal and come back soon!'}
         </p>
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="mt-8 bg-[#4F99CC] text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-100 hover:scale-105 transition-transform"
         >
@@ -212,10 +212,10 @@ const PaginaEstadisticas = () => {
       y: {
         beginAtZero: true,
         grid: { display: false },
-        ticks: { 
-          font: { size: 10, weight: 'bold' }, 
+        ticks: {
+          font: { size: 10, weight: 'bold' },
           color: '#94a3b8',
-          callback: function(value) {
+          callback: function (value) {
             const label = this.getLabelForValue(value);
             return truncarLabel(label, 15);
           }
@@ -246,7 +246,7 @@ const PaginaEstadisticas = () => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
           if (!chartArea) return null;
-          
+
           // Gradiente vertical: Rojo (abajo) -> Verde (arriba)
           const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
           gradient.addColorStop(0, 'rgba(239, 68, 68, 0.2)');   // Fatal
@@ -254,7 +254,7 @@ const PaginaEstadisticas = () => {
           gradient.addColorStop(0.5, 'rgba(250, 204, 21, 0.2)');  // Decente
           gradient.addColorStop(0.75, 'rgba(144, 190, 109, 0.2)'); // Bien
           gradient.addColorStop(1, 'rgba(77, 144, 142, 0.2)');    // Genial
-          
+
           return gradient;
         },
         fill: true,
@@ -349,7 +349,7 @@ const PaginaEstadisticas = () => {
 
   return (
     <div className="h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-y-auto p-6 lg:p-10 custom-scrollbar transition-colors duration-300">
-      
+
       {/* Header */}
       <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
@@ -367,11 +367,10 @@ const PaginaEstadisticas = () => {
             <button
               key={opc.value}
               onClick={() => setRangoDias(opc.value)}
-              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                rangoDias === opc.value
+              className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${rangoDias === opc.value
                   ? 'bg-[#2C4159] text-white shadow-md scale-105'
                   : 'text-gray-400 dark:text-gray-500 hover:text-[#2C4159] dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'
-              }`}
+                }`}
             >
               {opc.label}
             </button>
@@ -381,7 +380,7 @@ const PaginaEstadisticas = () => {
 
       {/* Grid Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* KPI Cards */}
         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
           <div className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors duration-300">
@@ -395,7 +394,7 @@ const PaginaEstadisticas = () => {
               </p>
             </div>
           </div>
-          
+
           <div className="bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors duration-300">
             <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-500">
               <Moon size={24} />
@@ -460,7 +459,7 @@ const PaginaEstadisticas = () => {
             </h2>
             <TooltipInfo texto={t('tooltip_comparativa')} />
           </div>
-          
+
           <div className="space-y-4 shrink-0">
             <div className="flex justify-between items-end">
               <div>
@@ -480,13 +479,13 @@ const PaginaEstadisticas = () => {
               </div>
             </div>
             <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden transition-colors duration-300">
-              <motion.div 
-                animate={{ 
-                  width: `${Math.min(100, Math.max(10, 
+              <motion.div
+                animate={{
+                  width: `${Math.min(100, Math.max(10,
                     ((stats?.animoEvolucion.reduce((acc, curr) => acc + curr.valor, 0) / (stats?.animoEvolucion.length || 1)) / 5) * 100
-                  ))}%` 
+                  ))}%`
                 }}
-                className="h-full bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]" 
+                className="h-full bg-gradient-to-r from-[#4F99CC] to-[#C6A55E]"
               />
             </div>
           </div>
@@ -497,13 +496,13 @@ const PaginaEstadisticas = () => {
               {(stats?.rachasActuales || []).filter(r => r.racha > 0).length > 0 ? (
                 (stats?.rachasActuales || []).filter(r => r.racha > 0).map(r => (
                   <div key={r.nombre} className="flex items-center gap-3">
-                     <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-500">
-                        <Flame size={16} />
-                     </div>
-                     <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-black text-[#2C4159] dark:text-white truncate" title={r.nombre}>{r.nombre}</p>
-                        <p className="text-[9px] font-bold text-orange-500">{r.racha} {idioma === 'es' ? (r.racha === 1 ? 'día' : 'días') : (r.racha === 1 ? 'day' : 'days')} {idioma === 'es' ? 'seguidos' : 'streak'}</p>
-                     </div>
+                    <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-500">
+                      <Flame size={16} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-black text-[#2C4159] dark:text-white truncate" title={r.nombre}>{r.nombre}</p>
+                      <p className="text-[9px] font-bold text-orange-500">{r.racha} {idioma === 'es' ? (r.racha === 1 ? 'día' : 'días') : (r.racha === 1 ? 'day' : 'days')} {idioma === 'es' ? 'seguidos' : 'streak'}</p>
+                    </div>
                   </div>
                 ))
               ) : (
@@ -543,14 +542,14 @@ const PaginaEstadisticas = () => {
             </div>
           </div>
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-8">{idioma === 'es' ? 'Progreso de tus hábitos en el periodo' : 'Habit progress in the selected period'}</p>
-          
+
           <div className="flex-1 overflow-y-auto scroll-personalizado pr-2 space-y-8 mt-4">
             {stats?.cumplimientoHabitos && stats.cumplimientoHabitos.length > 0 ? (
               stats.cumplimientoHabitos.map((h, idx) => {
                 const pct = Math.min(100, Math.round((h.total / rangoDias) * 100));
                 const pctPrevio = Math.min(100, Math.round((h.totalPrevio / rangoDias) * 100));
                 const tendencia = h.totalPrevio > 0 ? Math.round(((h.total - h.totalPrevio) / h.totalPrevio) * 100) : (h.total > 0 ? 100 : 0);
-                
+
                 const colores = [
                   'text-blue-500',
                   'text-amber-500',
@@ -580,7 +579,7 @@ const PaginaEstadisticas = () => {
                         </span>
                       </div>
                     </div>
-                    
+
                     {/* Mapa de Calor (Dots) */}
                     <div className={`flex flex-wrap gap-1 ${colorClase}`}>
                       {(() => {
@@ -592,16 +591,15 @@ const PaginaEstadisticas = () => {
                           const fechaStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                           const completado = h.diasCompletados?.includes(fechaStr);
                           puntos.push(
-                            <motion.div 
-                              key={i} 
+                            <motion.div
+                              key={i}
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
                               transition={{ delay: (rangoDias - i) * 0.01 }}
-                              className={`w-2.5 h-2.5 rounded-[3px] transition-all duration-300 ${
-                                completado 
-                                  ? 'bg-current opacity-100 shadow-[0_0_8px_rgba(current)]' 
+                              className={`w-2.5 h-2.5 rounded-[3px] transition-all duration-300 ${completado
+                                  ? 'bg-current opacity-100 shadow-[0_0_8px_rgba(current)]'
                                   : 'bg-slate-200 dark:bg-gray-700'
-                              }`}
+                                }`}
                               title={fechaStr}
                             />
                           );
@@ -634,15 +632,15 @@ const PaginaEstadisticas = () => {
           </div>
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-2">{idioma === 'es' ? 'Efecto de tus hábitos en tu humor' : 'Effect of your habits on your mood'}</p>
           <div className="h-[320px] flex items-center justify-center mt-4">
-            <Radar 
-              data={dataRadar} 
+            <Radar
+              data={dataRadar}
               options={{
                 ...chartOptions,
                 scales: {
                   r: {
                     angleLines: { color: 'rgba(0,0,0,0.05)' },
                     grid: { color: 'rgba(0,0,0,0.05)' },
-                    pointLabels: { 
+                    pointLabels: {
                       font: { size: 10, weight: 'bold' },
                       callback: (label) => truncarLabel(label, 10)
                     },
@@ -651,7 +649,7 @@ const PaginaEstadisticas = () => {
                     suggestedMax: 5
                   }
                 }
-              }} 
+              }}
             />
           </div>
         </div>
@@ -691,8 +689,8 @@ const PaginaEstadisticas = () => {
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">{idioma === 'es' ? 'Distribución global de tu humor' : 'Global mood distribution'}</p>
           <div className="flex-1 flex items-center justify-center min-h-0">
             <div className="h-full w-full max-h-[260px]">
-              <Doughnut 
-                data={dataDistribucionAnimo} 
+              <Doughnut
+                data={dataDistribucionAnimo}
                 options={{
                   ...chartOptions,
                   plugins: {
@@ -714,7 +712,7 @@ const PaginaEstadisticas = () => {
                     y: { display: false }
                   },
                   cutout: '70%'
-                }} 
+                }}
               />
             </div>
           </div>
@@ -733,7 +731,7 @@ const PaginaEstadisticas = () => {
           </div>
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">{idioma === 'es' ? 'Cómo impactan tus horas de sueño en tu bienestar' : 'How sleep hours impact your well-being'}</p>
           <div className="h-[300px]">
-            <Scatter 
+            <Scatter
               data={{
                 datasets: [{
                   label: idioma === 'es' ? 'Días' : 'Days',
@@ -748,7 +746,7 @@ const PaginaEstadisticas = () => {
                   borderColor: 'rgba(255,255,255,0.9)',
                   pointStyle: 'circle'
                 }]
-              }} 
+              }}
               options={{
                 ...chartOptions,
                 plugins: {
@@ -759,7 +757,7 @@ const PaginaEstadisticas = () => {
                       label: (ctx) => {
                         const s = ctx.raw.x;
                         const a = ctx.raw.y;
-                        return idioma === 'es' 
+                        return idioma === 'es'
                           ? [`Sueño: ${s}h`, `Ánimo: ${a}/5`]
                           : [`Sleep: ${s}h`, `Mood: ${a}/5`];
                       }
@@ -782,7 +780,7 @@ const PaginaEstadisticas = () => {
                     title: { display: true, text: idioma === 'es' ? 'Nivel de ánimo' : 'Mood level', font: { size: 10, weight: 'bold' }, color: '#94a3b8' }
                   }
                 }
-              }} 
+              }}
             />
           </div>
         </div>
@@ -804,7 +802,7 @@ const PaginaEstadisticas = () => {
               <TooltipInfo texto={t('tooltip_paz')} />
             </div>
           </div>
-          
+
           {/* Técnicas en una linea compacta */}
           <div className="mb-6">
             <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -832,14 +830,14 @@ const PaginaEstadisticas = () => {
 
           {/* Gráfica principal */}
           <div className="flex-1 min-h-0 mb-6">
-            <Bar 
-              data={dataMeditacion} 
+            <Bar
+              data={dataMeditacion}
               options={{
                 ...chartOptions,
-                plugins: { 
-                  ...chartOptions.plugins, 
-                  tooltip: { 
-                    ...chartOptions.plugins.tooltip, 
+                plugins: {
+                  ...chartOptions.plugins,
+                  tooltip: {
+                    ...chartOptions.plugins.tooltip,
                     displayColors: true,
                     callbacks: {
                       label: (ctx) => {
@@ -859,9 +857,9 @@ const PaginaEstadisticas = () => {
                         return lineas;
                       }
                     }
-                  } 
+                  }
                 }
-              }} 
+              }}
             />
           </div>
 
@@ -906,7 +904,7 @@ const PaginaEstadisticas = () => {
         </div>
 
       </div>
-      
+
       {/* Footer / Padding */}
       <div className="h-20" />
     </div>

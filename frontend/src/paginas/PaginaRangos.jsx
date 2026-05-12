@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { useIdioma } from '../contextos/ContextoIdioma';
-import { 
+import {
   Trophy,
-  ChevronRight
+  ChevronRight,
+  X
 } from 'lucide-react';
 import IconosRangos from '../componentes/IconosRangos';
 
@@ -70,14 +71,14 @@ export function calcularRangoInfo(xp) {
       break;
     }
   }
-  
+
   const currentTier = RANK_TIERS[currentTierIndex];
   const nextTier = RANK_TIERS[currentTierIndex + 1] || null;
   const prevTier = currentTierIndex > 0 ? RANK_TIERS[currentTierIndex - 1] : null;
-  
+
   const category = RANK_CATEGORIES.find(c => c.id === currentTier.categoryId);
   const categoryIndex = RANK_CATEGORIES.findIndex(c => c.id === currentTier.categoryId);
-  
+
   const xpInCurrentTier = xp - currentTier.xp;
   const xpTotalForThisTier = nextTier ? nextTier.xp - currentTier.xp : 10000;
   const progressPercentage = nextTier ? (xpInCurrentTier / xpTotalForThisTier) * 100 : 100;
@@ -97,9 +98,9 @@ export function calcularRangoInfo(xp) {
       fullName: prevTier.name,
       tier: prevTier.tier
     } : null,
-    nextRank: nextTier ? { 
+    nextRank: nextTier ? {
       ...RANK_CATEGORIES.find(c => c.id === nextTier.categoryId),
-      fullName: nextTier.name, 
+      fullName: nextTier.name,
       tier: nextTier.tier
     } : null,
     isMaxRank: !nextTier
@@ -108,9 +109,9 @@ export function calcularRangoInfo(xp) {
 
 export const RankIcon = ({ rankData, tier = 'III', size = 'md', className = '', showGlow = true }) => {
   if (!rankData) return null;
-  
+
   const IconComponent = IconMap[rankData.iconName || rankData.icon] || Trophy;
-  
+
   const pixelSizes = {
     sm: 100,
     md: 150,
@@ -120,8 +121,8 @@ export const RankIcon = ({ rankData, tier = 'III', size = 'md', className = '', 
 
   return (
     <div className={`relative flex items-center justify-center ${className}`}>
-      <IconComponent 
-        size={pixelSizes[size]} 
+      <IconComponent
+        size={pixelSizes[size]}
         tier={tier}
         showGlow={showGlow}
       />
@@ -187,162 +188,163 @@ const PaginaRangos = () => {
   }
 
   return (
-    <div className="h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-y-auto custom-scrollbar p-6 lg:p-10 pb-24 transition-colors duration-300">
+    <div className={`h-full w-full bg-neutral-50 dark:bg-gray-900 overflow-y-auto custom-scrollbar p-4 md:p-6 lg:p-10 pb-24 transition-colors duration-300 ${mostrarModalLigas ? 'overflow-hidden' : ''}`}>
       <div className="max-w-5xl mx-auto space-y-12">
-      {/* Encabezado */}
-      <header className="text-center space-y-4">
-        <h1 className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] uppercase tracking-tighter transition-colors duration-300">
-          {idioma === 'es' ? 'Clasificación Ranked' : 'Ranked Leaderboard'}
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium transition-colors duration-300">
-          {idioma === 'es' ? 'Tu disciplina se convierte en poder. Asciende en las ligas completando tus metas diarias.' : 'Your discipline becomes power. Rise through the leagues by completing your daily goals.'}
-        </p>
-      </header>
+        {/* Encabezado */}
+        <header className="text-center space-y-4">
+          <h1 className="text-3xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] uppercase tracking-tighter transition-colors duration-300">
+            {idioma === 'es' ? 'Clasificación Ranked' : 'Ranked Leaderboard'}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium transition-colors duration-300">
+            {idioma === 'es' ? 'Tu disciplina se convierte en poder. Asciende en las ligas completando tus metas diarias.' : 'Your discipline becomes power. Rise through the leagues by completing your daily goals.'}
+          </p>
+        </header>
 
-      {/* Track de Categorías (Interactuable) */}
-      <motion.div 
-        whileHover={{ scale: 1.01 }}
-        onClick={() => setMostrarModalLigas(true)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setMostrarModalLigas(true);
-          }
-        }}
-        tabIndex={0}
-        role="button"
-        aria-label={idioma === 'es' ? 'Explorar todas las ligas' : 'Explore all leagues'}
-        className="bg-white dark:bg-gray-800 rounded-[32px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-[#4F99CC] relative overflow-hidden group duration-300"
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-[#4F99CC]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 transition-colors duration-300">
-            {idioma === 'es' ? 'Ligas Disponibles' : 'Available Leagues'}
-          </h3>
-          <span className="text-[10px] font-black text-[#4F99CC] uppercase tracking-widest flex items-center gap-1">
-            {idioma === 'es' ? 'Explorar todas' : 'Explore all'} <ChevronRight size={12} />
-          </span>
-        </div>
-        <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8 max-w-2xl mx-auto relative z-10">
-          {RANK_CATEGORIES.map((cat, idx) => {
-            const isUnlocked = idx <= rankInfo.categoryIndex;
-            const isCurrent = idx === rankInfo.categoryIndex;
-            
-            return (
-              <div key={cat.id} className={`transition-all duration-700 ${isUnlocked ? 'opacity-100' : 'opacity-20'} transform ${isCurrent ? 'scale-110' : 'scale-100'}`}>
-                <RankIcon rankData={cat} size="track" className={isCurrent ? 'ring-4 ring-[#4F99CC] ring-offset-4 ring-offset-white rounded-full' : ''} />
-              </div>
-            );
-          })}
-        </div>
-      </motion.div>
+        {/* Track de Categorías (Interactuable) */}
+        <motion.div
+          whileHover={{ scale: 1.01 }}
+          onClick={() => setMostrarModalLigas(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setMostrarModalLigas(true);
+            }
+          }}
+          tabIndex={0}
+          role="button"
+          aria-label={idioma === 'es' ? 'Explorar todas las ligas' : 'Explore all leagues'}
+          className="bg-white dark:bg-gray-800 rounded-[32px] p-4 md:p-8 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-[#4F99CC] relative overflow-hidden group duration-300"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-[#4F99CC]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 transition-colors duration-300">
+              {idioma === 'es' ? 'Ligas Disponibles' : 'Available Leagues'}
+            </h3>
+            <span className="text-[10px] font-black text-[#4F99CC] uppercase tracking-widest flex items-center gap-1">
+              {idioma === 'es' ? 'Explorar todas' : 'Explore all'} <ChevronRight size={12} />
+            </span>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 max-w-full md:max-w-2xl mx-auto relative z-10 py-2 px-4 md:px-0">
+            {RANK_CATEGORIES.map((cat, idx) => {
+              const isUnlocked = idx <= rankInfo.categoryIndex;
+              const isCurrent = idx === rankInfo.categoryIndex;
 
-      {/* Visualización Principal del Rango */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-[48px] p-8 md:p-16 shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full blur-[160px] opacity-[0.08] ${rankInfo.category.bg} pointer-events-none`} />
-
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-40">
-          {/* Rango Anterior */}
-          <div className="hidden md:flex flex-col items-center gap-4 opacity-20">
-            {rankInfo.prevRank ? (
-              <>
-                <RankIcon rankData={rankInfo.prevRank} tier={rankInfo.prevRank.tier} size="sm" />
-                <div className="text-center">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">{idioma === 'es' ? 'Anterior' : 'Previous'}</p>
-                  <p className={`text-xs font-bold ${rankInfo.prevRank.color}`}>{getRankName(rankInfo.prevRank.fullName)}</p>
+              return (
+                <div key={cat.id} className={`transition-all duration-700 ${isUnlocked ? 'opacity-100' : 'opacity-20'} transform ${isCurrent ? 'scale-125' : 'scale-100'}`}>
+                  <RankIcon rankData={cat} size="track" className={isCurrent ? 'ring-4 ring-[#4F99CC] ring-offset-4 ring-offset-white rounded-full shadow-xl' : ''} />
                 </div>
-              </>
-            ) : (
-              <div className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-3xl transition-colors duration-300">
-                <p className="text-[8px] font-black uppercase text-gray-200 dark:text-gray-600">{idioma === 'es' ? 'Inicio' : 'Start'}</p>
-              </div>
-            )}
+              );
+            })}
           </div>
+        </motion.div>
 
-          {/* Rango Actual (Centro) */}
-          <motion.div 
-            className="flex flex-col items-center gap-10"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-          >
-            <div className="relative">
-              <div className={`absolute inset-0 blur-2xl opacity-20 ${rankInfo.category.bg} rounded-full`} />
-              <RankIcon 
-                rankData={rankInfo.category} 
-                tier={rankInfo.tier}
-                size="lg" 
-              />
-            </div>
-            <div className="text-center space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 mb-1">
-                {idioma === 'es' ? 'Rango Actual' : 'Current Rank'}
-              </p>
-              <h2 className={`text-6xl md:text-7xl font-black tracking-tighter uppercase ${rankInfo.category.color} transition-colors duration-300`}>
-                {getRankName(rankInfo.fullName)}
-              </h2>
-              <div className="inline-flex items-center gap-3 bg-neutral-50 dark:bg-gray-900 px-6 py-2 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm transition-colors duration-300">
-                <span className={`w-2 h-2 rounded-full ${rankInfo.category.bg} animate-pulse`}></span>
-                <p className="text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.1em] transition-colors duration-300">
-                  {xp} {idioma === 'es' ? 'XP Acumulados' : 'Accumulated XP'}
-                </p>
-              </div>
-            </div>
-          </motion.div>
+        {/* Visualización Principal del Rango */}
+        <div className="relative bg-white dark:bg-gray-800 rounded-[32px] md:rounded-[48px] p-6 md:p-16 shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-300">
+          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full blur-[160px] opacity-[0.08] ${rankInfo.category.bg} pointer-events-none`} />
 
-          {/* Siguiente Rango */}
-          <div className="hidden md:flex flex-col items-center gap-4 opacity-20">
-            {rankInfo.nextRank ? (
-              <>
-                <RankIcon rankData={rankInfo.nextRank} tier={rankInfo.nextRank.tier} size="sm" />
-                <div className="text-center">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">{idioma === 'es' ? 'Siguiente' : 'Next'}</p>
-                  <p className={`text-xs font-bold ${rankInfo.nextRank.color}`}>{getRankName(rankInfo.nextRank.fullName)}</p>
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-40">
+            {/* Rango Anterior */}
+            <div className="hidden md:flex flex-col items-center gap-4 opacity-20">
+              {rankInfo.prevRank ? (
+                <>
+                  <RankIcon rankData={rankInfo.prevRank} tier={rankInfo.prevRank.tier} size="sm" />
+                  <div className="text-center">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">{idioma === 'es' ? 'Anterior' : 'Previous'}</p>
+                    <p className={`text-xs font-bold ${rankInfo.prevRank.color}`}>{getRankName(rankInfo.prevRank.fullName)}</p>
+                  </div>
+                </>
+              ) : (
+                <div className="w-20 h-20 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-700 rounded-3xl transition-colors duration-300">
+                  <p className="text-[8px] font-black uppercase text-gray-200 dark:text-gray-600">{idioma === 'es' ? 'Inicio' : 'Start'}</p>
                 </div>
-              </>
-            ) : (
-              <div className="w-20 h-20 flex flex-col items-center justify-center bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl border border-yellow-100 dark:border-yellow-900/50 transition-colors duration-300">
-                <Trophy size={28} className="text-yellow-500 opacity-50" />
-              </div>
-            )}
-          </div>
-        </div>
+              )}
+            </div>
 
-        {/* Barra de Progreso Mejorada */}
-        <div className="relative z-10 max-w-2xl mx-auto mt-20 space-y-6">
-          <div className="flex justify-between items-end px-2">
-            <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest transition-colors duration-300">{idioma === 'es' ? 'Progreso del Rango' : 'Rank Progress'}</p>
-            <p className="text-sm font-black text-gray-700 dark:text-gray-200 transition-colors duration-300">
-              <span className={rankInfo.category.color}>{rankInfo.xpInCurrentTier}</span>
-              <span className="text-gray-300 dark:text-gray-600 mx-1">/</span>
-              <span>{rankInfo.xpTotalForThisTier} XP</span>
-            </p>
-          </div>
-          
-          <div className="h-6 bg-gray-100 dark:bg-gray-700 rounded-2xl overflow-hidden shadow-inner p-1.5 border border-gray-200/50 dark:border-gray-600/50 transition-colors duration-300">
-            <motion.div 
-              className={`h-full rounded-xl bg-gradient-to-r ${rankInfo.category.gradient} shadow-lg relative`}
-              initial={{ width: 0 }}
-              animate={{ width: `${rankInfo.progressPercentage}%` }}
-              transition={{ duration: 1.5, ease: "circOut" }}
+            {/* Rango Actual (Centro) */}
+            <motion.div
+              className="flex flex-col items-center gap-10"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
             >
-              <div className="absolute inset-0 bg-white/20 opacity-30 animate-pulse" />
-            </motion.div>
-          </div>
-          
-          <div className="text-center">
-            {rankInfo.isMaxRank ? (
-              <p className="text-xl font-black text-[#C6A55E] uppercase tracking-tight flex items-center justify-center gap-3">
-                <Trophy size={24} />
-                {idioma === 'es' ? '¡Has alcanzado la gloria máxima!' : 'You have reached the ultimate glory!'}
-              </p>
-            ) : (
-              <div className="flex flex-col items-center gap-1">
-                <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300">{idioma === 'es' ? 'Ascenso en camino' : 'Promotion on the way'}</p>
-                <p className="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300">
-                  {idioma === 'es' ? 'Te faltan ' : 'You need '}<span className={`${rankInfo.nextRank?.color || 'text-[#4F99CC]'} font-black`}>{rankInfo.xpRemaining}</span> {idioma === 'es' ? 'puntos para ' : 'points for '}<span className="uppercase">{getRankName(rankInfo.nextRank?.fullName)}</span>
-                </p>
+              <div className="relative">
+                <div className={`absolute inset-0 blur-2xl opacity-20 ${rankInfo.category.bg} rounded-full`} />
+                <RankIcon
+                  rankData={rankInfo.category}
+                  tier={rankInfo.tier}
+                  size="lg"
+                />
               </div>
-            )}
+              <div className="text-center space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 mb-1">
+                  {idioma === 'es' ? 'Rango Actual' : 'Current Rank'}
+                </p>
+                <h2 className={`text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter uppercase ${rankInfo.category.color} transition-colors duration-300`}>
+                  {getRankName(rankInfo.fullName)}
+                </h2>
+                <div className="inline-flex items-center gap-3 bg-neutral-50 dark:bg-gray-900 px-6 py-2 rounded-full border border-gray-100 dark:border-gray-700 shadow-sm transition-colors duration-300">
+                  <span className={`w-2 h-2 rounded-full ${rankInfo.category.bg} animate-pulse`}></span>
+                  <p className="text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.1em] transition-colors duration-300">
+                    {xp} {idioma === 'es' ? 'XP Acumulados' : 'Accumulated XP'}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Siguiente Rango */}
+            <div className="hidden md:flex flex-col items-center gap-4 opacity-20">
+              {rankInfo.nextRank ? (
+                <>
+                  <RankIcon rankData={rankInfo.nextRank} tier={rankInfo.nextRank.tier} size="sm" />
+                  <div className="text-center">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">{idioma === 'es' ? 'Siguiente' : 'Next'}</p>
+                    <p className={`text-xs font-bold ${rankInfo.nextRank.color}`}>{getRankName(rankInfo.nextRank.fullName)}</p>
+                  </div>
+                </>
+              ) : (
+                <div className="w-20 h-20 flex flex-col items-center justify-center bg-yellow-50 dark:bg-yellow-900/20 rounded-3xl border border-yellow-100 dark:border-yellow-900/50 transition-colors duration-300">
+                  <Trophy size={28} className="text-yellow-500 opacity-50" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Barra de Progreso Mejorada */}
+          <div className="relative z-10 max-w-2xl mx-auto mt-8 md:mt-20 space-y-6">
+            <div className="flex justify-between items-end px-2">
+              <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest transition-colors duration-300">{idioma === 'es' ? 'Progreso del Rango' : 'Rank Progress'}</p>
+              <p className="text-sm font-black text-gray-700 dark:text-gray-200 transition-colors duration-300">
+                <span className={rankInfo.category.color}>{rankInfo.xpInCurrentTier}</span>
+                <span className="text-gray-300 dark:text-gray-600 mx-1">/</span>
+                <span>{rankInfo.xpTotalForThisTier} XP</span>
+              </p>
+            </div>
+
+            <div className="h-6 bg-gray-100 dark:bg-gray-700 rounded-2xl overflow-hidden shadow-inner p-1.5 border border-gray-200/50 dark:border-gray-600/50 transition-colors duration-300">
+              <motion.div
+                className={`h-full rounded-xl bg-gradient-to-r ${rankInfo.category.gradient} shadow-lg relative`}
+                initial={{ width: 0 }}
+                animate={{ width: `${rankInfo.progressPercentage}%` }}
+                transition={{ duration: 1.5, ease: "circOut" }}
+              >
+                <div className="absolute inset-0 bg-white/20 opacity-30 animate-pulse" />
+              </motion.div>
+            </div>
+
+            <div className="text-center">
+              {rankInfo.isMaxRank ? (
+                <p className="text-xl font-black text-[#C6A55E] uppercase tracking-tight flex items-center justify-center gap-3">
+                  <Trophy size={24} />
+                  {idioma === 'es' ? '¡Has alcanzado la gloria máxima!' : 'You have reached the ultimate glory!'}
+                </p>
+              ) : (
+                <div className="flex flex-col items-center gap-1">
+                  <p className="text-gray-400 dark:text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] transition-colors duration-300">{idioma === 'es' ? 'Ascenso en camino' : 'Promotion on the way'}</p>
+                  <p className="text-lg font-bold text-gray-800 dark:text-white transition-colors duration-300">
+                    {idioma === 'es' ? 'Te faltan ' : 'You need '}<span className={`${rankInfo.nextRank?.color || 'text-[#4F99CC]'} font-black`}>{rankInfo.xpRemaining}</span> {idioma === 'es' ? 'puntos para ' : 'points for '}<span className="uppercase">{getRankName(rankInfo.nextRank?.fullName)}</span>
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -350,68 +352,87 @@ const PaginaRangos = () => {
       {/* Modal de Exploración de Ligas */}
       <AnimatePresence>
         {mostrarModalLigas && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md"
+            className="fixed inset-0 z-[300] flex items-start md:items-center justify-center bg-black/60 backdrop-blur-md pt-4 px-3 pb-24 md:p-6"
             onClick={() => setMostrarModalLigas(false)}
           >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }}
+            <motion.div
+              initial={{ scale: 0.92, y: 24 }}
               animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="bg-white dark:bg-gray-800 rounded-[40px] w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col transition-colors duration-300"
+              exit={{ scale: 0.92, y: 24 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+              className="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-4xl flex flex-col shadow-2xl transition-colors duration-300"
+              style={{ maxHeight: 'calc(100svh - 5.5rem)', height: 'auto' }}
               onClick={e => e.stopPropagation()}
             >
-              <div className="p-8 border-b border-gray-100 dark:border-gray-700 shrink-0 transition-colors duration-300">
-                <h2 className="text-3xl font-black text-[#2C4159] dark:text-white uppercase tracking-tighter transition-colors duration-300">{idioma === 'es' ? 'Jerarquía de Ligas' : 'Leagues Hierarchy'}</h2>
-                <p className="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">{idioma === 'es' ? 'Descubre el camino hacia la maestría absoluta en ImproveMe.' : 'Discover the path to absolute mastery in ImproveMe.'}</p>
+              {/* Header */}
+              <div className="relative flex items-start justify-between p-5 md:p-8 border-b border-gray-100 dark:border-gray-700 shrink-0">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-black text-[#2C4159] dark:text-white uppercase tracking-tighter pr-10 transition-colors duration-300">
+                    {idioma === 'es' ? 'Jerarquía de Ligas' : 'Leagues Hierarchy'}
+                  </h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 transition-colors duration-300">
+                    {idioma === 'es' ? 'Descubre el camino hacia la maestría absoluta en ImproveMe.' : 'Discover the path to absolute mastery in ImproveMe.'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setMostrarModalLigas(false)}
+                  className="absolute top-4 right-4 md:top-6 md:right-6 p-2 rounded-xl text-gray-400 hover:text-[#2C4159] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                  aria-label={idioma === 'es' ? 'Cerrar' : 'Close'}
+                >
+                  <X size={22} />
+                </button>
               </div>
-              
-              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Body — scrollable */}
+              <div className="flex-1 overflow-y-auto pl-4 md:pl-10 pr-2 md:pr-8 py-4 pb-24 md:pb-10 custom-scrollbar mr-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 pr-4">
                   {RANK_TIERS.map((tierData, idx) => {
                     const cat = RANK_CATEGORIES.find(c => c.id === tierData.categoryId);
                     const isUnlocked = xp >= tierData.xp;
-                    
+
                     return (
-                      <div 
-                        key={`${tierData.name}-${idx}`} 
-                        className={`p-6 rounded-[32px] border-2 transition-all flex items-center gap-6 ${isUnlocked ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 shadow-sm' : 'bg-gray-50 dark:bg-gray-900 border-dashed border-gray-200 dark:border-gray-700 opacity-60'}`}
+                      <div
+                        key={`${tierData.name}-${idx}`}
+                        className={`p-3 md:p-5 rounded-2xl border-2 flex items-center gap-3 md:gap-5 transition-all ${
+                          isUnlocked
+                            ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 shadow-sm'
+                            : 'bg-gray-50 dark:bg-gray-900 border-dashed border-gray-200 dark:border-gray-700 opacity-50'
+                        }`}
                       >
+                        {/* Icon */}
                         <div className="shrink-0">
                           <RankIcon rankData={cat} tier={tierData.tier} size="sm" showGlow={false} />
                         </div>
+
+                        {/* Text */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-center mb-1">
-                            <h4 className={`text-xl font-black uppercase tracking-tight ${cat.color}`}>{getRankName(tierData.name)}</h4>
-                            <span className="text-[10px] font-black text-gray-400 dark:text-gray-500">MIN. {tierData.xp} XP</span>
+                          <div className="flex items-baseline justify-between gap-2 flex-wrap">
+                            <h4 className={`text-sm md:text-base font-black uppercase tracking-tight leading-tight ${cat.color}`}>
+                              {getRankName(tierData.name)}
+                            </h4>
+                            <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 shrink-0">
+                              MÍN. {tierData.xp.toLocaleString()} XP
+                            </span>
                           </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed italic">"{idioma === 'es' ? tierData.desc : tierData.descEn}"</p>
+                          <p className="text-[11px] md:text-xs text-gray-500 dark:text-gray-400 leading-relaxed italic mt-0.5">
+                            "{idioma === 'es' ? tierData.desc : tierData.descEn}"
+                          </p>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               </div>
-              
-              <div className="p-8 bg-gray-50 dark:bg-gray-900 shrink-0 transition-colors duration-300">
-                <button 
-                  onClick={() => setMostrarModalLigas(false)}
-                  className="w-full py-4 bg-[#2C4159] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-black transition-colors"
-                >
-                  {idioma === 'es' ? 'Cerrar Explorador' : 'Close Explorer'}
-                </button>
-              </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
-    </div>
   );
 };
 
 export default PaginaRangos;
-
