@@ -195,13 +195,24 @@ const PaginaCalendario = () => {
           </div>
           
           <div className="flex gap-2">
-            <button onClick={() => cambiarMes(-1)} className="p-2 hover:bg-gray-50 rounded-xl text-gray-400 transition-colors">
+            <button 
+              onClick={() => cambiarMes(-1)} 
+              aria-label={idioma === 'es' ? 'Mes anterior' : 'Previous month'}
+              className="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl text-gray-400 transition-colors outline-none focus:ring-2 focus:ring-[#4F99CC]"
+            >
               <ChevronLeft size={24} />
             </button>
-            <button onClick={() => setFechaActual(new Date())} className="px-4 py-2 hover:bg-gray-50 rounded-xl text-xs font-black text-[#4F99CC] transition-colors uppercase">
+            <button 
+              onClick={() => setFechaActual(new Date())} 
+              className="px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl text-xs font-black text-[#4F99CC] transition-colors uppercase outline-none focus:ring-2 focus:ring-[#4F99CC]"
+            >
               {idioma === 'es' ? 'Hoy' : 'Today'}
             </button>
-            <button onClick={() => cambiarMes(1)} className="p-2 hover:bg-gray-50 rounded-xl text-gray-400 transition-colors">
+            <button 
+              onClick={() => cambiarMes(1)} 
+              aria-label={idioma === 'es' ? 'Mes siguiente' : 'Next month'}
+              className="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl text-gray-400 transition-colors outline-none focus:ring-2 focus:ring-[#4F99CC]"
+            >
               <ChevronRight size={24} />
             </button>
           </div>
@@ -225,18 +236,20 @@ const PaginaCalendario = () => {
           )}
           
           {dias.map((dia, idx) => (
-            <div 
+            <button 
               key={idx} 
               onClick={() => dia.clave && setDiaSeleccionado(dia.clave)}
+              disabled={!dia.fecha}
+              aria-label={dia.fecha ? (idioma === 'es' ? `Ver detalles del ${dia.fecha.getDate()} de ${fechaActual.toLocaleString('es-ES', { month: 'long' })}` : `View details for ${dia.fecha.getDate()} ${fechaActual.toLocaleString('en-US', { month: 'long' })}`) : undefined}
               className={`
-                border-r border-b border-gray-50 dark:border-gray-700 p-2 min-h-[80px] transition-all cursor-pointer group
-                ${!dia.fecha ? 'bg-gray-50/50 dark:bg-gray-800/50' : 'hover:bg-[#4F99CC]/5 dark:hover:bg-[#4F99CC]/20'}
+                border-r border-b border-gray-50 dark:border-gray-700 p-2 min-h-[80px] transition-all group text-left items-start flex flex-col
+                ${!dia.fecha ? 'bg-gray-50/50 dark:bg-gray-800/50 cursor-default' : 'hover:bg-[#4F99CC]/5 dark:hover:bg-[#4F99CC]/20 cursor-pointer outline-none focus:ring-2 focus:ring-inset focus:ring-[#4F99CC]'}
                 ${diaSeleccionado === dia.clave ? 'bg-[#4F99CC]/10 ring-2 ring-inset ring-[#4F99CC]' : ''}
               `}
             >
               {dia.fecha && (
-                <div className="h-full flex flex-col justify-between">
-                  <div className="flex justify-between items-start">
+                <div className="h-full w-full flex flex-col justify-between">
+                  <div className="flex justify-between items-start w-full">
                     <span className={`text-xs font-black ${dia.esHoy ? 'bg-[#4F99CC] text-white w-6 h-6 flex items-center justify-center rounded-lg shadow-sm' : 'text-[#2C4159] dark:text-gray-300'}`}>
                       {dia.fecha.getDate()}
                     </span>
@@ -260,7 +273,7 @@ const PaginaCalendario = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </button>
           ))}
         </div>
       </div>

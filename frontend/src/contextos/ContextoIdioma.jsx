@@ -58,7 +58,16 @@ const traducciones = {
     med_finalizada: '¡Sesión Completada!',
     med_minutos: 'Minutos',
     med_tecnica: 'Técnica de Respiración',
-    med_musica: 'Música Ambiental'
+    med_musica: 'Música Ambiental',
+    
+    // Tooltips de Estadísticas
+    tooltip_comparativa: 'Muestra tu promedio de ánimo actual y cómo ha cambiado respecto al periodo anterior, además de tus mejores rachas.',
+    tooltip_consistencia: 'Mapa de calor que visualiza los días que has completado cada uno de tus hábitos activos.',
+    tooltip_impacto: 'Compara tu nivel de ánimo en los días que cumples un hábito (línea azul) frente a los que no (línea dorada), para identificar qué rutinas mejoran más tu bienestar. Cuanto más hacia fuera esté la línea azul, mayor impacto positivo.',
+    tooltip_bienestar: 'Gráfico de línea que muestra la evolución diaria de tu estado de ánimo a lo largo del tiempo.',
+    tooltip_clima: 'Distribución porcentual de tus estados de ánimo (desde fatal hasta genial) en el periodo seleccionado.',
+    tooltip_descanso: 'Analiza la relación entre las horas dormidas y tu humor. El tamaño del punto indica el nivel de ánimo.',
+    tooltip_paz: 'Seguimiento de tus minutos de meditación diarios y las técnicas de respiración más utilizadas.'
   },
   en: {
     // Navigation
@@ -115,7 +124,16 @@ const traducciones = {
     med_finalizada: 'Session Completed!',
     med_minutos: 'Minutes',
     med_tecnica: 'Breathing Technique',
-    med_musica: 'Ambient Music'
+    med_musica: 'Ambient Music',
+
+    // Stats Tooltips
+    tooltip_comparativa: 'Shows your current average mood and how it has changed compared to the previous period, along with your best streaks.',
+    tooltip_consistencia: 'Heatmap visualizing the days you have completed each of your active habits.',
+    tooltip_impacto: "Compares your mood level on days you complete a habit (blue line) vs those you don't (gold line), to identify which routines improve your well-being most. The further out the blue line is, the greater the positive impact.",
+    tooltip_bienestar: 'Line chart showing the daily evolution of your mood over time.',
+    tooltip_clima: 'Percentage distribution of your moods (from fatal to great) in the selected period.',
+    tooltip_descanso: 'Analyzes the relationship between sleep hours and your mood. Point size indicates the mood level.',
+    tooltip_paz: 'Tracking of your daily meditation minutes and most used breathing techniques.'
   }
 };
 

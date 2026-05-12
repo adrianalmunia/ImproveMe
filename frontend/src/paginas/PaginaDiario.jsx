@@ -383,12 +383,14 @@ export function PaginaDiario() {
             {/* Selector de Humor (Imágenes más grandes y sin punto) */}
             <div className="flex justify-around items-center py-6">
               {humores.map((h) => (
-                <motion.div
+                <motion.button
                   key={h.id}
                   whileHover={{ scale: 1.15, y: -5 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setHumor(h.id)}
-                  className="flex flex-col items-center gap-3 cursor-pointer group"
+                  aria-label={h.label}
+                  aria-pressed={humor === h.id}
+                  className="flex flex-col items-center gap-3 cursor-pointer group outline-none focus:ring-2 focus:ring-[#4F99CC] focus:ring-offset-2 dark:focus:ring-offset-gray-900 rounded-2xl p-2"
                 >
                   <div className={`relative transition-all duration-300 ${humor === h.id ? 'scale-110' : 'opacity-40 grayscale-[40%] group-hover:opacity-100 group-hover:grayscale-0'}`}>
                     <img src={h.imagen} alt={h.label} className="w-20 h-20 object-contain" />
@@ -396,7 +398,7 @@ export function PaginaDiario() {
                   <span className={`text-xs font-bold uppercase tracking-widest transition-colors ${humor === h.id ? 'text-[#4F99CC]' : 'text-gray-400'}`}>
                     {h.label}
                   </span>
-                </motion.div>
+                </motion.button>
               ))}
             </div>
 
@@ -419,7 +421,7 @@ export function PaginaDiario() {
                 <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('diario_sueno')}</label>
                 <span className="text-[#4F99CC] font-bold">{sueno >= 10 ? '+10' : sueno} {idioma === 'es' ? 'horas' : 'hours'}</span>
               </div>
-              <div className="relative h-2 w-full rounded-full bg-gray-200 overflow-visible">
+              <div className="relative h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-visible transition-colors duration-300">
                 <div
                   className="absolute h-full rounded-full bg-gradient-to-r from-[#4F99CC] to-[#A855F7]"
                   style={{ width: `${(sueno / 10) * 100}%` }}
@@ -431,11 +433,12 @@ export function PaginaDiario() {
                   step="0.5"
                   value={sueno}
                   onChange={(e) => setSueno(parseFloat(e.target.value))}
-                  className="absolute -top-1 w-full h-4 opacity-0 cursor-pointer z-10"
+                  aria-label={t('diario_sueno')}
+                  className="absolute -top-1 w-full h-4 opacity-0 cursor-pointer z-10 focus:opacity-100 focus:accent-[#4F99CC]"
                 />
                 <motion.div
                   style={{ left: `${(sueno / 10) * 100}%` }}
-                  className="absolute top-1/2 -translate-y-1/2 -ml-3 w-6 h-6 bg-white dark:bg-gray-800 rounded-full shadow-lg border-2 border-[#4F99CC] pointer-events-none"
+                  className="absolute top-1/2 -translate-y-1/2 -ml-3 w-6 h-6 bg-white dark:bg-gray-800 rounded-full shadow-lg border-2 border-[#4F99CC] pointer-events-none transition-colors duration-300"
                 />
               </div>
             </div>
@@ -452,23 +455,24 @@ export function PaginaDiario() {
 
               <button
                 onClick={() => inputImagenRef.current.click()}
-                className={`flex-1 relative py-3 px-6 bg-white dark:bg-gray-800 border rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${imagen ? 'border-[#4F99CC] text-[#4F99CC]' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
+                className={`flex-1 relative py-3 px-6 bg-white dark:bg-gray-800 border rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors outline-none focus:ring-2 focus:ring-[#4F99CC] ${imagen ? 'border-[#4F99CC] text-[#4F99CC]' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
               >
                 {imagen ? (idioma === 'es' ? 'Imagen Lista' : 'Image Ready') : (idioma === 'es' ? 'Añadir Imagen' : 'Add Image')}
                 {imagen && (
-                  <motion.div
+                  <motion.button
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
                     onClick={eliminarImagen}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600"
+                    aria-label={idioma === 'es' ? 'Eliminar imagen' : 'Delete image'}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 focus:ring-2 focus:ring-red-400 focus:ring-offset-2 outline-none"
                   >
                     ✕
-                  </motion.div>
+                  </motion.button>
                 )}
               </button>
 
               <button
                 onClick={manejarAudioClick}
-                className={`flex-1 relative py-3 px-6 bg-white dark:bg-gray-800 border rounded-full text-xs font-bold flex items-center justify-center gap-2 transition-colors ${estaGrabando
+                className={`flex-1 relative py-3 px-6 bg-white dark:bg-gray-800 border rounded-full text-xs font-bold flex items-center justify-center gap-2 transition-colors outline-none focus:ring-2 focus:ring-[#4F99CC] ${estaGrabando
                     ? 'border-red-500 text-red-500 animate-pulse'
                     : audio
                       ? 'border-[#4F99CC] text-[#4F99CC] hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -477,13 +481,14 @@ export function PaginaDiario() {
               >
                 {estaGrabando ? (idioma === 'es' ? 'Grabando...' : 'Recording...') : audio ? (idioma === 'es' ? 'Audio Listo' : 'Audio Ready') : (idioma === 'es' ? 'Grabar Audio' : 'Record Audio')}
                 {audio && !estaGrabando && (
-                  <motion.div
+                  <motion.button
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
                     onClick={eliminarAudio}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600"
+                    aria-label={idioma === 'es' ? 'Eliminar audio' : 'Delete audio'}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 focus:ring-2 focus:ring-red-400 focus:ring-offset-2 outline-none"
                   >
                     ✕
-                  </motion.div>
+                  </motion.button>
                 )}
               </button>
             </div>

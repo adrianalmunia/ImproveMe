@@ -68,17 +68,19 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
     : entrada.contenido_texto || (idioma === 'es' ? "Sin contenido escrito para este día." : "No written content for this day.");
 
   return (
-    <div className="relative cursor-pointer" style={{ perspective: 1200 }} onClick={() => onClick(entrada)}>
-      <motion.div 
+    <div style={{ perspective: 1200 }} className="relative">
+      <motion.button 
+        onClick={() => onClick(entrada)}
         onMouseMove={manejarMouseMove}
         onMouseLeave={manejarMouseLeave}
         whileHover={{ scale: 1.02 }}
-        className="w-full h-[400px] rounded-[40px] shadow-xl p-[3px] flex flex-col items-center justify-center text-center relative z-10"
+        aria-label={idioma === 'es' ? `Ver registro del ${fechaStr}` : `View record for ${fechaStr}`}
+        className="w-full h-[400px] rounded-[40px] shadow-xl p-[3px] flex flex-col items-center justify-center text-center relative z-10 outline-none focus:ring-4 focus:ring-[#4F99CC] focus:ring-offset-4 dark:focus:ring-offset-gray-900 group"
         style={{ 
           background: 'linear-gradient(180deg, #4F99CC 0%, #C6A55E 100%)',
+          transformStyle: "preserve-3d",
           rotateX,
           rotateY,
-          transformStyle: "preserve-3d",
           willChange: "transform",
           backfaceVisibility: "hidden"
         }}
@@ -86,7 +88,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
         <div className="w-full h-full bg-white dark:bg-gray-800 rounded-[37px] relative overflow-hidden flex flex-col items-center transition-colors duration-300">
           <div className="absolute inset-0 bg-gradient-to-b from-white dark:from-gray-800 to-[#4F99CC]/5 dark:to-[#4F99CC]/10 pointer-events-none transition-colors duration-300"></div>
           
-          <div className="mb-2 mt-4 relative z-10 shrink-0 text-center flex flex-col items-center" style={{ transform: "translateZ(20px)" }}>
+          <div className="mb-2 mt-4 relative z-10 shrink-0 text-center flex flex-col items-center" style={{ transform: "translateZ(40px)" }}>
             <p className="text-[10px] font-black text-[#4F99CC] uppercase tracking-[0.1em]">{fechaStr}</p>
             <div className="w-8 h-0.5 bg-[#4F99CC]/30 mx-auto mt-1 rounded-full mb-2"></div>
             
@@ -99,7 +101,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
 
           {/* Previsualización de Imagen si existe */}
           {entrada.archivos_multimedia?.find(a => a.tipo_archivo === 'imagen') ? (
-            <div className="w-full h-28 mt-2 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative z-10 shrink-0 transition-colors duration-300" style={{ transform: "translateZ(10px)" }}>
+            <div className="w-[90%] h-32 mt-2 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative z-10 shrink-0 transition-colors duration-300" style={{ transform: "translateZ(20px)" }}>
               <img 
                 src={`http://localhost:3000${entrada.archivos_multimedia.find(a => a.tipo_archivo === 'imagen').url_archivo}`} 
                 alt="Miniatura" 
@@ -110,34 +112,33 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
 
           {/* Mostrar reproductor de audio si existe */}
           {entrada.archivos_multimedia?.find(a => a.tipo_archivo === 'audio') && (
-            <div className="w-full flex justify-center mt-3 z-20 shrink-0" style={{ transform: "translateZ(15px)" }} onClick={(e) => e.stopPropagation()}>
+            <div className="w-full flex justify-center mt-3 z-20 shrink-0" style={{ transform: "translateZ(30px)" }} onClick={(e) => e.stopPropagation()}>
               <div className="scale-[0.85] origin-top w-[115%] flex justify-center -mb-2">
                 <ReproductorAudio src={`http://localhost:3000${entrada.archivos_multimedia.find(a => a.tipo_archivo === 'audio').url_archivo}`} />
               </div>
             </div>
           )}
 
-          <div className="flex-1 w-full flex items-center justify-center mt-2 px-2 overflow-hidden" style={{ transform: "translateZ(0)" }}>
+          <div className="flex-1 w-full flex items-center justify-center mt-2 px-6 overflow-hidden" style={{ transform: "translateZ(10px)" }}>
             <p className="text-xs font-['Tilt_Warp'] text-gray-700 dark:text-gray-300 leading-relaxed text-center w-full break-words line-clamp-6 transition-colors duration-300">
               {extracto}
             </p>
           </div>
 
-          <div className="w-16 h-1 mt-4 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] rounded-full shrink-0 mb-4"></div>
+          <div className="w-16 h-1 mt-4 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] rounded-full shrink-0 mb-6"></div>
         </div>
 
-        {/* Icono Flotante de Humor */}
+        {/* Icono Flotante de Humor (FUERA del div overflow-hidden) */}
         <motion.div 
-          className="absolute -top-6 -left-6 w-20 h-20 bg-white dark:bg-gray-800 rounded-full shadow-lg border-[3px] flex items-center justify-center overflow-hidden z-20 transition-colors duration-300"
+          className="absolute -top-6 -left-6 w-20 h-20 bg-white dark:bg-gray-800 rounded-full shadow-md border-[3px] flex items-center justify-center overflow-hidden z-20 transition-colors duration-300"
           style={{ 
             borderColor: humorInfo.color,
-            transformStyle: "preserve-3d",
             backfaceVisibility: "hidden"
           }}
         >
           <img src={humorInfo.imagen} alt="Humor" className="w-full h-full object-cover" />
         </motion.div>
-      </motion.div>
+      </motion.button>
     </div>
   );
 };

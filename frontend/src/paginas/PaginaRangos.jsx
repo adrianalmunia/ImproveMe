@@ -203,7 +203,16 @@ const PaginaRangos = () => {
       <motion.div 
         whileHover={{ scale: 1.01 }}
         onClick={() => setMostrarModalLigas(true)}
-        className="bg-white dark:bg-gray-800 rounded-[32px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all relative overflow-hidden group duration-300"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setMostrarModalLigas(true);
+          }
+        }}
+        tabIndex={0}
+        role="button"
+        aria-label={idioma === 'es' ? 'Explorar todas las ligas' : 'Explore all leagues'}
+        className="bg-white dark:bg-gray-800 rounded-[32px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-[#4F99CC] relative overflow-hidden group duration-300"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-[#4F99CC]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="flex justify-between items-center mb-6">

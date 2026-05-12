@@ -405,7 +405,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
           </AnimatePresence>
 
           <div className="flex flex-col gap-3">
-            {habitos.map(h => (
+            {[...habitos]
+              .sort((a, b) => {
+                if (a.estado === null && b.estado !== null) return -1;
+                if (a.estado !== null && b.estado === null) return 1;
+                return 0;
+              })
+              .map(h => (
               <motion.div
                 layout
                 key={h.id}
@@ -414,7 +420,8 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => eliminarItem(h.id, 'habito')}
-                    className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                    aria-label={idioma === 'es' ? 'Eliminar hábito' : 'Delete habit'}
+                    className="p-1.5 text-gray-300 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 outline-none"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -437,7 +444,7 @@ const PaginaHabitos = ({ setVistaActual }) => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                   <button
                     onClick={(e) => {
                       if (h.estado === 'positivo') {
@@ -451,24 +458,24 @@ const PaginaHabitos = ({ setVistaActual }) => {
                         ganarXP(10, e);
                       }
                     }}
-                    className={`p-1.5 rounded-lg transition-transform active:scale-90 ${h.estado === 'positivo' ? 'bg-green-500 text-white' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
+                    aria-label={idioma === 'es' ? 'Marcar como positivo' : 'Mark as positive'}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-green-400 ${h.estado === 'positivo' ? 'bg-green-500 text-white shadow-lg' : 'bg-green-50 text-green-500 hover:bg-green-500 hover:text-white'}`}
                   >
                     <Plus size={16} />
                   </button>
                   <button
                     onClick={(e) => {
                       if (h.estado === 'negativo') {
-                        // Deshacer negativo: restaurar la racha que teníamos
                         setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: null, racha: item.rachaAnterior || 0 } : item));
                         ganarXP(10, e);
                       } else {
-                        // Marcar negativo: guardar racha actual solo si venimos de neutro
                         const nuevaRachaAnterior = h.estado === 'positivo' ? Math.max(0, h.racha - 1) : h.racha;
                         setHabitos(habitos.map(item => item.id === h.id ? { ...item, estado: 'negativo', rachaAnterior: nuevaRachaAnterior, racha: 0 } : item));
                         ganarXP(-10, e);
                       }
                     }}
-                    className={`p-1.5 rounded-lg transition-transform active:scale-90 ${h.estado === 'negativo' ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600 hover:bg-red-100'}`}
+                    aria-label={idioma === 'es' ? 'Marcar como negativo' : 'Mark as negative'}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-red-400 ${h.estado === 'negativo' ? 'bg-red-500 text-white shadow-lg' : 'bg-red-50 text-red-500 hover:bg-red-500 hover:text-white'}`}
                   >
                     <Minus size={16} />
                   </button>
@@ -517,7 +524,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
           </AnimatePresence>
 
           <div className="flex flex-col gap-3">
-            {diarias.map(d => (
+            {[...diarias]
+              .sort((a, b) => {
+                if (!a.completada && b.completada) return -1;
+                if (a.completada && !b.completada) return 1;
+                return 0;
+              })
+              .map(d => (
               <motion.div
                 layout
                 key={d.id}
@@ -533,7 +546,8 @@ const PaginaHabitos = ({ setVistaActual }) => {
                       ganarXP(-20, e);
                     }
                   }}
-                  className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${d.completada ? 'bg-green-500 border-green-500 text-white scale-90' : 'border-gray-300 text-transparent hover:border-[#C6A55E]'}`}
+                  aria-label={d.completada ? (idioma === 'es' ? 'Marcar como pendiente' : 'Mark as pending') : (idioma === 'es' ? 'Marcar como completada' : 'Mark as completed')}
+                  className={`shrink-0 w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-green-400 ${d.completada ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 text-transparent hover:border-[#C6A55E] hover:text-[#C6A55E]'}`}
                 >
                   <CheckCircle2 size={16} />
                 </button>
@@ -546,7 +560,8 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 </div>
                 <button
                   onClick={() => eliminarItem(d.id, 'diaria')}
-                  className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                  aria-label={idioma === 'es' ? 'Eliminar tarea diaria' : 'Delete daily task'}
+                  className="p-1.5 text-gray-300 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 outline-none"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -599,7 +614,13 @@ const PaginaHabitos = ({ setVistaActual }) => {
           </AnimatePresence>
 
           <div className="flex flex-col gap-3">
-            {tareas.map(tarea => (
+            {[...tareas]
+              .sort((a, b) => {
+                if (!a.completada && b.completada) return -1;
+                if (a.completada && !b.completada) return 1;
+                return 0;
+              })
+              .map(tarea => (
               <motion.div
                 layout
                 key={tarea.id}
@@ -610,7 +631,6 @@ const PaginaHabitos = ({ setVistaActual }) => {
                     const completando = !tarea.completada;
                     if (completando) {
                       ganarXP(30, e);
-                      // Borrar tarea al completarla
                       setTimeout(() => {
                         setTareas(prev => prev.filter(item => item.id !== tarea.id));
                       }, 500);
@@ -619,7 +639,8 @@ const PaginaHabitos = ({ setVistaActual }) => {
                       ganarXP(-30, e);
                     }
                   }}
-                  className={`shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${tarea.completada ? 'bg-green-500 border-green-500 text-white scale-90' : 'border-gray-300 text-transparent hover:border-indigo-500'}`}
+                  aria-label={tarea.completada ? (idioma === 'es' ? 'Marcar como pendiente' : 'Mark as pending') : (idioma === 'es' ? 'Marcar como completada' : 'Mark as completed')}
+                  className={`shrink-0 w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all outline-none focus:ring-2 focus:ring-green-400 ${tarea.completada ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 text-transparent hover:border-indigo-500 hover:text-indigo-500'}`}
                 >
                   <CheckCircle2 size={16} />
                 </button>
@@ -634,7 +655,8 @@ const PaginaHabitos = ({ setVistaActual }) => {
                 </div>
                 <button
                   onClick={() => eliminarItem(tarea.id, 'tarea')}
-                  className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                  aria-label={idioma === 'es' ? 'Eliminar tarea' : 'Delete task'}
+                  className="p-1.5 text-gray-300 hover:text-red-500 focus:text-red-500 hover:bg-red-50 focus:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 outline-none"
                 >
                   <Trash2 size={16} />
                 </button>

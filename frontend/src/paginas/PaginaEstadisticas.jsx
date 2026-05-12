@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bar, 
   Line, 
@@ -35,7 +35,8 @@ import {
   Zap,
   Flame,
   Award,
-  Flower2
+  Flower2,
+  Info
 } from 'lucide-react';
 
 // Registrar componentes de Chart.js
@@ -73,6 +74,38 @@ const obtenerColorSueno = (horas) => {
   const g = Math.round(153 + (85 - 153) * ratio);
   const b = Math.round(204 + (247 - 204) * ratio);
   return `rgb(${r}, ${g}, ${b})`;
+};
+
+const TooltipInfo = ({ texto }) => {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div className="relative inline-block ml-auto">
+      <button 
+        onMouseEnter={() => setVisible(true)}
+        onMouseLeave={() => setVisible(false)}
+        onFocus={() => setVisible(true)}
+        onBlur={() => setVisible(false)}
+        aria-label="Información detallada"
+        className="cursor-help text-gray-300 dark:text-gray-600 hover:text-[#4F99CC] focus:text-[#4F99CC] transition-colors p-1 outline-none focus:ring-2 focus:ring-[#4F99CC] rounded-full"
+      >
+        <Info size={16} />
+      </button>
+      <AnimatePresence>
+        {visible && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            className="absolute z-[100] bottom-full right-0 mb-3 w-64 p-4 bg-[#2C4159] text-white text-[11px] font-medium rounded-2xl shadow-2xl border border-white/10 backdrop-blur-md pointer-events-none normal-case tracking-normal"
+          >
+            {texto}
+            <div className="absolute top-full right-2 -mt-1 border-8 border-transparent border-t-[#2C4159]" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 };
 
 const PaginaEstadisticas = () => {
@@ -420,10 +453,13 @@ const PaginaEstadisticas = () => {
 
         {/* Resumen Semanal vs Mensual */}
         <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-[450px] transition-colors duration-300">
-          <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-6 flex items-center gap-2 shrink-0 transition-colors duration-300">
-            <Calendar size={20} className="text-[#4F99CC]" />
-            {idioma === 'es' ? 'Comparativa' : 'Comparison'}
-          </h2>
+          <div className="flex items-center justify-between mb-6 shrink-0">
+            <h2 className="text-xl font-black text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
+              <Calendar size={20} className="text-[#4F99CC]" />
+              {idioma === 'es' ? 'Comparativa' : 'Comparison'}
+            </h2>
+            <TooltipInfo texto={t('tooltip_comparativa')} />
+          </div>
           
           <div className="space-y-4 shrink-0">
             <div className="flex justify-between items-end">
@@ -499,8 +535,11 @@ const PaginaEstadisticas = () => {
               <Target size={20} className="text-[#C6A55E]" />
               {idioma === 'es' ? 'Consistencia' : 'Consistency'}
             </h2>
-            <div className="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 rounded-full">
-              <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">{rangoDias} {idioma === 'es' ? 'días' : 'days'}</span>
+            <div className="flex items-center gap-2">
+              <div className="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 rounded-full">
+                <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">{rangoDias} {idioma === 'es' ? 'días' : 'days'}</span>
+              </div>
+              <TooltipInfo texto={t('tooltip_consistencia')} />
             </div>
           </div>
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-8">{idioma === 'es' ? 'Progreso de tus hábitos en el periodo' : 'Habit progress in the selected period'}</p>
@@ -561,7 +600,7 @@ const PaginaEstadisticas = () => {
                               className={`w-2.5 h-2.5 rounded-[3px] transition-all duration-300 ${
                                 completado 
                                   ? 'bg-current opacity-100 shadow-[0_0_8px_rgba(current)]' 
-                                  : 'bg-gray-200 dark:bg-gray-700 opacity-20'
+                                  : 'bg-slate-200 dark:bg-gray-700'
                               }`}
                               title={fechaStr}
                             />
@@ -586,17 +625,15 @@ const PaginaEstadisticas = () => {
 
         {/* Correlación Radar (Impacto Vital) - MOVIDA AQUÍ ARRIBA */}
         <div className="bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 h-[450px] transition-colors duration-300">
-          <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
-            <Zap size={20} className="text-yellow-500" />
-            {idioma === 'es' ? 'Impacto Vital' : 'Life Impact'}
-          </h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-black text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
+              <Zap size={20} className="text-yellow-500" />
+              {idioma === 'es' ? 'Impacto Vital' : 'Life Impact'}
+            </h2>
+            <TooltipInfo texto={t('tooltip_impacto')} />
+          </div>
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-2">{idioma === 'es' ? 'Efecto de tus hábitos en tu humor' : 'Effect of your habits on your mood'}</p>
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-6 leading-relaxed italic">
-            {idioma === 'es' 
-              ? "Compara tu ánimo los días que cumples un hábito frente a los que no. Cuanto más hacia fuera esté la línea azul, más impacto positivo tiene ese hábito en tu bienestar."
-              : "Compares your mood on days you complete a habit vs those you don't. The further out the blue line is, the more positive impact that habit has on your well-being."}
-          </p>
-          <div className="h-[280px] flex items-center justify-center">
+          <div className="h-[320px] flex items-center justify-center mt-4">
             <Radar 
               data={dataRadar} 
               options={{
@@ -617,14 +654,6 @@ const PaginaEstadisticas = () => {
               }} 
             />
           </div>
-          <div className="flex flex-col gap-1 mt-4">
-            <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-[#4F99CC]">
-              <div className="w-2 h-2 rounded-full bg-[#4F99CC]" /> {idioma === 'es' ? 'Con hábito' : 'With habit'}
-            </span>
-            <span className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-[#C6A55E]">
-              <div className="w-2 h-2 rounded-full bg-[#C6A55E]" /> {idioma === 'es' ? 'Sin hábito' : 'Without habit'}
-            </span>
-          </div>
         </div>
 
         {/* --- FILA 2 --- */}
@@ -636,10 +665,13 @@ const PaginaEstadisticas = () => {
               <TrendingUp size={20} className="text-[#4F99CC]" />
               {idioma === 'es' ? 'Bienestar Emocional' : 'Emotional Well-being'}
             </h2>
-            <div className="flex gap-2">
-              <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400 dark:text-gray-500">
-                <div className="w-2 h-2 rounded-full bg-[#4F99CC]" /> {idioma === 'es' ? 'Ánimo' : 'Mood'}
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="flex gap-2">
+                <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400 dark:text-gray-500">
+                  <div className="w-2 h-2 rounded-full bg-[#4F99CC]" /> {idioma === 'es' ? 'Ánimo' : 'Mood'}
+                </span>
+              </div>
+              <TooltipInfo texto={t('tooltip_bienestar')} />
             </div>
           </div>
           <div className="h-[330px]">
@@ -649,10 +681,13 @@ const PaginaEstadisticas = () => {
 
         {/* Distribución de Ánimo (Doughnut) */}
         <div className="bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 h-[450px] flex flex-col transition-colors duration-300">
-          <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
-            <Smile size={20} className="text-[#C6A55E]" />
-            {idioma === 'es' ? 'Clima Emocional' : 'Emotional Climate'}
-          </h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-black text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
+              <Smile size={20} className="text-[#C6A55E]" />
+              {idioma === 'es' ? 'Clima Emocional' : 'Emotional Climate'}
+            </h2>
+            <TooltipInfo texto={t('tooltip_clima')} />
+          </div>
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">{idioma === 'es' ? 'Distribución global de tu humor' : 'Global mood distribution'}</p>
           <div className="flex-1 flex items-center justify-center min-h-0">
             <div className="h-full w-full max-h-[260px]">
@@ -689,10 +724,13 @@ const PaginaEstadisticas = () => {
 
         {/* Análisis de Sueño vs Ánimo (MEJORADA) */}
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-[40px] p-8 shadow-sm border border-gray-100 dark:border-gray-700 h-[450px] transition-colors duration-300">
-          <h2 className="text-xl font-black text-[#2C4159] dark:text-white mb-2 flex items-center gap-2 transition-colors duration-300">
-            <Moon size={20} className="text-indigo-500" />
-            {idioma === 'es' ? 'Descanso vs Ánimo' : 'Rest vs Mood'}
-          </h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-black text-[#2C4159] dark:text-white flex items-center gap-2 transition-colors duration-300">
+              <Moon size={20} className="text-indigo-500" />
+              {idioma === 'es' ? 'Descanso vs Ánimo' : 'Rest vs Mood'}
+            </h2>
+            <TooltipInfo texto={t('tooltip_descanso')} />
+          </div>
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">{idioma === 'es' ? 'Cómo impactan tus horas de sueño en tu bienestar' : 'How sleep hours impact your well-being'}</p>
           <div className="h-[300px]">
             <Scatter 
@@ -759,8 +797,11 @@ const PaginaEstadisticas = () => {
               </h2>
               <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase">{idioma === 'es' ? 'Tu compromiso zen' : 'Your zen commitment'}</p>
             </div>
-            <div className="bg-teal-50 dark:bg-teal-900/30 px-3 py-1 rounded-full">
-              <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">{stats?.meditacion?.rachaActual || 0}d {idioma === 'es' ? 'Racha' : 'Streak'}</span>
+            <div className="flex items-center gap-3">
+              <div className="bg-teal-50 dark:bg-teal-900/30 px-3 py-1 rounded-full">
+                <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 uppercase tracking-widest">{stats?.meditacion?.rachaActual || 0}d {idioma === 'es' ? 'Racha' : 'Streak'}</span>
+              </div>
+              <TooltipInfo texto={t('tooltip_paz')} />
             </div>
           </div>
           

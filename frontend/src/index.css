@@ -24,20 +24,54 @@ html, body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Scrollbar Personalizado */
-.scroll-personalizado::-webkit-scrollbar {
-  width: 5px;
+/* Scrollbar Global y Personalizado */
+:root {
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+  --scrollbar-track: transparent;
 }
 
-.scroll-personalizado::-webkit-scrollbar-track {
-  background: transparent;
+.dark {
+  --scrollbar-thumb: #475569;
+  --scrollbar-thumb-hover: #64748b;
 }
 
-.scroll-personalizado::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+/* Aplicar a todo el documento */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
   border-radius: 20px;
+  border: 3px solid transparent; /* Efecto de padding */
+  background-clip: content-box;
 }
 
-.scroll-personalizado::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: content-box;
+}
+
+/* Versión fina para contenedores internos (como en estadísticas) */
+.scroll-personalizado::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scroll-personalizado::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border: 1px solid transparent;
+}
+
+/* Compatibilidad con Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
