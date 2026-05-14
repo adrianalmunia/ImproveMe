@@ -203,33 +203,30 @@ async function obtenerEstadisticasGenerales(usuarioId, dias = 30) {
         });
     });
 
-    // 10. Cálculo de racha de meditación
-    const fechasUnicas = [...new Set(todasLasSesiones.map(s => {
-        const f = s.fecha;
-        return `${f.getUTCFullYear()}-${String(f.getUTCMonth() + 1).padStart(2, '0')}-${String(f.getUTCDate()).padStart(2, '0')}`;
-    }))].sort().reverse();
+    // 10. Cálculo de racha de meditación (usando lógica robusta de calcularRacha)
+    const normalizadas = todasLasSesiones.map(s => {
+        const d = new Date(s.fecha);
+        return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    });
+    const unicas = [...new Set(normalizadas)].sort((a, b) => b - a);
     
+    const MS_DIA = 86400000;
     let rachaMedCalc = 0;
-    const ahora = new Date();
-    const hoyStr = `${ahora.getUTCFullYear()}-${String(ahora.getUTCMonth() + 1).padStart(2, '0')}-${String(ahora.getUTCDate()).padStart(2, '0')}`;
-    const ayer = new Date(ahora);
-    ayer.setUTCDate(ahora.getUTCDate() - 1);
-    const ayerStr = `${ayer.getUTCFullYear()}-${String(ayer.getUTCMonth() + 1).padStart(2, '0')}-${String(ayer.getUTCDate()).padStart(2, '0')}`;
-
-    if (fechasUnicas.length > 0) {
-        if (fechasUnicas[0] === hoyStr || fechasUnicas[0] === ayerStr) {
-            rachaMedCalc = 1;
-            for (let i = 0; i < fechasUnicas.length - 1; i++) {
-                const fActual = new Date(fechasUnicas[i]);
-                const fSiguiente = new Date(fechasUnicas[i + 1]);
-                const diff = Math.round((fActual - fSiguiente) / (1000 * 60 * 60 * 24));
-                if (diff === 1) rachaMedCalc++;
-                else break;
+    if (unicas.length > 0) {
+        // La primera fecha siempre cuenta como inicio de racha
+        rachaMedCalc = 1;
+        for (let i = 0; i < unicas.length - 1; i++) {
+            const diffDias = Math.round((unicas[i] - unicas[i + 1]) / MS_DIA);
+            if (diffDias === 1) {
+                rachaMedCalc++;
+            } else {
+                break; // La cadena se rompe si falta un día
             }
         }
     }
-
-    const rachaFinal = (usuario && usuario.racha_meditacion !== null) ? usuario.racha_meditacion : rachaMedCalc;
+    
+    // 10.5. Racha final: el cálculo dinámico es la fuente de verdad más fiable
+    const rachaFinal = rachaMedCalc;
 
     // 11. Respuesta unificada con los nombres de claves esperados por el frontend
     return {

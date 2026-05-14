@@ -164,6 +164,23 @@ const PaginaHabitos = ({ setVistaActual }) => {
   const [frecuenciaSeleccionada, setFrecuenciaSeleccionada] = useState(7);
   const [seccionActiva, setSeccionActiva] = useState(null);
 
+  // Atajos de teclado para Hábitos
+  useEffect(() => {
+    const manejarTeclas = (e) => {
+      // Alt + N para Nuevo Hábito
+      if (e.altKey && e.key === 'n') {
+        e.preventDefault();
+        setSeccionActiva('habito');
+      }
+      // Esc para cancelar creación
+      if (e.key === 'Escape' && seccionActiva) {
+        setSeccionActiva(null);
+      }
+    };
+    window.addEventListener('keydown', manejarTeclas);
+    return () => window.removeEventListener('keydown', manejarTeclas);
+  }, [seccionActiva]);
+
   // Estado para animaciones de XP flotante
   const [notificacionesXP, setNotificacionesXP] = useState([]);
 

@@ -20,7 +20,7 @@ async function registrarSesion(req, res) {
 
     try {
         console.log(`[Meditación] Registrando sesión para usuario ${usuario_id}:`, req.body);
-        
+
         // 1. Crear el registro de la sesión
         const sesion = await prisma.sesiones_meditacion.create({
             data: {
@@ -36,7 +36,7 @@ async function registrarSesion(req, res) {
         // Solo damos XP si ha meditado al menos el 80% del tiempo configurado
         const porcentajeCompletado = (sesion.segundos_completados / sesion.duracion_segundos) * 100;
         let xpGanada = 0;
-        
+
         if (porcentajeCompletado >= 80) {
             xpGanada = 50;
             await prisma.usuarios.update({
@@ -88,8 +88,8 @@ async function registrarSesion(req, res) {
         console.log(`[Meditación] Racha actualizada para usuario ${usuario_id}: ${nuevaRacha} días`);
 
         console.log(`[Meditación] Sesión guardada con ID: ${sesion.id}`);
-        res.status(201).json({ 
-            mensaje: "Sesión de meditación registrada", 
+        res.status(201).json({
+            mensaje: "Sesión de meditación registrada",
             sesion,
             xp_ganada: xpGanada,
             nueva_racha: nuevaRacha

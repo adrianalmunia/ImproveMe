@@ -111,6 +111,33 @@ export function ProveedorAutenticacion({ children }) {
     }
 
     /**
+     * Inicia sesión o registra con Google
+     * @param {string} tokenGoogle - ID token de Google
+     */
+    async function loginGoogle(tokenGoogle) {
+        try {
+            setError(null);
+            setEstaCargando(true);
+
+            const { usuario: usuarioGoogle, token: tokenGoogle2 } =
+                await servicioAPI.loginConGoogle(tokenGoogle);
+
+            setToken(tokenGoogle2);
+            setUsuario(usuarioGoogle);
+
+            localStorage.setItem('tokenAutenticacion', tokenGoogle2);
+            localStorage.setItem('usuarioAutenticacion', JSON.stringify(usuarioGoogle));
+
+            return usuarioGoogle;
+        } catch (err) {
+            setError(err.message);
+            throw err;
+        } finally {
+            setEstaCargando(false);
+        }
+    }
+
+    /**
      * Cierra sesión eliminando el usuario y token
      */
     function logout() {
@@ -200,6 +227,7 @@ export function ProveedorAutenticacion({ children }) {
         error,
         registrar,
         login,
+        loginGoogle,
         logout,
         limpiarAutenticacion,
         actualizarUsuario,

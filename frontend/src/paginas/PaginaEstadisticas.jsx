@@ -39,6 +39,13 @@ import {
   Info
 } from 'lucide-react';
 
+// Importar imágenes de estados de ánimo
+import moodFatal from '../assets/estados_animo/fatal.png';
+import moodMal from '../assets/estados_animo/mal.png';
+import moodDecente from '../assets/estados_animo/decente.png';
+import moodBien from '../assets/estados_animo/bien.png';
+import moodGenial from '../assets/estados_animo/genial.png';
+
 // Registrar componentes de Chart.js
 ChartJS.register(
   CategoryScale,
@@ -340,7 +347,7 @@ const PaginaEstadisticas = () => {
         data: distAnimo,
         backgroundColor: Object.values(coloresMood),
         borderWidth: 0,
-        hoverOffset: 15,
+        hoverOffset: 10, // Reducido de 15 a 10 para evitar recortes
         borderRadius: 10,
         spacing: 5
       }
@@ -631,11 +638,25 @@ const PaginaEstadisticas = () => {
             <TooltipInfo texto={t('tooltip_impacto')} />
           </div>
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-2">{idioma === 'es' ? 'Efecto de tus hábitos en tu humor' : 'Effect of your habits on your mood'}</p>
-          <div className="h-[320px] flex items-center justify-center mt-4">
+          <div className="h-[300px] flex items-center justify-center mt-2">
             <Radar
               data={dataRadar}
               options={{
                 ...chartOptions,
+                plugins: {
+                  ...chartOptions.plugins,
+                  legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                      boxWidth: 10,
+                      usePointStyle: true,
+                      padding: 14,
+                      font: { size: 10, weight: 'bold' },
+                      color: '#94a3b8'
+                    }
+                  }
+                },
                 scales: {
                   r: {
                     angleLines: { color: 'rgba(0,0,0,0.05)' },
@@ -673,7 +694,62 @@ const PaginaEstadisticas = () => {
             </div>
           </div>
           <div className="h-[330px]">
-            <Line data={dataAnimo} options={chartOptions} />
+            <Line
+              data={dataAnimo}
+              options={{
+                ...chartOptions,
+                layout: {
+                  padding: {
+                    top: 5,
+                    bottom: 10,
+                    left: 5,
+                    right: 15
+                  }
+                },
+                plugins: {
+                  ...chartOptions.plugins,
+                  tooltip: {
+                    ...chartOptions.plugins.tooltip,
+                    callbacks: {
+                      label: function (context) {
+                        const val = context.parsed.y;
+                        const labelsMap = {
+                          1: idioma === 'es' ? 'Fatal' : 'Fatal',
+                          2: idioma === 'es' ? 'Mal' : 'Bad',
+                          3: idioma === 'es' ? 'Decente' : 'Decent',
+                          4: idioma === 'es' ? 'Bien' : 'Good',
+                          5: idioma === 'es' ? 'Genial' : 'Great'
+                        };
+                        return `${idioma === 'es' ? 'Estado' : 'Mood'}: ${labelsMap[val] || val}`;
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  ...chartOptions.scales,
+                  y: {
+                    ...chartOptions.scales.y,
+                    beginAtZero: false,
+                    max: 5.5,
+                    min: 0.5,
+                    ticks: {
+                      ...chartOptions.scales.y.ticks,
+                      stepSize: 1,
+                      callback: function (value) {
+                        const labelsMap = {
+                          1: idioma === 'es' ? 'Fatal' : 'Fatal',
+                          2: idioma === 'es' ? 'Mal' : 'Bad',
+                          3: idioma === 'es' ? 'Decente' : 'Decent',
+                          4: idioma === 'es' ? 'Bien' : 'Good',
+                          5: idioma === 'es' ? 'Genial' : 'Great'
+                        };
+                        return labelsMap[value] || '';
+                      }
+                    }
+                  }
+                }
+              }}
+            />
           </div>
         </div>
 
@@ -687,24 +763,19 @@ const PaginaEstadisticas = () => {
             <TooltipInfo texto={t('tooltip_clima')} />
           </div>
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase mb-6">{idioma === 'es' ? 'Distribución global de tu humor' : 'Global mood distribution'}</p>
-          <div className="flex-1 flex items-center justify-center min-h-0">
-            <div className="h-full w-full max-h-[260px]">
+          <div className="flex-1 flex flex-col items-center justify-center min-h-0 mt-2">
+            <div className="h-full w-full max-h-[300px]">
               <Doughnut
                 data={dataDistribucionAnimo}
                 options={{
                   ...chartOptions,
+                  layout: {
+                    padding: 15 // Punto medio para evitar recortes sin dejar demasiado hueco
+                  },
                   plugins: {
                     ...chartOptions.plugins,
                     legend: {
-                      display: true,
-                      position: 'bottom',
-                      labels: {
-                        boxWidth: 8,
-                        usePointStyle: true,
-                        padding: 15,
-                        font: { size: 10, weight: 'bold' },
-                        color: '#94a3b8'
-                      }
+                      display: false, // Desactivamos la leyenda por defecto para usar la personalizada
                     }
                   },
                   scales: {
@@ -714,6 +785,22 @@ const PaginaEstadisticas = () => {
                   cutout: '70%'
                 }}
               />
+            </div>
+
+            {/* Leyenda Personalizada con Caritas */}
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4">
+              {[
+                { img: moodFatal, label: idioma === 'es' ? 'Fatal' : 'Fatal', color: '#EF4444' },
+                { img: moodMal, label: idioma === 'es' ? 'Mal' : 'Bad', color: '#F97316' },
+                { img: moodDecente, label: idioma === 'es' ? 'Decente' : 'Decent', color: '#FACC15' },
+                { img: moodBien, label: idioma === 'es' ? 'Bien' : 'Good', color: '#90BE6D' },
+                { img: moodGenial, label: idioma === 'es' ? 'Genial' : 'Great', color: '#4D908E' }
+              ].map((m, i) => (
+                <div key={i} className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity cursor-default">
+                  <img src={m.img} alt={m.label} className="w-5 h-5 object-contain" />
+                  <span className="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-tight">{m.label}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

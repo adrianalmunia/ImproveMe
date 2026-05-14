@@ -1,75 +1,37 @@
 // ================================================================================
 // SERVICIO DE AUTENTICACIÓN
 // ================================================================================
-// Aquí va toda la lógica de negocio relacionada con usuarios:
-// - Registrar nuevos usuarios
-// - Validar credenciales en login
-// - Encriptar contraseñas con Bcrypt
-// - Generar tokens JWT
-//
-// Este servicio es INDEPENDIENTE de Express, por lo que podría
-// reutilizarse en otras partes de la app o en APIs diferentes.
-
 const bcrypt = require('bcrypt');
+const { OAuth2Client } = require('google-auth-library');
 const prisma = require('../configuracion/baseDatos');
 const { generarToken } = require('../configuracion/autenticacion_jwt');
 const { validarEmail, validarContraseña, validarNombreUsuario } = require('../utilidades/validadores');
 
-// Número de vueltas para el hash de Bcrypt (más alto = más seguro pero más lento)
 const VUELTAS_BCRYPT = 10;
+const clienteGoogle = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-/**
- * Registra un nuevo usuario en la base de datos
- * @param {string} nombreUsuario - Nombre de usuario único
- * @param {string} email - Email único
- * @param {string} password - Contraseña sin encriptar
- * @returns {object} Datos del usuario creado y su token JWT
- */
 async function registrarUsuario(nombreUsuario, email, password) {
-    // 1. VALIDAR ENTRADA
-    if (!nombreUsuario || !email || !password) {
-        throw new Error('Todos los campos son obligatorios');
-    }
-
-    if (!validarNombreUsuario(nombreUsuario)) {
-        throw new Error(
-            'El nombre de usuario debe tener 3-20 caracteres (solo letras, números y _)'
-        );
-    }
-
-    if (!validarEmail(email)) {
-        throw new Error('El email no tiene formato válido');
-    }
-
+    if (!nombreUsuario || !email || !password) throw new Error('Todos los campos son obligatorios');
+    if (!validarNombreUsuario(nombreUsuario)) throw new Error('Nombre de usuario inválido');
+    if (!validarEmail(email)) throw new Error('Email inválido');
+    
     const validacionPassword = validarContraseña(password);
-    if (!validacionPassword.esValida) {
-        throw new Error(validacionPassword.errores.join('; '));
-    }
+    if (!validacionPassword.esValida) throw new Error(validacionPassword.errores.join('; '));
 
-    // 2. VERIFICAR SI USUARIO/EMAIL YA EXISTE
     const usuarioExistente = await prisma.usuarios.findFirst({
-        where: {
-            OR: [
-                { nombre_usuario: nombreUsuario },
-                { correo: email }
-            ]
-        }
+        where: { OR: [{ nombre_usuario: nombreUsuario }, { correo: email }] }
     });
+    if (usuarioExistente) throw new Error('El usuario o email ya está registrado');
 
-    if (usuarioExistente) {
-        throw new Error('El usuario o email ya está registrado');
-    }
-
-    // 3. ENCRIPTAR CONTRASEÑA
     const passwordEncriptada = await bcrypt.hash(password, VUELTAS_BCRYPT);
 
-    // 4. CREAR USUARIO EN BD
     const nuevoUsuario = await prisma.usuarios.create({
         data: {
             nombre_usuario: nombreUsuario,
             correo: email,
-            alias: nombreUsuario, // Inicialmente el alias es el nombre de usuario
+            alias: nombreUsuario,
             contrasena_hash: passwordEncriptada,
+            metodo_auth: "local",
             puntos_experiencia: 0
         },
         select: {
@@ -78,38 +40,17 @@ async function registrarUsuario(nombreUsuario, email, password) {
             correo: true,
             alias: true,
             puntos_experiencia: true,
+            metodo_auth: true,
             fecha_registro: true
         }
     });
 
-    // 5. GENERAR TOKEN JWT
-    const token = generarToken(nuevoUsuario.id);
-
-    // 6. RETORNAR DATOS (NUNCA devolver password o password_hash)
-    return {
-        usuario: nuevoUsuario,
-        token: token,
-        mensaje: 'Registro exitoso'
-    };
+    return { usuario: nuevoUsuario, token: generarToken(nuevoUsuario.id), mensaje: 'Registro exitoso' };
 }
 
-/**
- * Verifica las credenciales de un usuario (login)
- * @param {string} email - Email del usuario
- * @param {string} password - Contraseña sin encriptar
- * @returns {object} Datos del usuario y su token JWT
- */
 async function iniciarSesion(email, password) {
-    // 1. VALIDAR ENTRADA
-    if (!email || !password) {
-        throw new Error('Email y contraseña son obligatorios');
-    }
+    if (!email || !password) throw new Error('Email y contraseña son obligatorios');
 
-    if (!validarEmail(email)) {
-        throw new Error('El email no tiene formato válido');
-    }
-
-    // 2. BUSCAR USUARIO POR EMAIL
     const usuario = await prisma.usuarios.findUnique({
         where: { correo: email },
         select: {
@@ -118,39 +59,20 @@ async function iniciarSesion(email, password) {
             correo: true,
             alias: true,
             contrasena_hash: true,
+            metodo_auth: true,
             puntos_experiencia: true
         }
     });
 
-    // 3. VERIFICAR QUE USUARIO EXISTA
-    if (!usuario) {
-        throw new Error('Email o contraseña incorrectos');
-    }
+    if (!usuario) throw new Error('Email o contraseña incorrectos');
 
-    // 4. VERIFICAR CONTRASEÑA USANDO BCRYPT
     const passwordCorrecta = await bcrypt.compare(password, usuario.contrasena_hash);
+    if (!passwordCorrecta) throw new Error('Email o contraseña incorrectos');
 
-    if (!passwordCorrecta) {
-        throw new Error('Email o contraseña incorrectos');
-    }
-
-    // 5. GENERAR TOKEN JWT
-    const token = generarToken(usuario.id);
-
-    // 6. RETORNAR DATOS (sin password)
     const { contrasena_hash, ...usuarioSeguro } = usuario;
-    return {
-        usuario: usuarioSeguro,
-        token: token,
-        mensaje: 'Sesión iniciada exitosamente'
-    };
+    return { usuario: usuarioSeguro, token: generarToken(usuario.id), mensaje: 'Sesión iniciada' };
 }
 
-/**
- * Obtiene la información pública de un usuario por su ID
- * @param {number} idUsuario - ID del usuario
- * @returns {object} Datos públicos del usuario
- */
 async function obtenerPerfilUsuario(idUsuario) {
     const usuario = await prisma.usuarios.findUnique({
         where: { id: idUsuario },
@@ -159,81 +81,64 @@ async function obtenerPerfilUsuario(idUsuario) {
             nombre_usuario: true,
             correo: true,
             alias: true,
+            metodo_auth: true,
             puntos_experiencia: true,
             fecha_registro: true
         }
     });
-
-    if (!usuario) {
-        throw new Error('Usuario no encontrado');
-    }
-
+    if (!usuario) throw new Error('Usuario no encontrado');
     return usuario;
 }
 
 async function actualizarPerfilUsuario(idUsuario, datos) {
     const dataAActualizar = {};
+    const requiereVerificacion = !!(datos.nombre_usuario || datos.correo || datos.contrasena || datos.alias);
 
-    // 0. VERIFICAR CONTRASEÑA ACTUAL SI SE CAMBIAN DATOS SENSIBLES
-    const requiereVerificacion = datos.nombre_usuario || datos.correo || datos.contrasena || datos.alias;
+    const usuarioActual = await prisma.usuarios.findUnique({
+        where: { id: idUsuario },
+        select: { contrasena_hash: true, nombre_usuario: true, correo: true, metodo_auth: true }
+    });
 
     if (requiereVerificacion) {
-        if (!datos.contrasena_actual) {
+        const esUsuarioGoogle = usuarioActual.metodo_auth === 'google';
+        const estaEstableciendoPassPorPrimeraVez = esUsuarioGoogle && datos.contrasena && !datos.contrasena_actual;
+
+        if (!estaEstableciendoPassPorPrimeraVez && !datos.contrasena_actual) {
             throw new Error('Se requiere la contraseña actual para confirmar los cambios');
         }
 
-        const usuarioActual = await prisma.usuarios.findUnique({
-            where: { id: idUsuario },
-            select: { contrasena_hash: true, nombre_usuario: true, correo: true }
-        });
-
-        const passwordCorrecta = await bcrypt.compare(datos.contrasena_actual, usuarioActual.contrasena_hash);
-        if (!passwordCorrecta) {
-            throw new Error('La contraseña actual es incorrecta');
+        if (!estaEstableciendoPassPorPrimeraVez) {
+            const passwordCorrecta = await bcrypt.compare(datos.contrasena_actual, usuarioActual.contrasena_hash);
+            if (!passwordCorrecta) throw new Error('La contraseña actual es incorrecta');
         }
 
-        // 1. VALIDACIONES Y PREPARACIÓN DE DATOS
-        if (datos.nombre_usuario !== undefined && datos.nombre_usuario !== usuarioActual.nombre_usuario) {
-            if (!validarNombreUsuario(datos.nombre_usuario)) {
-                throw new Error('El nombre de usuario debe tener 3-20 caracteres (solo letras, números y _)');
-            }
+        if (datos.nombre_usuario && datos.nombre_usuario !== usuarioActual.nombre_usuario) {
+            if (!validarNombreUsuario(datos.nombre_usuario)) throw new Error('Nombre de usuario inválido');
             const existe = await prisma.usuarios.findUnique({ where: { nombre_usuario: datos.nombre_usuario } });
-            if (existe) throw new Error('El nombre de usuario ya está en uso');
+            if (existe) throw new Error('Nombre de usuario en uso');
             dataAActualizar.nombre_usuario = datos.nombre_usuario;
         }
 
-        if (datos.correo !== undefined && datos.correo !== usuarioActual.correo) {
-            if (!validarEmail(datos.correo)) {
-                throw new Error('El email no tiene formato válido');
-            }
+        if (datos.correo && datos.correo !== usuarioActual.correo) {
+            if (!validarEmail(datos.correo)) throw new Error('Email inválido');
             const existe = await prisma.usuarios.findUnique({ where: { correo: datos.correo } });
-            if (existe) throw new Error('El correo electrónico ya está en uso');
+            if (existe) throw new Error('Email en uso');
             dataAActualizar.correo = datos.correo;
         }
 
-        if (datos.contrasena !== undefined && datos.contrasena !== '') {
-            const validacionPassword = validarContraseña(datos.contrasena);
-            if (!validacionPassword.esValida) {
-                throw new Error(validacionPassword.errores.join('; '));
-            }
+        if (datos.contrasena) {
+            const validacion = validarContraseña(datos.contrasena);
+            if (!validacion.esValida) throw new Error(validacion.errores.join('; '));
             dataAActualizar.contrasena_hash = await bcrypt.hash(datos.contrasena, VUELTAS_BCRYPT);
         }
 
-        if (datos.alias !== undefined) {
-            dataAActualizar.alias = datos.alias;
-        }
+        if (datos.alias !== undefined) dataAActualizar.alias = datos.alias;
     }
 
-    if (datos.puntos_experiencia !== undefined) {
-        dataAActualizar.puntos_experiencia = datos.puntos_experiencia;
-    }
+    if (datos.puntos_experiencia !== undefined) dataAActualizar.puntos_experiencia = datos.puntos_experiencia;
 
-    // Si no hay nada que actualizar, retornamos el usuario actual
-    if (Object.keys(dataAActualizar).length === 0) {
-        return await obtenerPerfilUsuario(idUsuario);
-    }
+    if (Object.keys(dataAActualizar).length === 0) return await obtenerPerfilUsuario(idUsuario);
 
-    // 2. EJECUTAR ACTUALIZACIÓN
     const usuarioActualizado = await prisma.usuarios.update({
         where: { id: idUsuario },
         data: dataAActualizar,
@@ -242,106 +147,144 @@ async function actualizarPerfilUsuario(idUsuario, datos) {
             nombre_usuario: true,
             correo: true,
             alias: true,
+            metodo_auth: true,
             puntos_experiencia: true,
             fecha_registro: true
         }
     });
-
-    if (!usuarioActualizado) {
-        throw new Error('No se pudo actualizar el usuario');
-    }
 
     return usuarioActualizado;
 }
 
 async function eliminarUsuario(idUsuario, contrasena) {
-    if (!contrasena) {
-        throw new Error('Se requiere la contraseña para eliminar la cuenta');
-    }
-
     const usuarioActual = await prisma.usuarios.findUnique({
         where: { id: idUsuario },
-        select: { contrasena_hash: true }
+        select: { contrasena_hash: true, metodo_auth: true }
     });
 
-    if (!usuarioActual) {
-        throw new Error('Usuario no encontrado');
+    if (!usuarioActual) throw new Error('Usuario no encontrado');
+
+    if (usuarioActual.metodo_auth === 'local') {
+        if (!contrasena) throw new Error('Se requiere contraseña');
+        const correcta = await bcrypt.compare(contrasena, usuarioActual.contrasena_hash);
+        if (!correcta) throw new Error('Contraseña incorrecta');
     }
 
-    const passwordCorrecta = await bcrypt.compare(contrasena, usuarioActual.contrasena_hash);
-    if (!passwordCorrecta) {
-        throw new Error('La contraseña es incorrecta');
-    }
-
-    // Prisma manejará el borrado en cascada si está configurado en el schema
-    const usuarioEliminado = await prisma.usuarios.delete({
-        where: { id: idUsuario }
-    });
-
-    if (!usuarioEliminado) {
-        throw new Error('No se pudo eliminar el usuario');
-    }
-
-    return { mensaje: 'Cuenta eliminada permanentemente' };
+    await prisma.usuarios.delete({ where: { id: idUsuario } });
+    return { mensaje: 'Cuenta eliminada' };
 }
 
-/**
- * Recopila toda la información de un usuario para su exportación
- * @param {number} idUsuario - ID del usuario
- * @returns {object} Objeto con todos los datos del usuario
- */
 async function exportarDatosUsuario(idUsuario) {
-    // 1. Obtener datos básicos del perfil
     const perfil = await prisma.usuarios.findUnique({
         where: { id: idUsuario },
-        select: {
-            nombre_usuario: true,
-            correo: true,
-            puntos_experiencia: true,
-            fecha_registro: true
-        }
+        select: { nombre_usuario: true, correo: true, alias: true, puntos_experiencia: true, fecha_registro: true }
     });
-
     if (!perfil) throw new Error('Usuario no encontrado');
 
-    // 2. Obtener todas las entradas de diario (con sus archivos multimedia)
-    const entradasDiario = await prisma.entradas_diario.findMany({
-        where: { usuario_id: idUsuario },
-        include: { archivos_multimedia: true },
-        orderBy: { fecha: 'desc' }
-    });
+    const [diario, meditacion, habitos, tareas, tareasPendientes] = await Promise.all([
+        prisma.entradas_diario.findMany({ where: { usuario_id: idUsuario }, orderBy: { fecha: 'asc' } }),
+        prisma.sesiones_meditacion.findMany({ where: { usuario_id: idUsuario }, orderBy: { fecha: 'asc' } }),
+        prisma.habitos.findMany({
+            where: { usuario_id: idUsuario },
+            include: { registros_cumplimiento: { select: { fecha: true }, orderBy: { fecha: 'asc' } } }
+        }),
+        prisma.tareas_diarias.findMany({
+            where: { usuario_id: idUsuario },
+            include: { registros_cumplimiento: { select: { fecha: true }, orderBy: { fecha: 'asc' } } }
+        }),
+        prisma.tareas_pendientes.findMany({ where: { usuario_id: idUsuario, completada: false } })
+    ]);
 
-    // 3. Obtener todas las sesiones de meditación
-    const sesionesMeditacion = await prisma.sesiones_meditacion.findMany({
-        where: { usuario_id: idUsuario },
-        orderBy: { fecha: 'desc' }
-    });
-
-    // 4. Obtener todos los hábitos
-    const habitos = await prisma.habitos.findMany({
-        where: { usuario_id: idUsuario }
-    });
-
-    // 5. Obtener todas las tareas y diarias
-    const tareas = await prisma.tareas_diarias.findMany({
-        where: { usuario_id: idUsuario }
-    });
-
-    // Retornamos el paquete completo
+    // Formato estándar de exportación/importación de ImproveMe v1.0
     return {
-        usuario: perfil,
+        formato_version: "1.0",
+        aplicacion: "ImproveMe",
         fecha_exportacion: new Date().toISOString(),
-        diario: entradasDiario,
-        meditacion: sesionesMeditacion,
-        habitos: habitos,
-        tareas: tareas,
-        info: "Datos exportados desde ImproveMe - Tu mejor versión empieza hoy."
+        usuario: {
+            nombre_usuario: perfil.nombre_usuario,
+            correo: perfil.correo,
+            alias: perfil.alias,
+            puntos_experiencia: perfil.puntos_experiencia,
+            fecha_registro: perfil.fecha_registro,
+        },
+        habitos: habitos.map(h => ({
+            nombre: h.nombre,
+            estado: h.estado,
+            frecuencia_semanal: h.frecuencia_semanal,
+            registros: (h.registros_cumplimiento || []).map(r =>
+                new Date(r.fecha).toISOString().split('T')[0]
+            ),
+        })),
+        tareas_diarias: tareas.map(t => ({
+            nombre: t.nombre,
+            registros: (t.registros_cumplimiento || []).map(r =>
+                new Date(r.fecha).toISOString().split('T')[0]
+            ),
+        })),
+        tareas_pendientes: tareasPendientes.map(tp => ({
+            nombre: tp.nombre,
+            prioridad: tp.prioridad,
+            completada: tp.completada,
+        })),
+        diario: diario.map(d => ({
+            fecha: d.fecha,
+            puntuacion_animo: d.puntuacion_animo,
+            horas_sueno: d.horas_sueno !== null ? parseFloat(d.horas_sueno) : null,
+            contenido_texto: d.contenido_texto,
+        })),
+        meditacion: meditacion.map(m => ({
+            fecha: m.fecha,
+            duracion_segundos: m.duracion_segundos,
+            segundos_completados: m.segundos_completados,
+            tecnica_respiracion: m.tecnica_respiracion,
+            pista_musica: m.pista_musica,
+        })),
     };
+}
+
+async function loginConGoogle(tokenGoogle) {
+    if (!tokenGoogle) throw new Error('Token no proporcionado');
+
+    const ticket = await clienteGoogle.verifyIdToken({
+        idToken: tokenGoogle,
+        audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const { email, name, sub: googleId } = ticket.getPayload();
+
+    let usuario = await prisma.usuarios.findUnique({
+        where: { correo: email },
+        select: { id: true, nombre_usuario: true, correo: true, alias: true, metodo_auth: true, puntos_experiencia: true, fecha_registro: true }
+    });
+
+    if (!usuario) {
+        let nombreBase = (name || email.split('@')[0]).replace(/[^a-zA-Z0-9_]/g, '_').substring(0, 18);
+        let nombreUsuario = nombreBase;
+        let intento = 0;
+        while (await prisma.usuarios.findUnique({ where: { nombre_usuario: nombreUsuario } })) {
+            intento++;
+            nombreUsuario = `${nombreBase}_${intento}`;
+        }
+
+        usuario = await prisma.usuarios.create({
+            data: {
+                nombre_usuario: nombreUsuario,
+                correo: email,
+                alias: name || nombreUsuario,
+                contrasena_hash: await bcrypt.hash(googleId + process.env.JWT_SECRETO, VUELTAS_BCRYPT),
+                metodo_auth: "google",
+                puntos_experiencia: 0
+            },
+            select: { id: true, nombre_usuario: true, correo: true, alias: true, metodo_auth: true, puntos_experiencia: true, fecha_registro: true }
+        });
+    }
+
+    return { usuario, token: generarToken(usuario.id), mensaje: 'Login exitoso' };
 }
 
 module.exports = {
     registrarUsuario,
     iniciarSesion,
+    loginConGoogle,
     obtenerPerfilUsuario,
     actualizarPerfilUsuario,
     eliminarUsuario,

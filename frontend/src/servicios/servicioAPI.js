@@ -100,6 +100,14 @@ export async function iniciarSesion(email, password) {
 }
 
 /**
+ * Inicia sesión o registra con Google
+ * @param {string} tokenGoogle - ID token de Google Sign-In
+ */
+export async function loginConGoogle(tokenGoogle) {
+    return realizarSolicitud('autenticacion/google', 'POST', { tokenGoogle });
+}
+
+/**
  * Obtiene el perfil del usuario autenticado
  * @param {string} token - Token JWT del usuario
  * @returns {object} { usuario, mensaje }
@@ -170,6 +178,13 @@ export async function obtenerEntradasPorMes(usuarioId, mes, anio, token) {
     return realizarSolicitud(`diario/mes/${usuarioId}?mes=${mes}&anio=${anio}`, 'GET', null, token);
 }
 
+/**
+ * Busca entradas de diario globalmente por texto
+ */
+export async function buscarEntradas(usuarioId, query, token) {
+    return realizarSolicitud(`diario/buscar/${usuarioId}?q=${encodeURIComponent(query)}`, 'GET', null, token);
+}
+
 // ============ FUNCIONES DE MEDITACIÓN ============
 
 /**
@@ -228,6 +243,15 @@ export async function exportarDatos(token) {
     return realizarSolicitud('autenticacion/exportar', 'GET', null, token);
 }
 
+/**
+ * Importa datos desde el formato estándar de ImproveMe (JSON)
+ * @param {object} datos - Objeto JSON exportado desde ImproveMe
+ * @param {string} token - Token JWT del usuario
+ */
+export async function importarDatos(datos, token) {
+    return realizarSolicitud('autenticacion/importar', 'POST', datos, token);
+}
+
 export default {
     registrarUsuario,
     iniciarSesion,
@@ -235,11 +259,13 @@ export default {
     actualizarPerfil,
     eliminarCuenta,
     exportarDatos,
+    importarDatos,
     obtenerGamificacion,
     sincronizarGamificacion,
     guardarEntradaDiaria,
     obtenerEntradaHoy,
     obtenerEntradasPorMes,
+    buscarEntradas,
     registrarSesionMeditacion,
     obtenerHistorialMeditacion,
     obtenerEstadisticasMeditacion,

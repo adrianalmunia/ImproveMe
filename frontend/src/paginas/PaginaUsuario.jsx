@@ -3,13 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { useTema } from '../contextos/ContextoTema';
 import { useIdioma } from '../contextos/ContextoIdioma';
-import { obtenerEntradasPorMes, exportarDatos } from '../servicios/servicioAPI';
+import { obtenerEntradasPorMes, exportarDatos, importarDatos } from '../servicios/servicioAPI';
 import logoCompleto from '../assets/logo_completo.png';
-import { User, Mail, Lock, LogOut, Save, ShieldCheck, Eye, EyeOff, AlertTriangle, Trash2, Image as ImageIcon, Mic, ChevronRight, X, Calendar, Sun, Moon, FileText, Info, Download, Languages } from 'lucide-react';
+import { User, Mail, Lock, LogOut, Save, ShieldCheck, Eye, EyeOff, AlertTriangle, Trash2, Image as ImageIcon, Mic, ChevronRight, X, Calendar, Sun, Moon, FileText, Info, Download, Languages, Activity, Target, Smile, Flower2, BookOpen } from 'lucide-react';
 import { ReproductorAudio } from '../componentes/ReproductorAudio';
 
 export function PaginaUsuario() {
   const { usuario, logout, eliminar, actualizarUsuario, token } = useAutenticacion();
+  
+  const esUsuarioGoogle = usuario?.metodo_auth === 'google';
   const { temaOscuro, toggleTema } = useTema();
   const [nombre, setNombre] = useState(usuario?.nombre_usuario || '');
   const [email, setEmail] = useState(usuario?.correo || '');
@@ -39,6 +41,13 @@ export function PaginaUsuario() {
   const [mostrarAcerca, setMostrarAcerca] = useState(false);
   const [mostrarOpcionesExportar, setMostrarOpcionesExportar] = useState(false);
   const [mostrarIdiomas, setMostrarIdiomas] = useState(false);
+  const [mostrarImportar, setMostrarImportar] = useState(false);
+  const [archivoImport, setArchivoImport] = useState(null);
+  const [datosImport, setDatosImport] = useState(null);
+  const [resultadoImport, setResultadoImport] = useState(null);
+  const [cargandoImport, setCargandoImport] = useState(false);
+  const [errorImport, setErrorImport] = useState('');
+  const [dragOver, setDragOver] = useState(false);
   const { idioma, setIdioma, t } = useIdioma();
 
   const [mesFiltro, setMesFiltro] = useState(new Date().getMonth() + 1);
@@ -80,19 +89,19 @@ export function PaginaUsuario() {
       mostrarNotificacion('Las contraseñas no coinciden', 'error');
       return;
     }
-    if (!actualPasswordSeguridad) {
+    // Los usuarios de Google no necesitan contraseña actual para establecer una nueva
+    if (!esUsuarioGoogle && !actualPasswordSeguridad) {
       mostrarNotificacion('Debes introducir tu contraseña actual para realizar el cambio', 'error');
       return;
     }
-    
-    // Si ya tenemos la contraseña actual aquí, podemos saltar el modal o simplemente pasarla
-    setPasswordConfirmacion(actualPasswordSeguridad);
+    setPasswordConfirmacion(esUsuarioGoogle ? '__google_bypass__' : actualPasswordSeguridad);
     setTipoCambio('password');
     setMostrarConfirmacion(true);
   };
 
   const confirmarCambios = async () => {
-    if (!passwordConfirmacion) {
+    // Los usuarios de Google pueden cambiar contraseña sin la actual
+    if (!esUsuarioGoogle && !passwordConfirmacion) {
       mostrarNotificacion('Debes introducir tu contraseña actual para confirmar', 'error');
       return;
     }
@@ -133,17 +142,125 @@ export function PaginaUsuario() {
 
   const manejarBorrarCuenta = async () => {
     if (fraseConfirmacion !== FRASE_ELIMINAR) return;
-    if (!passwordBorrado) {
+    // Los usuarios de Google no necesitan contraseña para borrar
+    if (!esUsuarioGoogle && !passwordBorrado) {
       mostrarNotificacion('Debes introducir tu contraseña para confirmar el borrado', 'error');
       return;
     }
-
     try {
-      await eliminar(passwordBorrado);
+      await eliminar(esUsuarioGoogle ? null : passwordBorrado);
     } catch (error) {
       mostrarNotificacion(error.message || 'Error al eliminar cuenta', 'error');
     }
   };
+
+  const parsearCSV = (texto) => {
+    const secciones = {};
+    let seccionActual = null, cabeceras = [];
+    texto.split('\n').forEach(linea => {
+      const l = linea.trim();
+      if (!l || l.startsWith('#')) return; // Ignorar vacíos y comentarios
+      
+      const m = l.match(/^---\s*SECCION:\s*(\w+)\s*---$/);
+      if (m) { 
+        seccionActual = m[1].toLowerCase(); 
+        secciones[seccionActual] = []; 
+        cabeceras = []; 
+        return; 
+      }
+      
+      if (!seccionActual) return;
+      
+      if (cabeceras.length === 0) { 
+        cabeceras = l.split(',').map(h => h.trim().toLowerCase()); 
+        return; 
+      }
+      
+      // Parsear línea CSV respetando comillas
+      const vals = []; let dentro = false, actual = '';
+      for (let i = 0; i < l.length; i++) {
+        const c = l[i];
+        if (c === '"') {
+          if (dentro && l[i+1] === '"') { actual += '"'; i++; } // Escapado ""
+          else { dentro = !dentro; }
+        } else if (c === ',' && !dentro) {
+          vals.push(actual); actual = '';
+        } else actual += c;
+      }
+      vals.push(actual);
+      
+      const obj = {}; 
+      cabeceras.forEach((h, i) => { obj[h] = vals[i]?.trim() || null; });
+      secciones[seccionActual].push(obj);
+    });
+
+    const datosPerfil = (secciones.perfil || [])[0] || {};
+
+    return {
+      formato_version: '1.0', 
+      aplicacion: 'ImproveMe',
+      usuario: {
+        nombre_usuario: datosPerfil.nombre_usuario,
+        correo: datosPerfil.correo,
+        alias: datosPerfil.alias,
+        puntos_experiencia: parseInt(datosPerfil.puntos_experiencia) || 0
+      },
+      habitos: (secciones.habitos || []).map(h => ({ 
+        nombre: h.nombre, 
+        estado: h.estado, 
+        frecuencia_semanal: parseInt(h.frecuencia) || 7,
+        registros: h.registros ? h.registros.split(';').map(r => r.trim()) : []
+      })),
+      tareas_diarias: (secciones.tareas_diarias || []).map(t => ({ 
+        nombre: t.nombre,
+        registros: t.registros ? t.registros.split(';').map(r => r.trim()) : []
+      })),
+      tareas_pendientes: (secciones.tareas_pendientes || []).map(tp => ({
+        nombre: tp.nombre,
+        prioridad: tp.prioridad || 'media',
+        completada: tp.completada === 'true'
+      })),
+      diario: (secciones.diario || []).map(d => ({ 
+        fecha: d.fecha, 
+        puntuacion_animo: d.animo ? parseInt(d.animo) : null, 
+        horas_sueno: d.sueno ? parseFloat(d.sueno) : null, 
+        contenido_texto: d.texto 
+      })),
+      meditacion: (secciones.meditacion || []).map(m => ({ 
+        fecha: m.fecha, 
+        duracion_segundos: parseInt(m.duracion_seg) || 0, 
+        segundos_completados: parseInt(m.completados_seg) || 0, 
+        tecnica_respiracion: m.tecnica, 
+        pista_musica: m.musica 
+      })),
+    };
+  };
+
+  const manejarArchivoImport = (archivo) => {
+    if (!archivo) return;
+    setArchivoImport(archivo); setResultadoImport(null); setErrorImport('');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        let datos;
+        if (archivo.name.endsWith('.json')) { datos = JSON.parse(e.target.result); if (datos.aplicacion !== 'ImproveMe') throw new Error('Archivo no válido'); }
+        else if (archivo.name.endsWith('.csv')) { datos = parsearCSV(e.target.result); }
+        else throw new Error('Formato no soportado (.json o .csv)');
+        setDatosImport(datos);
+      } catch (err) { setErrorImport(err.message); setDatosImport(null); }
+    };
+    reader.readAsText(archivo);
+  };
+
+  const ejecutarImportacion = async () => {
+    if (!datosImport) return;
+    setCargandoImport(true); setErrorImport('');
+    try { const res = await importarDatos(datosImport, token); setResultadoImport(res); setDatosImport(null); setArchivoImport(null); }
+    catch (err) { setErrorImport(err.mensaje || err.message || 'Error al importar'); }
+    finally { setCargandoImport(false); }
+  };
+
+  const cerrarImportar = () => { setMostrarImportar(false); setArchivoImport(null); setDatosImport(null); setResultadoImport(null); setErrorImport(''); };
 
   const manejarExportarDatos = async (formato) => {
     try {
@@ -157,36 +274,61 @@ export function PaginaUsuario() {
         blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
         extension = 'json';
       } else {
-        // Generar CSV para Excel
+        // Generar CSV mejorado y legible
         const csvRows = [];
-        
-        // Cabecera Diario
-        csvRows.push('--- SECCION: DIARIO ---');
-        csvRows.push('Fecha,Animo,Sueño,Texto');
-        datos.diario.forEach(e => {
-          const textoLimpio = e.contenido_texto?.replace(/"/g, '""').replace(/\n/g, ' ') || '';
-          csvRows.push(`${new Date(e.fecha).toLocaleDateString()},${e.puntuacion_animo},${e.horas_sueno},"${textoLimpio}"`);
-        });
-        
-        csvRows.push(''); // Espacio
-        
-        // Cabecera Meditación
-        csvRows.push('--- SECCION: MEDITACION ---');
-        csvRows.push('Fecha,Duracion(seg),Completado(seg),Tecnica,Musica');
-        datos.meditacion.forEach(m => {
-          csvRows.push(`${new Date(m.fecha).toLocaleDateString()},${m.duracion_segundos},${m.segundos_completados},"${m.tecnica_respiracion || ''}","${m.pista_musica || ''}"`);
-        });
+        csvRows.push('# EXPORTACIÓN DE DATOS IMPROVEME');
+        csvRows.push(`# Generado: ${new Date().toLocaleString()}`);
+        csvRows.push('');
 
-        csvRows.push(''); // Espacio
+        // Perfil
+        csvRows.push('--- SECCION: PERFIL ---');
+        csvRows.push('Nombre_Usuario,Correo,Alias,Puntos_Experiencia');
+        csvRows.push(`"${datos.usuario.nombre_usuario}","${datos.usuario.correo}","${datos.usuario.alias || ''}",${datos.usuario.puntos_experiencia}`);
+        csvRows.push('');
 
-        // Cabecera Hábitos
+        // Hábitos
         csvRows.push('--- SECCION: HABITOS ---');
-        csvRows.push('Nombre,Icono,Frecuencia');
+        csvRows.push('Nombre,Estado,Frecuencia,Registros');
         datos.habitos.forEach(h => {
-          csvRows.push(`"${h.nombre}","${h.icono}","${h.frecuencia}"`);
+          const regs = (h.registros || []).join(';');
+          csvRows.push(`"${h.nombre}","${h.estado || ''}",${h.frecuencia_semanal || 7},"${regs}"`);
+        });
+        csvRows.push('');
+        
+        // Tareas Diarias
+        csvRows.push('--- SECCION: TAREAS_DIARIAS ---');
+        csvRows.push('Nombre,Registros');
+        datos.tareas_diarias.forEach(t => {
+          const regs = (t.registros || []).join(';');
+          csvRows.push(`"${t.nombre}","${regs}"`);
+        });
+        csvRows.push('');
+
+        // Tareas Pendientes
+        csvRows.push('--- SECCION: TAREAS_PENDIENTES ---');
+        csvRows.push('Nombre,Prioridad,Completada');
+        (datos.tareas_pendientes || []).forEach(tp => {
+          csvRows.push(`"${tp.nombre}","${tp.prioridad}",${tp.completada}`);
+        });
+        csvRows.push('');
+
+        // Diario
+        csvRows.push('--- SECCION: DIARIO ---');
+        csvRows.push('Fecha,Animo,Sueno,Texto');
+        datos.diario.forEach(e => {
+          const textoLimpio = e.contenido_texto?.replace(/"/g, '""') || '';
+          csvRows.push(`"${new Date(e.fecha).toISOString()}",${e.puntuacion_animo},${e.horas_sueno},"${textoLimpio}"`);
+        });
+        csvRows.push('');
+
+        // Meditación
+        csvRows.push('--- SECCION: MEDITACION ---');
+        csvRows.push('Fecha,Duracion_Seg,Completados_Seg,Tecnica,Musica');
+        datos.meditacion.forEach(m => {
+          csvRows.push(`"${new Date(m.fecha).toISOString()}",${m.duracion_segundos},${m.segundos_completados},"${m.tecnica_respiracion || ''}","${m.pista_musica || ''}"`);
         });
 
-        const csvContent = "\ufeff" + csvRows.join('\n'); // \ufeff para soporte acentos en Excel
+        const csvContent = "\ufeff" + csvRows.join('\n');
         blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         extension = 'csv';
       }
@@ -241,6 +383,25 @@ export function PaginaUsuario() {
   const archivosFiltrados = archivosReales.filter(a =>
     filtroGaleria === 'imagenes' ? a.tipo_archivo === 'imagen' : a.tipo_archivo === 'audio'
   );
+
+  // Atajos de teclado para Usuario
+  useEffect(() => {
+    const manejarTeclas = (e) => {
+      if (e.key === 'Escape') {
+        if (imagenExpandida) setImagenExpandida(null);
+        else if (mostrarGaleria) setMostrarGaleria(false);
+        else if (mostrarConfirmacion) setMostrarConfirmacion(false);
+        else if (mostrarConfirmarBorrado) setMostrarConfirmarBorrado(false);
+        else if (mostrarTerminos) setMostrarTerminos(false);
+        else if (mostrarAcerca) setMostrarAcerca(false);
+        else if (mostrarOpcionesExportar) setMostrarOpcionesExportar(false);
+        else if (mostrarIdiomas) setMostrarIdiomas(false);
+        else if (mostrarImportar) cerrarImportar();
+      }
+    };
+    window.addEventListener('keydown', manejarTeclas);
+    return () => window.removeEventListener('keydown', manejarTeclas);
+  }, [imagenExpandida, mostrarGaleria, mostrarConfirmacion, mostrarConfirmarBorrado, mostrarTerminos, mostrarAcerca, mostrarOpcionesExportar, mostrarIdiomas, mostrarImportar]);
 
   return (
     <main className="flex-1 relative overflow-y-auto h-full p-8 lg:p-12 pb-24 font-['Inter'] bg-neutral-50 dark:bg-gray-900 transition-colors duration-300">
@@ -324,16 +485,24 @@ export function PaginaUsuario() {
               <Lock size={20} className="text-[#C6A55E]" /> {t('seguridad')}
             </h3>
             <form onSubmit={manejarCambioPassword} className="space-y-4 flex flex-col flex-1">
-              <div className="relative">
-                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Contraseña Actual' : 'Current Password'}</label>
-                <input
-                  type={verActualPasswordSeguridad ? "text" : "password"} value={actualPasswordSeguridad} onChange={(e) => setActualPasswordSeguridad(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all" placeholder="••••••••"
-                />
-                <button type="button" onClick={() => setVerActualPasswordSeguridad(!verActualPasswordSeguridad)} className="absolute right-4 bottom-3 text-gray-400 dark:text-gray-500">
-                  {verActualPasswordSeguridad ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
+              {/* Usuarios de Google no necesitan contraseña actual */}
+              {!esUsuarioGoogle && (
+                <div className="relative">
+                  <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Contraseña Actual' : 'Current Password'}</label>
+                  <input
+                    type={verActualPasswordSeguridad ? "text" : "password"} value={actualPasswordSeguridad} onChange={(e) => setActualPasswordSeguridad(e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all" placeholder="••••••••"
+                  />
+                  <button type="button" onClick={() => setVerActualPasswordSeguridad(!verActualPasswordSeguridad)} className="absolute right-4 bottom-3 text-gray-400 dark:text-gray-500">
+                    {verActualPasswordSeguridad ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              )}
+              {esUsuarioGoogle && (
+                <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-xs text-blue-600 dark:text-blue-400 font-medium">
+                  🔗 Tu cuenta está vinculada a Google. Puedes establecer una contraseña directamente.
+                </div>
+              )}
               <div className="relative">
                 <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Nueva Clave' : 'New Password'}</label>
                 <input
@@ -372,23 +541,30 @@ export function PaginaUsuario() {
                   <ShieldCheck size={40} />
                 </div>
                 <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-2">{idioma === 'es' ? 'Confirmar Cambios' : 'Confirm Changes'}</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">{idioma === 'es' ? `Por seguridad, introduce tu contraseña actual para aplicar los cambios en tu ${tipoCambio === 'perfil' ? 'perfil' : 'contraseña'}.` : `For security, enter your current password to apply changes to your ${tipoCambio === 'perfil' ? 'profile' : 'password'}.`}</p>
+                <p className="text-sm mb-8 text-gray-500 dark:text-gray-400">
+                  {esUsuarioGoogle 
+                    ? (idioma === 'es' ? 'Confirma los cambios en tu perfil.' : 'Confirm the changes to your profile.')
+                    : (idioma === 'es' ? `Por seguridad, introduce tu contraseña actual para aplicar los cambios en tu ${tipoCambio === 'perfil' ? 'perfil' : 'contraseña'}.` : `For security, enter your current password to apply changes to your ${tipoCambio === 'perfil' ? 'profile' : 'password'}.`)
+                  }
+                </p>
  
-                 <div className="relative mb-6">
-                   <input
-                     type="password"
-                     value={passwordConfirmacion}
-                     onChange={(e) => setPasswordConfirmacion(e.target.value)}
-                     placeholder={idioma === 'es' ? "Contraseña actual" : "Current password"}
-                     className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-2xl outline-none text-center font-bold dark:text-white transition-colors"
-                     autoFocus
-                   />
-                 </div>
+                 {!esUsuarioGoogle && (
+                   <div className="relative mb-6">
+                     <input
+                       type="password"
+                       value={passwordConfirmacion}
+                       onChange={(e) => setPasswordConfirmacion(e.target.value)}
+                       placeholder={idioma === 'es' ? "Contraseña actual" : "Current password"}
+                       className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-2xl outline-none text-center font-bold dark:text-white transition-colors"
+                       autoFocus
+                     />
+                   </div>
+                 )}
  
                  <div className="flex flex-col gap-3">
                    <button
                      onClick={confirmarCambios}
-                     disabled={estaCargando || !passwordConfirmacion}
+                     disabled={estaCargando || (!esUsuarioGoogle && !passwordConfirmacion)}
                      className="w-full py-4 bg-[#4F99CC] dark:bg-[#4F99CC]/80 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg hover:bg-[#3d82b3] dark:hover:bg-[#4F99CC] disabled:opacity-50 transition-all"
                    >
                      {estaCargando ? (idioma === 'es' ? 'Procesando...' : 'Processing...') : (idioma === 'es' ? 'Confirmar y Guardar' : 'Confirm and Save')}
@@ -460,19 +636,19 @@ export function PaginaUsuario() {
 
           <motion.button
             whileHover={{ scale: 1.02 }}
-            onClick={() => setMostrarTerminos(true)}
-            className="flex items-center justify-between p-6 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-[32px] shadow-xl group transition-colors duration-300 w-full"
+            onClick={() => setMostrarImportar(true)}
+            className="p-6 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-white rounded-[32px] shadow-xl flex items-center justify-between group w-full transition-colors duration-300"
           >
             <div className="flex items-center gap-4 text-left">
-              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-500">
-                <FileText size={24} />
+              <div className="w-12 h-12 bg-gray-50 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-[#4F99CC] group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-colors">
+                <Download size={24} className="rotate-180" />
               </div>
               <div>
-                <h4 className="font-['Tilt_Warp'] text-lg">{t('terminos')}</h4>
-                <p className="text-gray-400 dark:text-gray-500 text-[10px]">{idioma === 'es' ? 'Legal y condiciones' : 'Legal and conditions'}</p>
+                <h4 className="font-['Tilt_Warp'] text-lg">{idioma === 'es' ? 'Importar' : 'Import'}</h4>
+                <p className="text-gray-400 dark:text-gray-500 text-[10px]">{idioma === 'es' ? 'Migrar datos desde otro perfil' : 'Migrate data from another profile'}</p>
               </div>
             </div>
-            <ChevronRight size={20} className="opacity-30 dark:opacity-50" />
+            <ChevronRight size={20} className="opacity-30 dark:opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -530,28 +706,38 @@ export function PaginaUsuario() {
 
           {mostrarConfirmarBorrado && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-red-200 dark:border-red-900/50 shadow-xl transition-colors duration-300">
-              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{idioma === 'es' ? 'Paso 1: Confirma tu contraseña:' : 'Step 1: Confirm your password:'}</p>
-              <div className="relative mb-4">
-                <input
-                  type={verPasswordBorrado ? "text" : "password"}
-                  value={passwordBorrado}
-                  onChange={(e) => setPasswordBorrado(e.target.value)}
-                  placeholder={idioma === 'es' ? "Tu contraseña actual" : "Your current password"}
-                  className="w-full px-5 py-3 bg-red-50 dark:bg-red-900/20 rounded-2xl outline-none font-bold text-red-600 dark:text-red-400"
-                />
-                <button type="button" onClick={() => setVerPasswordBorrado(!verPasswordBorrado)} className="absolute right-4 top-1/2 -translate-y-1/2 text-red-300">
-                  {verPasswordBorrado ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
+              {/* Paso 1: contraseña — solo para usuarios locales */}
+              {!esUsuarioGoogle && (
+                <>
+                  <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{idioma === 'es' ? 'Paso 1: Confirma tu contraseña:' : 'Step 1: Confirm your password:'}</p>
+                  <div className="relative mb-4">
+                    <input
+                      type={verPasswordBorrado ? "text" : "password"}
+                      value={passwordBorrado}
+                      onChange={(e) => setPasswordBorrado(e.target.value)}
+                      placeholder={idioma === 'es' ? "Tu contraseña actual" : "Your current password"}
+                      className="w-full px-5 py-3 bg-red-50 dark:bg-red-900/20 rounded-2xl outline-none font-bold text-red-600 dark:text-red-400"
+                    />
+                    <button type="button" onClick={() => setVerPasswordBorrado(!verPasswordBorrado)} className="absolute right-4 top-1/2 -translate-y-1/2 text-red-300">
+                      {verPasswordBorrado ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </>
+              )}
+              {esUsuarioGoogle && (
+                <div className="mb-4 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 rounded-2xl text-xs text-blue-600 dark:text-blue-400 font-medium">
+                  🔗 Cuenta de Google — no se requiere contraseña para confirmar.
+                </div>
+              )}
  
-              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{idioma === 'es' ? `Paso 2: Escribe "${FRASE_ELIMINAR}":` : `Step 2: Type "${FRASE_ELIMINAR}":`}</p>
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{idioma === 'es' ? (esUsuarioGoogle ? `Escribe "${FRASE_ELIMINAR}" para confirmar:` : `Paso 2: Escribe "${FRASE_ELIMINAR}":`) : `${esUsuarioGoogle ? '' : 'Step 2: '}Type "${FRASE_ELIMINAR}":`}</p>
                <div className="flex flex-col sm:flex-row gap-4">
                  <input type="text" value={fraseConfirmacion} onChange={(e) => setFraseConfirmacion(e.target.value)} className="flex-1 px-5 py-3 bg-red-50 dark:bg-red-900/20 rounded-2xl outline-none font-bold text-red-600 dark:text-red-400" />
                  <div className="flex gap-2">
                    <button
-                     disabled={fraseConfirmacion !== FRASE_ELIMINAR || !passwordBorrado}
+                     disabled={fraseConfirmacion !== FRASE_ELIMINAR || (!esUsuarioGoogle && !passwordBorrado)}
                      onClick={manejarBorrarCuenta}
-                     className={`px-6 py-3 rounded-2xl font-black transition-colors ${fraseConfirmacion === FRASE_ELIMINAR && passwordBorrado ? 'bg-red-500 dark:bg-red-600/80 text-white hover:bg-red-600 dark:hover:bg-red-500' : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'}`}
+                     className={`px-6 py-3 rounded-2xl font-black transition-colors ${fraseConfirmacion === FRASE_ELIMINAR && (esUsuarioGoogle || passwordBorrado) ? 'bg-red-500 dark:bg-red-600/80 text-white hover:bg-red-600 dark:hover:bg-red-500' : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'}`}
                    >
                      {idioma === 'es' ? 'Borrar' : 'Delete'}
                    </button>
@@ -740,12 +926,12 @@ export function PaginaUsuario() {
                 </button>
 
                 <button
-                  onClick={() => manejarExportarDatos('excel')}
+                  onClick={() => manejarExportarDatos('csv')}
                   className="w-full py-4 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-2xl font-bold flex items-center justify-between px-6 hover:bg-green-50 dark:hover:bg-green-900/30 hover:border-green-100 dark:hover:border-green-800 transition-all group duration-300"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center text-[10px]">CSV</div>
-                    <span>{idioma === 'es' ? 'Excel / Hoja de Cálculo' : 'Excel / Spreadsheet'}</span>
+                    <span>{idioma === 'es' ? 'CSV / Hoja de Cálculo' : 'CSV / Spreadsheet'}</span>
                   </div>
                   <ChevronRight size={18} className="opacity-0 group-hover:opacity-100" />
                 </button>
@@ -841,6 +1027,89 @@ export function PaginaUsuario() {
                   <img src={imagenExpandida} alt="Imagen expandida" className="w-full h-auto max-h-[85vh] object-contain" />
                 </div>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL IMPORTAR */}
+      <AnimatePresence>
+        {mostrarImportar && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[400] bg-black/60 backdrop-blur-md flex items-center justify-center p-6">
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-[40px] p-10 shadow-2xl transition-colors duration-300">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 dark:text-white">{idioma === 'es' ? 'Importar Datos' : 'Import Data'}</h3>
+                <button onClick={cerrarImportar} className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
+              </div>
+              {!resultadoImport ? (
+                <>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{idioma === 'es' ? 'Sube un archivo .json o .csv exportado desde ImproveMe para migrar tus datos a esta cuenta.' : 'Upload a .json or .csv file exported from ImproveMe to migrate data to this account.'}</p>
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={(e) => { e.preventDefault(); setDragOver(false); manejarArchivoImport(e.dataTransfer.files[0]); }}
+                    onClick={() => document.getElementById('input-archivo-import').click()}
+                    className={`w-full border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 ${dragOver ? 'border-[#4F99CC] bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-[#4F99CC] hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}
+                  >
+                    <input id="input-archivo-import" type="file" accept=".json,.csv" className="hidden" onChange={(e) => manejarArchivoImport(e.target.files[0])} />
+                    {archivoImport ? (
+                      <div className="text-[#4F99CC]"><div className="text-4xl mb-2">📄</div><p className="font-bold text-gray-800 dark:text-white">{archivoImport.name}</p><p className="text-xs text-gray-400 mt-1">{(archivoImport.size / 1024).toFixed(1)} KB</p></div>
+                    ) : (
+                      <div className="text-gray-400"><div className="text-4xl mb-3">☁️</div><p className="font-bold">{idioma === 'es' ? 'Arrastra tu archivo aquí' : 'Drag your file here'}</p><p className="text-xs mt-1">{idioma === 'es' ? 'o haz clic para seleccionar' : 'or click to select'}</p><p className="text-[10px] mt-3 uppercase tracking-widest text-gray-300">.json / .csv</p></div>
+                    )}
+                  </div>
+                  {errorImport && <p className="mt-4 text-red-500 text-sm text-center font-medium">{errorImport}</p>}
+                  {datosImport && !errorImport && (
+                    <div className="mt-5 bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-4 text-sm space-y-2">
+                      <p className="font-bold text-gray-700 dark:text-gray-200 mb-3">{idioma === 'es' ? 'Vista previa:' : 'Preview:'}</p>
+                      {[
+                        [<Target size={16} className="text-[#C6A55E]" />, idioma === 'es' ? 'Hábitos' : 'Habits', datosImport.habitos?.length],
+                        [<Activity size={16} className="text-[#4F99CC]" />, idioma === 'es' ? 'Tareas diarias' : 'Daily tasks', datosImport.tareas_diarias?.length],
+                        [<BookOpen size={16} className="text-indigo-500" />, idioma === 'es' ? 'Entradas de diario' : 'Diary entries', datosImport.diario?.length],
+                        [<Flower2 size={16} className="text-teal-500" />, idioma === 'es' ? 'Sesiones de meditación' : 'Meditation sessions', datosImport.meditacion?.length],
+                        [<ShieldCheck size={16} className="text-purple-500" />, idioma === 'es' ? 'Experiencia (XP)' : 'Experience (XP)', datosImport.usuario?.puntos_experiencia],
+                      ].map(([icon, label, count]) => (
+                        <div key={label} className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+                          <span className="flex items-center gap-2">{icon}{label}</span>
+                          <span className="font-bold text-[#4F99CC]">{count || 0}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-3 mt-6">
+                    <button onClick={cerrarImportar} className="flex-1 py-3 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 rounded-2xl font-bold">{idioma === 'es' ? 'Cancelar' : 'Cancel'}</button>
+                    <button onClick={ejecutarImportacion} disabled={!datosImport || cargandoImport} className="flex-1 py-3 bg-[#4F99CC] text-white rounded-2xl font-bold disabled:opacity-40 transition-all">
+                      {cargandoImport ? '⏳ Importando...' : (idioma === 'es' ? 'Importar' : 'Import')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center">
+                  <h4 className="text-xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-6">{idioma === 'es' ? '¡Importación completada!' : 'Import complete!'}</h4>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-5 text-sm space-y-3 text-left mb-6">
+                    {[
+                      [<Target size={16} className="text-[#C6A55E]" />, idioma === 'es' ? 'Hábitos' : 'Habits', resultadoImport.resultado?.habitos],
+                      [<Activity size={16} className="text-[#4F99CC]" />, idioma === 'es' ? 'Tareas' : 'Tasks', resultadoImport.resultado?.tareas_diarias],
+                      [<BookOpen size={16} className="text-indigo-500" />, idioma === 'es' ? 'Diario' : 'Diary', resultadoImport.resultado?.diario],
+                      [<Flower2 size={16} className="text-teal-500" />, idioma === 'es' ? 'Meditación' : 'Meditation', resultadoImport.resultado?.meditacion],
+                      [<ShieldCheck size={16} className="text-purple-500" />, idioma === 'es' ? 'Perfil y XP' : 'Profile & XP', resultadoImport.resultado?.perfil?.actualizado ? { importados: 1, omitidos: 0 } : null],
+                    ].map(([icon, label, r]) => r && (
+                      <div key={label} className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+                        <span className="flex items-center gap-2">{icon}{label}</span>
+                        <span>
+                          {typeof r.importados === 'number' ? (
+                            <><span className="font-bold text-green-500">{r.importados} {idioma === 'es' ? 'nuevos' : 'new'}</span>
+                            {r.omitidos > 0 && <span className="text-gray-400 ml-2">{r.omitidos} {idioma === 'es' ? 'ya existían' : 'already existed'}</span>}</>
+                          ) : (
+                            <span className="font-bold text-green-500">{idioma === 'es' ? 'Actualizado' : 'Updated'}</span>
+                          )}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <button onClick={cerrarImportar} className="w-full py-3 bg-[#4F99CC] text-white rounded-2xl font-bold">Cerrar</button>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

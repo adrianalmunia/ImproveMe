@@ -207,6 +207,23 @@ export function PaginaDiario() {
     }
   }
 
+  // Atajos de teclado para el Diario
+  useEffect(() => {
+    const manejarTeclas = (e) => {
+      // Ctrl + S / Cmd + S para guardar
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        manejarGuardar();
+      }
+      // Esc para cerrar modal de imagen
+      if (e.key === 'Escape') {
+        setImagenExpandida(false);
+      }
+    };
+    window.addEventListener('keydown', manejarTeclas);
+    return () => window.removeEventListener('keydown', manejarTeclas);
+  }, [texto, humor, sueno, archivoImagen, archivoAudio, imagen, token, usuario]);
+
   // Manejador de imagen
   const manejarCambioImagen = (e) => {
     const file = e.target.files[0];

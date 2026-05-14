@@ -1,348 +1,494 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Zap, 
-  Target, 
-  BarChart2, 
-  Flower2, 
-  Shield, 
-  ArrowRight, 
-  CheckCircle2, 
-  TrendingUp, 
-  MessageSquare,
-  Trophy,
-  Moon,
-  Smile
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Shield, Zap, TrendingUp, CheckCircle2, Brain, X } from 'lucide-react';
 import logoCompleto from '../assets/logo_completo.png';
-import logoImproveMe from '../assets/logo_improveme.png';
+import {
+  MoodDoughnutChart, MeditationCard, SleepScatterChart, HabitCard,
+  MoodLineChart, HabitHeatmap, RankPreview, features
+} from './LandingSections';
 
 const LandingPage = ({ onIrAAutenticacion }) => {
-  
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        staggerChildren: 0.2,
-        delayChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: { duration: 0.6, ease: "easeOut" }
-    }
-  };
-
-  const features = [
-    {
-      icon: <Smile className="text-blue-500" size={24} />,
-      title: "Registro de Ánimo",
-      description: "Entiende tus emociones con nuestro sistema de journaling visual y seguimiento de humor diario."
-    },
-    {
-      icon: <Target className="text-amber-500" size={24} />,
-      title: "Hábitos Gamificados",
-      description: "Gana XP, asciende de rango y compite en el ranking global mientras forjas tu disciplina."
-    },
-    {
-      icon: <BarChart2 className="text-indigo-500" size={24} />,
-      title: "Estadísticas Avanzadas",
-      description: "Descubre correlaciones entre tu sueño, tus hábitos y tu bienestar emocional con gráficos interactivos."
-    },
-    {
-      icon: <Flower2 className="text-teal-500" size={24} />,
-      title: "Meditación y Mindfulness",
-      description: "Sesiones guiadas y sonidos ambiente para reducir el estrés y mejorar tu enfoque."
-    }
-  ];
+  const [mostrarTerminos, setMostrarTerminos] = useState(false);
+  const [mostrarAcerca, setMostrarAcerca] = useState(false);
+  const [mostrarReportarError, setMostrarReportarError] = useState(false);
+  const [descripcionError, setDescripcionError] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [enviadoExito, setEnviadoExito] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F6F5F7] dark:bg-gray-900 font-['Inter'] selection:bg-blue-100 selection:text-blue-600 transition-colors duration-300 overflow-x-hidden">
-      
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border-b border-gray-100 dark:border-gray-700 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src={logoImproveMe} alt="Logo" className="w-10 h-10 object-contain" />
-            <span className="text-2xl font-['Tilt_Warp'] text-[#2C4159] dark:text-white transition-colors duration-300">ImproveMe</span>
+    <div className="min-h-screen bg-[#fafafa] dark:bg-gray-950 font-['Inter'] selection:bg-blue-100 selection:text-blue-600 transition-colors duration-300 overflow-x-hidden">
+
+      {/* ══════ NAVBAR ══════ */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-b border-gray-200/40 dark:border-gray-800/40">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center">
+            <img src={logoCompleto} alt="ImproveMe" className="h-9 object-contain" />
           </div>
-          
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => onIrAAutenticacion('login')}
-              className="px-6 py-2 text-sm font-bold text-[#2C4159] dark:text-gray-300 hover:text-blue-500 transition-colors"
-            >
+          <div className="flex items-center gap-3">
+            <button onClick={() => onIrAAutenticacion('login')}
+              className="hidden sm:block px-5 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-[#2C4159] dark:hover:text-white transition-colors">
               Iniciar Sesión
             </button>
-            <button 
-              onClick={() => onIrAAutenticacion('registro')}
-              className="px-6 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-full text-sm font-bold shadow-lg hover:scale-105 transition-all active:scale-95"
-            >
-              Empezar Gratis
+            <button onClick={() => onIrAAutenticacion('registro')}
+              className="px-5 py-2 bg-[#2C4159] dark:bg-white text-white dark:text-[#2C4159] rounded-full text-sm font-semibold hover:opacity-90 transition-opacity">
+              Empezar
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-40 pb-20 px-6 relative">
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="mb-8 p-1.5 rounded-full bg-gradient-to-r from-blue-500/10 to-amber-500/10 border border-blue-200 dark:border-gray-700"
-          >
-            <span className="px-4 py-1 text-xs font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">Transformación 2.0</span>
-          </motion.div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
+      {/* ══════ HERO ══════ */}
+      <section className="pt-36 pb-6 md:pt-44 md:pb-10 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-['Tilt_Warp'] text-[#2C4159] dark:text-white leading-[1.1] mb-8 transition-colors duration-300"
+            transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="text-4xl sm:text-6xl md:text-8xl font-['Tilt_Warp'] text-[#2C4159] dark:text-white leading-[1.05] tracking-tight mb-6"
           >
-            Desbloquea tu <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-amber-500">Mejor Versión</span>
+            Tu mejor versión.
           </motion.h1>
-          
-          <motion.p 
-            initial={{ opacity: 0, y: 30 }}
+
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mb-12 font-medium transition-colors duration-300"
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="text-4xl sm:text-6xl md:text-8xl font-['Tilt_Warp'] text-transparent bg-clip-text bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] leading-[1.05] tracking-tight mb-10"
           >
-            La aplicación todo-en-uno que combina psicología, gamificación y análisis de datos para ayudarte a construir una vida más plena y productiva.
+            Cada día.
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-xl mx-auto mb-10 font-medium leading-relaxed"
+          >
+            Diario emocional, hábitos gamificados, meditación y estadísticas avanzadas en una sola plataforma.
           </motion.p>
-          
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col sm:flex-row gap-4"
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <button 
-              onClick={() => onIrAAutenticacion('registro')}
-              className="px-10 py-5 bg-[#4F99CC] text-white rounded-3xl font-black text-lg shadow-2xl shadow-blue-200 dark:shadow-blue-900/20 hover:scale-105 transition-transform active:scale-95 flex items-center gap-3"
-            >
-              Comenzar Ahora <ArrowRight size={24} />
+            <button onClick={() => onIrAAutenticacion('registro')}
+              className="px-8 py-4 bg-[#4F99CC] text-white rounded-full font-semibold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2">
+              Comenzar gratis <ArrowRight size={20} />
             </button>
-            <button className="px-10 py-5 bg-white dark:bg-gray-800 text-[#2C4159] dark:text-white rounded-3xl font-black text-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
-              Ver Demo
+            <button onClick={() => onIrAAutenticacion('login')}
+              className="px-8 py-4 text-[#2C4159] dark:text-white font-semibold text-lg hover:text-[#4F99CC] transition-colors">
+              Ya tengo cuenta
             </button>
           </motion.div>
 
-          {/* Preview Mockup */}
-          <motion.div 
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="mt-20 w-full max-w-5xl relative"
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="mt-6 text-xs text-gray-400 font-medium flex items-center justify-center gap-2">
+            <Shield size={13} /> Sin tarjeta necesaria
+          </motion.p>
+        </div>
+      </section>
+
+      {/* ══════ DASHBOARD PREVIEW ══════ */}
+      <section className="py-16 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start"
           >
-            <div className="relative z-10 p-2 rounded-[40px] bg-gradient-to-b from-gray-200 to-white dark:from-gray-700 dark:to-gray-900 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)]">
-              <div className="bg-white dark:bg-gray-800 rounded-[32px] overflow-hidden aspect-video relative group">
-                <div className="absolute inset-0 bg-neutral-100 dark:bg-gray-900 flex items-center justify-center">
-                  {/* Mockup Content */}
-                  <div className="w-full h-full p-8 grid grid-cols-12 gap-6 opacity-40 group-hover:opacity-100 transition-opacity duration-700">
-                    <div className="col-span-3 space-y-4">
-                      <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
-                      <div className="h-40 w-full bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800"></div>
-                      <div className="h-32 w-full bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
-                    </div>
-                    <div className="col-span-6 space-y-4">
-                      <div className="h-64 w-full bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center justify-center">
-                        <BarChart2 className="text-blue-500/20" size={64} />
-                      </div>
-                      <div className="h-24 w-full bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-100 dark:border-amber-800"></div>
-                    </div>
-                    <div className="col-span-3 space-y-4">
-                      <div className="h-48 w-full bg-teal-50 dark:bg-teal-900/20 rounded-2xl border border-teal-100 dark:border-teal-800"></div>
-                      <div className="h-40 w-full bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
-                    </div>
-                  </div>
-                  {/* Overlay text */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/10 dark:bg-black/10 backdrop-blur-[2px]">
-                    <div className="p-8 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-white dark:border-gray-700 text-center scale-110">
-                      <img src={logoCompleto} alt="Logo" className="h-12 mx-auto mb-4" />
-                      <p className="font-bold text-[#2C4159] dark:text-white text-lg">Tu Dashboard Personalizado</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="space-y-8">
+              <MoodDoughnutChart />
+              <SleepScatterChart />
             </div>
-            
-            {/* Background elements */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-500/5 blur-[120px] rounded-full -z-10"></div>
-            <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-500/10 blur-[80px] rounded-full -z-10"></div>
+            <div className="space-y-8 md:mt-12">
+              <MeditationCard />
+              <HabitCard />
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-32 bg-white dark:bg-gray-800/50 transition-colors duration-300">
+      {/* ══════ FEATURES GRID ══════ */}
+      <section className="py-24 bg-white dark:bg-gray-900/50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-['Tilt_Warp'] text-[#2C4159] dark:text-white mb-6">Todo lo que necesitas</h2>
-            <p className="text-gray-500 dark:text-gray-400 font-medium max-w-2xl mx-auto">Diseñado meticulosamente para que cada interacción sea un paso hacia tu objetivo.</p>
+          <div className="text-center mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-5xl font-['Tilt_Warp'] text-[#2C4159] dark:text-white mb-4"
+            >
+              Todo lo que necesitas
+            </motion.h2>
+            <p className="text-gray-500 dark:text-gray-400 font-medium max-w-xl mx-auto">
+              6 módulos integrados. Una sola plataforma. Cero fricciones.
+            </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, idx) => (
-              <motion.div 
-                key={idx}
-                whileHover={{ y: -10 }}
-                className="p-8 bg-[#F6F5F7] dark:bg-gray-900 rounded-[32px] border border-transparent hover:border-blue-200 dark:hover:border-blue-900 transition-all group"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((f, idx) => (
+              <motion.div key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.08 }}
+                whileHover={{ y: -8 }}
+                className={`p-8 bg-[#fafafa] dark:bg-gray-900 rounded-[32px] border-2 border-transparent ${f.border} transition-all group cursor-default`}
               >
-                <div className="w-14 h-14 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center shadow-sm mb-6 group-hover:scale-110 transition-transform">
-                  {feature.icon}
+                <div className={`w-14 h-14 ${f.bg} rounded-2xl flex items-center justify-center mb-6 ${f.color} group-hover:scale-110 transition-transform`}>
+                  {f.icon}
                 </div>
-                <h3 className="text-xl font-black text-[#2C4159] dark:text-white mb-4 transition-colors">{feature.title}</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed font-medium transition-colors">{feature.description}</p>
+                <h3 className="text-xl font-black text-[#2C4159] dark:text-white mb-3">{f.title}</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed font-medium">{f.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Statistics Preview Section */}
-      <section className="py-32 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+      {/* ══════ INTELIGENCIA DE DATOS ══════ */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-widest mb-8">
-              <BarChart2 size={16} /> Inteligencia de Datos
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-full text-indigo-600 dark:text-indigo-400 text-xs font-black uppercase tracking-widest mb-8">
+              <Brain size={16} /> Inteligencia de Datos
             </div>
-            <h2 className="text-4xl md:text-5xl font-['Tilt_Warp'] text-[#2C4159] dark:text-white leading-tight mb-8">Tus datos cuentan una <span className="text-blue-500">historia</span></h2>
-            <p className="text-gray-500 dark:text-gray-400 text-lg mb-10 font-medium">
-              ¿Sabías que tu productividad aumenta un 40% cuando duermes más de 7 horas? O que meditar por la mañana reduce tu ansiedad nocturna. 
-              ImproveMe analiza tus registros y te da insights accionables.
+            <h2 className="text-3xl md:text-5xl font-['Tilt_Warp'] text-[#2C4159] dark:text-white leading-tight mb-8">
+              Tus datos cuentan una{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-[#4F99CC]">historia</span>
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 text-lg mb-10 font-medium leading-relaxed">
+              Descubre cómo tu sueño afecta tu ánimo, qué hábitos te hacen más productivo y cuáles son tus patrones emocionales a lo largo del tiempo.
             </p>
-            
-            <ul className="space-y-6">
+            <ul className="space-y-5">
               {[
-                "Mapas de correlación hábito-ánimo",
-                "Seguimiento de racha de meditación",
-                "Análisis de calidad del sueño",
-                "Predicción de estados emocionales"
+                'Correlación entre sueño y estado de ánimo',
+                'Mapas de calor de consistencia de hábitos',
+                'Análisis de tendencias por período',
+                'Estadísticas comparativas dinámicas'
               ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-[#2C4159] dark:text-gray-300 font-bold">
-                  <div className="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
-                    <CheckCircle2 size={14} />
+                <motion.li key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-center gap-3 text-[#2C4159] dark:text-gray-300 font-bold"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 shrink-0">
+                    <CheckCircle2 size={16} />
                   </div>
                   {item}
-                </li>
+                </motion.li>
               ))}
             </ul>
           </div>
-          
-          <div className="relative">
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-[40px] shadow-2xl border border-gray-100 dark:border-gray-700 relative z-10">
-              <div className="flex items-center justify-between mb-8">
-                <p className="font-black text-[#2C4159] dark:text-white uppercase tracking-widest text-xs">Bienestar Semanal</p>
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                </div>
-              </div>
-              
-              <div className="h-64 flex items-end justify-between gap-4">
-                {[40, 70, 45, 90, 65, 80, 95].map((h, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-3">
-                    <motion.div 
-                      initial={{ height: 0 }}
-                      whileInView={{ height: `${h}%` }}
-                      transition={{ duration: 1, delay: i * 0.1 }}
-                      className={`w-full rounded-t-xl ${i === 6 ? 'bg-gradient-to-b from-blue-400 to-blue-600' : 'bg-gray-100 dark:bg-gray-700'}`}
-                    />
-                    <span className="text-[10px] font-bold text-gray-400 uppercase">
-                      {['L', 'M', 'X', 'J', 'V', 'S', 'D'][i]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-10 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800 flex items-center gap-4">
-                <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center text-blue-500 shadow-sm">
-                  <Zap size={20} />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">¡Rango Superado!</p>
-                  <p className="text-sm font-bold text-[#2C4159] dark:text-white leading-tight">Has ganado 250 XP esta semana</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Floating element */}
-            <motion.div 
-              animate={{ y: [0, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-              className="absolute -top-10 -right-10 p-6 bg-amber-500 text-white rounded-3xl shadow-2xl z-20"
-            >
-              <Trophy size={32} />
-              <p className="text-xs font-black mt-2">Rank #4</p>
-            </motion.div>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="space-y-5"
+          >
+            <MoodLineChart />
+            <HabitHeatmap />
+          </motion.div>
         </div>
       </section>
 
-      {/* Gamification Section */}
-      <section className="py-32 bg-black text-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="mb-12"
-          >
-            <h2 className="text-4xl md:text-6xl font-['Tilt_Warp'] mb-8">Mejora en la <span className="text-amber-500">Vida Real</span></h2>
-            <p className="text-gray-400 text-lg max-w-3xl mx-auto font-medium">
-              Trata tu vida como un RPG. Completa tus hábitos diarios, acumula XP y asciende de rango. 
-              Desde "Sin Rango" hasta "Rubí", el camino es tuyo.
+      {/* ══════ GAMIFICACIÓN ══════ */}
+      <section className="py-28 bg-[#0f172a] text-white overflow-hidden relative">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/8 blur-[150px] rounded-full" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-500/8 blur-[150px] rounded-full" />
+        </div>
+        <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
+            <h2 className="text-3xl md:text-6xl font-['Tilt_Warp'] mb-4">
+              Mejora en la{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C6A55E] to-red-400">
+                Vida Real
+              </span>
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto font-medium mb-14">
+              Trata tu vida como un RPG. Completa hábitos, gana XP y asciende de liga.
             </p>
           </motion.div>
-          
-          <div className="flex flex-wrap justify-center gap-4 mb-20">
-             {['Hierro', 'Bronce', 'Plata', 'Oro', 'Platino', 'Diamante', 'Maestro'].map((rank, i) => (
-               <div key={i} className="px-6 py-3 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md flex items-center gap-3">
-                 <div className={`w-3 h-3 rounded-full ${[
-                   'bg-gray-500', 'bg-orange-800', 'bg-gray-300', 'bg-yellow-400', 'bg-teal-400', 'bg-blue-400', 'bg-purple-500'
-                 ][i]}`}></div>
-                 <span className="font-black uppercase tracking-widest text-xs">{rank}</span>
-               </div>
-             ))}
-          </div>
-          
-          <button 
-            onClick={() => onIrAAutenticacion('registro')}
-            className="px-12 py-6 bg-white text-black rounded-full font-black text-xl hover:scale-105 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)] active:scale-95"
+
+          <div className="mb-16"><RankPreview /></div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 max-w-3xl mx-auto text-left"
           >
+            {[
+              { icon: <Zap size={20} />, title: 'Gana XP', desc: 'Cada hábito completado te recompensa con puntos de experiencia.' },
+              { icon: <TrendingUp size={20} />, title: 'Sube de Liga', desc: 'Acumula XP para ascender a través de 9 ligas únicas.' },
+              { icon: <Shield size={20} />, title: 'Mantén Rachas', desc: 'La consistencia es clave. Tus rachas potencian tu motivación.' },
+            ].map((item, i) => (
+              <div key={i} className="p-6 bg-white/5 rounded-3xl border border-white/10">
+                <div className="w-10 h-10 bg-[#C6A55E]/20 rounded-xl flex items-center justify-center text-[#C6A55E] mb-4">
+                  {item.icon}
+                </div>
+                <h4 className="font-black text-white mb-2">{item.title}</h4>
+                <p className="text-sm text-gray-400 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </motion.div>
+
+          <button onClick={() => onIrAAutenticacion('registro')}
+            className="px-10 py-5 bg-white text-[#0f172a] rounded-full font-bold text-lg hover:scale-105 transition-all active:scale-95">
             Únete a la competición
           </button>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-20 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 transition-colors">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-10">
-            <div className="flex items-center gap-3">
-              <img src={logoImproveMe} alt="Logo" className="w-10 h-10 object-contain" />
-              <span className="text-2xl font-['Tilt_Warp'] text-[#2C4159] dark:text-white">ImproveMe</span>
-            </div>
-            
-            <div className="flex gap-10">
-              <a href="#" className="text-gray-400 hover:text-blue-500 font-bold transition-colors">Privacidad</a>
-              <a href="#" className="text-gray-400 hover:text-blue-500 font-bold transition-colors">Términos</a>
-              <a href="#" className="text-gray-400 hover:text-blue-500 font-bold transition-colors">Contacto</a>
-            </div>
-            
-            <p className="text-gray-400 font-medium text-sm">© 2026 ImproveMe. Hecho para tu mejor versión.</p>
+      {/* ══════ FINAL CTA ══════ */}
+      <section className="py-28">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <img src={logoCompleto} alt="ImproveMe" className="h-14 mx-auto mb-10 opacity-70" />
+            <h2 className="text-3xl md:text-5xl font-['Tilt_Warp'] text-[#2C4159] dark:text-white mb-5">
+              Empieza hoy.
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 text-lg max-w-md mx-auto mb-10 font-medium">
+              Tu mejor versión está a un clic de distancia.
+            </p>
+            <button onClick={() => onIrAAutenticacion('registro')}
+              className="px-10 py-5 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] text-white rounded-full font-bold text-lg shadow-xl hover:scale-105 transition-transform active:scale-95 inline-flex items-center gap-2">
+              Crear mi cuenta <ArrowRight size={20} />
+            </button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ══════ FOOTER ══════ */}
+      <footer className="py-8 md:py-12 border-t border-gray-200/50 dark:border-gray-800/50">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+          <img src={logoCompleto} alt="ImproveMe" className="h-7 md:h-8 object-contain" />
+          <div className="flex flex-wrap justify-center gap-6 md:gap-8">
+            <button onClick={() => setMostrarAcerca(true)}
+              className="text-gray-400 hover:text-[#2C4159] dark:hover:text-white font-medium text-sm transition-colors">
+              Sobre el Proyecto
+            </button>
+            <button onClick={() => setMostrarTerminos(true)}
+              className="text-gray-400 hover:text-[#2C4159] dark:hover:text-white font-medium text-sm transition-colors">
+              Términos
+            </button>
+            <button onClick={() => setMostrarReportarError(true)}
+              className="text-gray-400 hover:text-[#2C4159] dark:hover:text-white font-medium text-sm transition-colors">
+              Reportar error
+            </button>
           </div>
+          <p className="text-gray-400 text-sm">© 2026 ImproveMe</p>
         </div>
       </footer>
+
+      {/* ══════ MODAL TÉRMINOS ══════ */}
+      <AnimatePresence>
+        {mostrarTerminos && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 lg:p-12">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
+              className="w-full max-w-3xl h-[80vh] bg-white rounded-[48px] overflow-hidden flex flex-col shadow-2xl relative">
+              <div className="p-12 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] flex justify-between items-center shrink-0 shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
+                <h2 className="text-3xl font-['Tilt_Warp'] text-white relative z-10">Términos y Condiciones</h2>
+                <button onClick={() => setMostrarTerminos(false)}
+                  className="w-12 h-12 bg-white/20 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-colors relative z-10 backdrop-blur-md border border-white/30">
+                  <X />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-12 text-gray-600 space-y-6">
+                <section>
+                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">1. Aceptación de los Términos</h3>
+                  <p className="text-sm leading-relaxed">Al utilizar ImproveMe, aceptas cumplir con estos términos. Esta aplicación está diseñada para el crecimiento personal y el registro de hábitos.</p>
+                </section>
+                <section>
+                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">2. Privacidad de los Datos</h3>
+                  <p className="text-sm leading-relaxed">Tus registros diarios, audios e imágenes se almacenan de forma segura. ImproveMe no comparte tu información personal con terceros sin tu consentimiento explícito.</p>
+                </section>
+                <section>
+                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">3. Uso Responsable</h3>
+                  <p className="text-sm leading-relaxed">Te comprometes a utilizar la aplicación de manera constructiva. El contenido multimedia subido debe respetar las normas de convivencia y legalidad vigente.</p>
+                </section>
+                <section>
+                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">4. Propiedad Intelectual</h3>
+                  <p className="text-sm leading-relaxed">Toda la propiedad intelectual de la aplicación ImproveMe pertenece a sus desarrolladores. El contenido que subas sigue siendo de tu propiedad.</p>
+                </section>
+                <section>
+                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">5. Modificaciones</h3>
+                  <p className="text-sm leading-relaxed">Nos reservamos el derecho de modificar estos términos en cualquier momento. Se te notificará de cualquier cambio significativo.</p>
+                </section>
+                <div className="pt-8 text-center border-t border-gray-100">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase">Última actualización: 22 de Abril de 2026</p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ══════ MODAL SOBRE EL PROYECTO ══════ */}
+      <AnimatePresence>
+        {mostrarAcerca && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 lg:p-12">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
+              className="w-full max-w-3xl h-[80vh] bg-white rounded-[48px] overflow-hidden flex flex-col shadow-2xl relative">
+              <div className="p-12 bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] flex justify-between items-center shrink-0 shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
+                <h2 className="text-3xl font-['Tilt_Warp'] text-white relative z-10">Sobre el Proyecto</h2>
+                <button onClick={() => setMostrarAcerca(false)}
+                  className="w-12 h-12 bg-white/20 text-white rounded-full flex items-center justify-center hover:bg-white/40 transition-colors relative z-10 backdrop-blur-md border border-white/30">
+                  <X />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-12 text-gray-600 space-y-6">
+                <div className="flex justify-center mb-8">
+                  <img src={logoCompleto} alt="Logo" className="h-20" />
+                </div>
+                <section>
+                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">Nuestra Misión</h3>
+                  <p className="text-sm leading-relaxed text-justify">ImproveMe es una plataforma integral diseñada para facilitar el autoconocimiento y el crecimiento personal. Nace de la necesidad de tener un espacio privado y seguro donde registrar no solo lo que hacemos, sino cómo nos sentimos, ayudando a identificar patrones de comportamiento y mejorar nuestra calidad de vida día a día.</p>
+                </section>
+                <section>
+                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">Características Principales</h3>
+                  <ul className="list-disc list-inside text-sm space-y-2 ml-2">
+                    <li>Registro diario de emociones y pensamientos.</li>
+                    <li>Seguimiento de hábitos saludables (sueño, meditación, etc.).</li>
+                    <li>Soporte multimedia: guarda tus recuerdos en voz e imagen.</li>
+                    <li>Análisis de progreso mediante estadísticas detalladas.</li>
+                  </ul>
+                </section>
+                <section>
+                  <h3 className="font-bold text-gray-800 mb-2 uppercase tracking-widest text-xs">Tecnología</h3>
+                  <p className="text-sm leading-relaxed">Este proyecto ha sido desarrollado utilizando tecnologías modernas como React para el frontend, Tailwind CSS para un diseño premium y Node.js con Prisma para una gestión de datos eficiente y segura.</p>
+                </section>
+                <div className="pt-8 text-center border-t border-gray-100">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase">ImproveMe © 2026 · Tu mejor versión empieza hoy</p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ══════ MODAL REPORTAR ERROR ══════ */}
+      <AnimatePresence>
+        {mostrarReportarError && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 lg:p-12">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
+              className="w-full max-w-3xl h-[85vh] bg-white rounded-[48px] overflow-hidden flex flex-col shadow-2xl relative">
+
+              <div className="p-12 bg-[#2C4159] flex justify-between items-center shrink-0 shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
+                <div>
+                  <h2 className="text-3xl font-['Tilt_Warp'] text-white relative z-10">Reportar Error</h2>
+                  <p className="text-white/60 text-sm font-medium mt-1 relative z-10">Ayúdanos a mejorar ImproveMe</p>
+                </div>
+                <button onClick={() => setMostrarReportarError(false)}
+                  className="w-12 h-12 bg-white/10 text-white rounded-full flex items-center justify-center hover:bg-white/20 transition-colors relative z-10 backdrop-blur-md border border-white/20">
+                  <X />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-12 text-gray-600 space-y-8">
+                <div className="space-y-4">
+                  <h3 className="font-bold text-gray-800 uppercase tracking-widest text-xs flex items-center gap-2">
+                    <Brain size={14} className="text-[#4F99CC]" /> Información del Sistema
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Navegador</p>
+                      <p className="text-xs font-mono text-gray-600 break-all">{navigator.userAgent.split(' ').slice(-3).join(' ')}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Plataforma</p>
+                      <p className="text-xs font-mono text-gray-600">{navigator.platform || 'Desconocida'}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Resolución</p>
+                      <p className="text-xs font-mono text-gray-600">{window.screen.width}x{window.screen.height}</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Idioma</p>
+                      <p className="text-xs font-mono text-gray-600">{navigator.language}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-bold text-gray-800 uppercase tracking-widest text-xs">Descripción de la Incidencia</h3>
+                  <textarea
+                    value={descripcionError}
+                    onChange={(e) => setDescripcionError(e.target.value)}
+                    placeholder="Describe detalladamente qué estabas haciendo y qué error has detectado..."
+                    className="w-full h-40 p-6 bg-gray-50 rounded-[32px] border-2 border-transparent focus:border-[#4F99CC] focus:bg-white outline-none transition-all resize-none text-sm leading-relaxed"
+                  />
+                </div>
+
+                <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-gray-100">
+                  <p className="text-[10px] text-gray-400 font-medium max-w-xs text-center sm:text-left">
+                    Al enviar, se generará un reporte para la <b>administración de la plataforma</b> con estos datos técnicos adjuntos.
+                  </p>
+                  <button
+                    disabled={!descripcionError.trim() || enviando}
+                    onClick={async () => {
+                      try {
+                        setEnviando(true);
+                        const response = await fetch('http://localhost:3000/api/soporte/reportar-error', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            descripcion: descripcionError,
+                            infoTecnica: {
+                              agente: navigator.userAgent,
+                              plataforma: navigator.platform,
+                              resolucion: `${window.screen.width}x${window.screen.height}`,
+                              idioma: navigator.language,
+                              url: window.location.href
+                            }
+                          })
+                        });
+
+                        if (response.ok) {
+                          setEnviadoExito(true);
+                          setTimeout(() => {
+                            setMostrarReportarError(false);
+                            setEnviadoExito(false);
+                            setDescripcionError('');
+                          }, 2000);
+                        } else {
+                          alert('Error al enviar el reporte. Por favor, inténtalo de nuevo.');
+                        }
+                      } catch (error) {
+                        console.error('Error:', error);
+                        alert('No se pudo conectar con el servidor.');
+                      } finally {
+                        setEnviando(false);
+                      }
+                    }}
+                    className={`px-8 py-4 ${enviadoExito ? 'bg-green-500' : 'bg-[#2C4159]'} text-white rounded-full font-bold text-sm hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2`}
+                  >
+                    {enviadoExito ? '¡Enviado!' : enviando ? 'Enviando...' : 'Enviar Reporte'}
+                    {!enviadoExito && !enviando && <ArrowRight size={16} />}
+                    {enviadoExito && <CheckCircle2 size={16} />}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

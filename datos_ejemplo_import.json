@@ -1,0 +1,80 @@
+{
+  "formato_version": "1.0",
+  "aplicacion": "ImproveMe",
+  "fecha_exportacion": "2026-05-13T12:00:00.000Z",
+  "usuario": {
+    "nombre_usuario": "carlos_mejora",
+    "correo": "carlos@example.com",
+    "alias": "Carlos",
+    "puntos_experiencia": 1340,
+    "fecha_registro": "2025-09-01T00:00:00.000Z"
+  },
+  "habitos": [
+    {
+      "nombre": "Meditación matutina",
+      "estado": "positivo",
+      "frecuencia_semanal": 7,
+      "registros": [
+        "2026-04-14","2026-04-15","2026-04-16","2026-04-18","2026-04-19","2026-04-20",
+        "2026-04-21","2026-04-22","2026-04-23","2026-04-24","2026-04-25","2026-04-26",
+        "2026-04-27","2026-04-28","2026-04-29","2026-04-30",
+        "2026-05-01","2026-05-02","2026-05-03","2026-05-04","2026-05-05","2026-05-06",
+        "2026-05-08","2026-05-09","2026-05-11","2026-05-12","2026-05-13"
+      ]
+    },
+    {
+      "nombre": "Lectura 30 min",
+      "estado": "positivo",
+      "frecuencia_semanal": 5,
+      "registros": [
+        "2026-04-14","2026-04-15","2026-04-17","2026-04-18","2026-04-20",
+        "2026-04-21","2026-04-22","2026-04-24","2026-04-25","2026-04-27","2026-04-28","2026-04-29",
+        "2026-05-01","2026-05-02","2026-05-04","2026-05-05","2026-05-06",
+        "2026-05-08","2026-05-09","2026-05-12","2026-05-13"
+      ]
+    }
+  ],
+  "tareas_diarias": [
+    { 
+      "nombre": "Beber 2 litros de agua",
+      "registros": [
+        "2026-05-08","2026-05-09","2026-05-10","2026-05-11","2026-05-12","2026-05-13"
+      ]
+    },
+    { 
+      "nombre": "10 minutos de estiramientos",
+      "registros": [
+        "2026-05-10","2026-05-11","2026-05-12","2026-05-13"
+      ]
+    },
+    { 
+      "nombre": "Planificar el día",
+      "registros": [
+        "2026-05-12","2026-05-13"
+      ]
+    }
+  ],
+  "tareas_pendientes": [
+    { "nombre": "Comprar regalo de cumpleaños", "prioridad": "alta", "completada": false },
+    { "nombre": "Llamar al dentista", "prioridad": "media", "completada": false },
+    { "nombre": "Arreglar el grifo de la cocina", "prioridad": "baja", "completada": false }
+  ],
+  "diario": [
+    {
+      "fecha": "2026-05-11T00:00:00.000Z",
+      "puntuacion_animo": 4,
+      "horas_sueno": 7.0,
+      "contenido_texto": "Día productivo. Me siento bien con las nuevas rutinas."
+    },
+    {
+      "fecha": "2026-05-13T00:00:00.000Z",
+      "puntuacion_animo": 5,
+      "horas_sueno": 8.0,
+      "contenido_texto": "Excelente cierre de semana."
+    }
+  ],
+  "meditacion": [
+    { "fecha": "2026-05-11T07:15:00.000Z", "duracion_segundos": 600, "segundos_completados": 600, "tecnica_respiracion": "equilibrio", "pista_musica": "lluvia" },
+    { "fecha": "2026-05-13T07:30:00.000Z", "duracion_segundos": 900, "segundos_completados": 900, "tecnica_respiracion": "relajacion", "pista_musica": "lluvia" }
+  ]
+}

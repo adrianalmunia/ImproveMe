@@ -16,6 +16,7 @@ const rutasMeditacion = require('./rutas/rutasMeditacion');
 const rutasTareas = require('./rutas/rutasTareas');
 const rutasCalendario = require('./rutas/rutasCalendario');
 const rutasEstadisticas = require('./rutas/rutasEstadisticas');
+const rutasSoporte = require('./rutas/rutasSoporte');
 
 // ============ CONFIGURACIÓN BÁSICA ============
 const app = express();
@@ -93,6 +94,9 @@ app.use('/api/calendario', rutasCalendario);
 
 // Rutas de estadísticas
 app.use('/api/estadisticas', rutasEstadisticas);
+
+// Rutas de soporte
+app.use('/api/soporte', rutasSoporte);
 
 // ============ MANEJO DE ERRORES 404 ============
 // Si ninguna ruta anterior coincide, devolvemos 404

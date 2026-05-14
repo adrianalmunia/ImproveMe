@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { useIdioma } from '../contextos/ContextoIdioma';
-import { obtenerEntradasPorMes } from '../servicios/servicioAPI';
+import { obtenerEntradasPorMes, buscarEntradas } from '../servicios/servicioAPI';
 import { ReproductorAudio } from '../componentes/ReproductorAudio';
 import logoCompleto from '../assets/logo_completo.png';
 
@@ -144,30 +144,65 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
 };
 
 export function PaginaRegistros() {
-  const { usuario } = useAutenticacion();
+  const { usuario, token } = useAutenticacion();
   const { t, idioma } = useIdioma();
   const [fechaFiltro, setFechaFiltro] = useState(new Date());
   const [entradas, setEntradas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [entradaSeleccionada, setEntradaSeleccionada] = useState(null);
   const [imagenExpandida, setImagenExpandida] = useState(null);
+  const [busqueda, setBusqueda] = useState('');
+  const [busquedaDebounced, setBusquedaDebounced] = useState('');
+  const inputBusquedaRef = useRef(null);
+
+  // Debounce para la búsqueda
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setBusquedaDebounced(busqueda);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [busqueda]);
+
+  // Atajos de teclado para Registros
+  useEffect(() => {
+    const manejarTeclas = (e) => {
+      // Ctrl + F para buscar
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        inputBusquedaRef.current?.focus();
+      }
+      // Esc para cerrar modales
+      if (e.key === 'Escape') {
+        if (imagenExpandida) setImagenExpandida(null);
+        else if (entradaSeleccionada) setEntradaSeleccionada(null);
+      }
+    };
+    window.addEventListener('keydown', manejarTeclas);
+    return () => window.removeEventListener('keydown', manejarTeclas);
+  }, [imagenExpandida, entradaSeleccionada]);
 
   useEffect(() => {
     async function cargarEntradas() {
-      if (usuario?.id) {
-        setCargando(true);
-        try {
-          const data = await obtenerEntradasPorMes(usuario.id, fechaFiltro.getMonth() + 1, fechaFiltro.getFullYear());
-          setEntradas(data);
-        } catch (error) {
-          console.error("Error al cargar registros:", error);
-        } finally {
-          setCargando(false);
+      if (!usuario?.id || !token) return;
+      setCargando(true);
+      try {
+        let res;
+        if (busquedaDebounced.trim()) {
+          // Si hay búsqueda, usamos el endpoint global
+          res = await buscarEntradas(usuario.id, busquedaDebounced, token);
+        } else {
+          // Si no hay búsqueda, filtramos por mes y año actual
+          res = await obtenerEntradasPorMes(usuario.id, fechaFiltro.getMonth() + 1, fechaFiltro.getFullYear(), token);
         }
+        setEntradas(res);
+      } catch (error) {
+        console.error("Error cargando historial:", error);
+      } finally {
+        setCargando(false);
       }
     }
     cargarEntradas();
-  }, [usuario, fechaFiltro]);
+  }, [usuario, token, fechaFiltro, busquedaDebounced]);
 
   const cambiarMes = (incremento) => {
     // Seteamos el día 1 antes de cambiar de mes para evitar saltos por meses de distinta duración
@@ -177,6 +212,9 @@ export function PaginaRegistros() {
 
   const meses = idioma === 'es' ? mesesEs : mesesEn;
   const nombreMesAnio = `${meses[fechaFiltro.getMonth()]} ${fechaFiltro.getFullYear()}`;
+
+  // Ya no filtramos localmente, lo hace el backend globalmente si hay búsqueda
+  const entradasFiltradas = entradas;
 
   return (
     <main className="flex-1 relative overflow-y-auto h-full p-8 lg:p-12 pb-24 font-['Inter'] dark:bg-gray-900 transition-colors duration-300">
@@ -230,15 +268,38 @@ export function PaginaRegistros() {
           </button>
         </div>
 
+        {/* BUSCADOR */}
+        <div className="max-w-md mx-auto mb-12">
+          <div className="relative">
+            <input
+              ref={inputBusquedaRef}
+              type="text"
+              placeholder={idioma === 'es' ? 'Buscar en el historial... (Ctrl + F)' : 'Search history... (Ctrl + F)'}
+              className="w-full bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-full px-6 py-3 text-sm outline-none focus:border-[#4F99CC] transition-all shadow-sm dark:text-white"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+            />
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
         {/* CONTENIDO (GRID O VACÍO) */}
         {cargando ? (
           <div className="flex justify-center items-center py-20">
             <div className="w-12 h-12 border-4 border-[#4F99CC] border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ) : entradas.length === 0 ? (
+        ) : entradasFiltradas.length === 0 ? (
           <div className="text-center py-20 text-gray-400 dark:text-gray-500 transition-colors duration-300">
-            <p className="text-xl font-['Tilt_Warp']">{idioma === 'es' ? `No hay registros en ${nombreMesAnio.toLowerCase()}.` : `No records in ${nombreMesAnio.toLowerCase()}.`}</p>
-            <p className="mt-2 text-sm">{idioma === 'es' ? 'Empieza a escribir en tu diario para verlos aquí.' : 'Start writing in your journal to see them here.'}</p>
+            <p className="text-xl font-['Tilt_Warp']">
+              {busqueda 
+                ? (idioma === 'es' ? `No se encontraron resultados para "${busqueda}"` : `No results found for "${busqueda}"`)
+                : (idioma === 'es' ? `No hay registros en ${nombreMesAnio.toLowerCase()}.` : `No records in ${nombreMesAnio.toLowerCase()}.`)}
+            </p>
+            <p className="mt-2 text-sm">{idioma === 'es' ? 'Prueba con otros términos o cambia de mes.' : 'Try other terms or change the month.'}</p>
           </div>
         ) : (
           <motion.div 
@@ -246,7 +307,7 @@ export function PaginaRegistros() {
             animate={{ opacity: 1 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16 pt-8 px-4"
           >
-            {entradas.map(entrada => (
+            {entradasFiltradas.map(entrada => (
               <TarjetaMiniatura 
                 key={entrada.id} 
                 entrada={entrada} 

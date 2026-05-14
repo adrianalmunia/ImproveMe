@@ -15,4 +15,7 @@ router.get('/hoy/:usuarioId', controladorDiario.obtenerEntradaHoy);
 // Ruta para obtener entradas de un mes específico (requiere query params: ?mes=MM&anio=YYYY)
 router.get('/mes/:usuarioId', controladorDiario.obtenerEntradasPorMes);
 
+// Ruta para buscar entradas globalmente (soporta query param ?q=texto)
+router.get('/buscar/:usuarioId', controladorDiario.buscarEntradas);
+
 module.exports = router;

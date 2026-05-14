@@ -177,6 +177,18 @@ const PaginaRangos = () => {
     }
   }, [usuario]);
 
+  // Atajos de teclado para Rangos
+  useEffect(() => {
+    const manejarTeclas = (e) => {
+      if (e.key === 'Escape') {
+        setMostrarModalLigas(false);
+      }
+    };
+    window.addEventListener('keydown', manejarTeclas);
+    return () => window.removeEventListener('keydown', manejarTeclas);
+  }, []);
+
+
   const rankInfo = calcularRangoInfo(xp);
 
   if (cargando) {

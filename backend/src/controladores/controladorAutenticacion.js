@@ -7,11 +7,14 @@
 const {
     registrarUsuario,
     iniciarSesion,
+    loginConGoogle,
     obtenerPerfilUsuario,
     actualizarPerfilUsuario,
     eliminarUsuario,
     exportarDatosUsuario
 } = require('../servicios/servicioAutenticacion');
+
+const { importarDatos } = require('../servicios/servicioImportacion');
 
 /**
  * Controlador: Registrar un nuevo usuario
@@ -156,11 +159,57 @@ async function controlarExportarDatos(req, res) {
     }
 }
 
+/**
+ * Controlador: Iniciar sesión / Registrarse con Google
+ * POST /api/autenticacion/google
+ * Body esperado: { tokenGoogle }
+ */
+async function controlarLoginGoogle(req, res) {
+    try {
+        const { tokenGoogle } = req.body;
+        const resultado = await loginConGoogle(tokenGoogle);
+        return res.status(200).json(resultado);
+    } catch (error) {
+        console.error('Error en login con Google:', error.message);
+        return res.status(401).json({
+            error: 'Autenticación con Google fallida',
+            mensaje: error.message
+        });
+    }
+}
+
+/**
+ * Controlador: Importar datos desde archivo JSON/CSV
+ * POST /api/autenticacion/importar
+ * Body esperado: el objeto JSON exportado desde ImproveMe
+ */
+async function controlarImportarDatos(req, res) {
+    try {
+        const idUsuario = req.usuarioId;
+        const datos = req.body;
+
+        if (!datos || typeof datos !== 'object') {
+            return res.status(400).json({ error: 'Datos inválidos', mensaje: 'El cuerpo de la petición debe ser un objeto JSON' });
+        }
+
+        const resultado = await importarDatos(idUsuario, datos);
+        return res.status(200).json(resultado);
+    } catch (error) {
+        console.error('Error al importar datos:', error.message);
+        return res.status(400).json({
+            error: 'Error en importación',
+            mensaje: error.message
+        });
+    }
+}
+
 module.exports = {
     controlarRegistro,
     controlarLogin,
+    controlarLoginGoogle,
     controlarObtenerPerfil,
     controlarActualizarPerfil,
     controlarEliminarPerfil,
-    controlarExportarDatos
+    controlarExportarDatos,
+    controlarImportarDatos
 };

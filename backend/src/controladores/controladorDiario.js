@@ -179,8 +179,42 @@ async function obtenerEntradasPorMes(req, res) {
     }
 }
 
+async function buscarEntradas(req, res) {
+    const { usuarioId } = req.params;
+    const { q } = req.query;
+
+    if (!usuarioId) {
+        return res.status(400).json({ error: "El ID de usuario es obligatorio" });
+    }
+
+    try {
+        const entradas = await prisma.entradas_diario.findMany({
+            where: {
+                usuario_id: parseInt(usuarioId),
+                contenido_texto: {
+                    contains: q || '',
+                    mode: 'insensitive'
+                }
+            },
+            include: {
+                archivos_multimedia: true
+            },
+            orderBy: {
+                fecha: 'desc'
+            },
+            take: 100 // Aumentamos un poco el límite para búsquedas globales
+        });
+
+        res.status(200).json(entradas);
+    } catch (error) {
+        console.error("Error al buscar entradas:", error);
+        res.status(500).json({ error: "Error al realizar la búsqueda en el diario" });
+    }
+}
+
 module.exports = {
     guardarEntradaDiaria,
     obtenerEntradaHoy,
-    obtenerEntradasPorMes
+    obtenerEntradasPorMes,
+    buscarEntradas
 };

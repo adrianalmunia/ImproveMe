@@ -10,10 +10,12 @@ const { verificarAutenticacion } = require('../middleware/autenticacion');
 const {
     controlarRegistro,
     controlarLogin,
+    controlarLoginGoogle,
     controlarObtenerPerfil,
     controlarActualizarPerfil,
     controlarEliminarPerfil,
-    controlarExportarDatos
+    controlarExportarDatos,
+    controlarImportarDatos
 } = require('../controladores/controladorAutenticacion');
 
 // ============ RUTAS PÚBLICAS (no requieren autenticación) ============
@@ -29,6 +31,12 @@ router.post('/registro', controlarRegistro);
  * Permite a usuarios registrados iniciar sesión
  */
 router.post('/login', controlarLogin);
+
+/**
+ * POST /api/autenticacion/google
+ * Inicia sesión o registra un usuario con Google Sign-In
+ */
+router.post('/google', controlarLoginGoogle);
 
 // ============ RUTAS PROTEGIDAS (requieren autenticación) ============
 
@@ -55,5 +63,8 @@ router.delete('/perfil', verificarAutenticacion, controlarEliminarPerfil);
 
 // Obtener todos los datos para exportar
 router.get('/exportar', verificarAutenticacion, controlarExportarDatos);
+
+// Importar datos desde archivo JSON
+router.post('/importar', verificarAutenticacion, controlarImportarDatos);
 
 module.exports = router;
