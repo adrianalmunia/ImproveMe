@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { useTema } from '../contextos/ContextoTema';
 import { useIdioma } from '../contextos/ContextoIdioma';
-import { obtenerEntradasPorMes, exportarDatos, importarDatos } from '../servicios/servicioAPI';
+import { obtenerEntradasPorMes, exportarDatos, importarDatos, URL_BASE_ARCHIVOS } from '../servicios/servicioAPI';
 import logoCompleto from '../assets/logo_completo.png';
 import { User, Mail, Lock, LogOut, Save, ShieldCheck, Eye, EyeOff, AlertTriangle, Trash2, Image as ImageIcon, Mic, ChevronRight, X, Calendar, Sun, Moon, FileText, Info, Download, Languages, Activity, Target, Smile, Flower2, BookOpen } from 'lucide-react';
 import { ReproductorAudio } from '../componentes/ReproductorAudio';
@@ -787,10 +787,10 @@ export function PaginaUsuario() {
                         <div className="flex-1 bg-gray-100 dark:bg-gray-700 relative overflow-hidden flex flex-col transition-colors duration-300">
                           {archivo.tipo_archivo === 'imagen' ? (
                             <img
-                              src={`http://localhost:3000${archivo.url_archivo}`}
+                              src={`${URL_BASE_ARCHIVOS}${archivo.url_archivo}`}
                               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 cursor-pointer"
                               alt="Recuerdo"
-                              onClick={() => setImagenExpandida(`http://localhost:3000${archivo.url_archivo}`)}
+                              onClick={() => setImagenExpandida(`${URL_BASE_ARCHIVOS}${archivo.url_archivo}`)}
                             />
                           ) : (
                             <div className="w-full h-full bg-[#C6A55E]/10 flex flex-col items-center justify-center p-6 text-center z-20 relative">
@@ -799,7 +799,7 @@ export function PaginaUsuario() {
                               </div>
                               <p className="text-[#C6A55E] font-bold text-xs uppercase tracking-widest mb-4">{idioma === 'es' ? 'Nota de Voz' : 'Voice Note'}</p>
                               <div className="w-full max-w-[240px]">
-                                <ReproductorAudio src={`http://localhost:3000${archivo.url_archivo}`} light />
+                                <ReproductorAudio src={`${URL_BASE_ARCHIVOS}${archivo.url_archivo}`} light />
                               </div>
                             </div>
                           )}

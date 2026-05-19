@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { useIdioma } from '../contextos/ContextoIdioma';
-import { obtenerEntradasPorMes, buscarEntradas } from '../servicios/servicioAPI';
+import { obtenerEntradasPorMes, buscarEntradas, URL_BASE_ARCHIVOS } from '../servicios/servicioAPI';
 import { ReproductorAudio } from '../componentes/ReproductorAudio';
 import logoCompleto from '../assets/logo_completo.png';
 
@@ -103,7 +103,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
           {entrada.archivos_multimedia?.find(a => a.tipo_archivo === 'imagen') ? (
             <div className="w-[90%] h-32 mt-2 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 relative z-10 shrink-0 transition-colors duration-300" style={{ transform: "translateZ(20px)" }}>
               <img 
-                src={`http://localhost:3000${entrada.archivos_multimedia.find(a => a.tipo_archivo === 'imagen').url_archivo}`} 
+                src={`${URL_BASE_ARCHIVOS}${entrada.archivos_multimedia.find(a => a.tipo_archivo === 'imagen').url_archivo}`} 
                 alt="Miniatura" 
                 className="w-full h-full object-cover" 
               />
@@ -114,7 +114,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
           {entrada.archivos_multimedia?.find(a => a.tipo_archivo === 'audio') && (
             <div className="w-full flex justify-center mt-3 z-20 shrink-0" style={{ transform: "translateZ(30px)" }} onClick={(e) => e.stopPropagation()}>
               <div className="scale-[0.85] origin-top w-[115%] flex justify-center -mb-2">
-                <ReproductorAudio src={`http://localhost:3000${entrada.archivos_multimedia.find(a => a.tipo_archivo === 'audio').url_archivo}`} />
+                <ReproductorAudio src={`${URL_BASE_ARCHIVOS}${entrada.archivos_multimedia.find(a => a.tipo_archivo === 'audio').url_archivo}`} />
               </div>
             </div>
           )}
@@ -362,12 +362,12 @@ export function PaginaRegistros() {
                   {entradaSeleccionada.archivos_multimedia?.find(a => a.tipo_archivo === 'imagen') && (
                     <div className="mb-4 w-full rounded-2xl overflow-hidden shadow-sm border border-[#4F99CC]/20 shrink-0 flex justify-center">
                       <img 
-                        src={`http://localhost:3000${entradaSeleccionada.archivos_multimedia.find(a => a.tipo_archivo === 'imagen').url_archivo}`} 
+                        src={`${URL_BASE_ARCHIVOS}${entradaSeleccionada.archivos_multimedia.find(a => a.tipo_archivo === 'imagen').url_archivo}`} 
                         alt="Adjunto" 
                         className="w-full h-auto object-cover max-h-40 cursor-pointer" 
                         onClick={(e) => {
                           e.stopPropagation();
-                          setImagenExpandida(`http://localhost:3000${entradaSeleccionada.archivos_multimedia.find(a => a.tipo_archivo === 'imagen').url_archivo}`);
+                          setImagenExpandida(`${URL_BASE_ARCHIVOS}${entradaSeleccionada.archivos_multimedia.find(a => a.tipo_archivo === 'imagen').url_archivo}`);
                         }}
                       />
                     </div>
@@ -376,7 +376,7 @@ export function PaginaRegistros() {
                   {/* Mostrar Audio si existe (Reproductor Custom) */}
                   {entradaSeleccionada.archivos_multimedia?.find(a => a.tipo_archivo === 'audio') && (
                     <div className="mb-4 w-full flex justify-center">
-                      <ReproductorAudio src={`http://localhost:3000${entradaSeleccionada.archivos_multimedia.find(a => a.tipo_archivo === 'audio').url_archivo}`} />
+                      <ReproductorAudio src={`${URL_BASE_ARCHIVOS}${entradaSeleccionada.archivos_multimedia.find(a => a.tipo_archivo === 'audio').url_archivo}`} />
                     </div>
                   )}
 

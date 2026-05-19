@@ -445,7 +445,8 @@ const LandingPage = ({ onIrAAutenticacion }) => {
                     onClick={async () => {
                       try {
                         setEnviando(true);
-                        const response = await fetch('http://localhost:3000/api/soporte/reportar-error', {
+                        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+                        const response = await fetch(`${API_URL}/soporte/reportar-error`, {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
