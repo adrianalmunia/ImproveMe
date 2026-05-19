@@ -8,6 +8,14 @@ export const URL_BASE_ARCHIVOS = import.meta.env.VITE_API_URL
     ? import.meta.env.VITE_API_URL.replace('/api', '') 
     : 'http://localhost:3000';
 
+export function obtenerUrlArchivo(rutaArchivo) {
+    if (!rutaArchivo) return '';
+    if (rutaArchivo.startsWith('http://') || rutaArchivo.startsWith('https://')) {
+        return rutaArchivo;
+    }
+    return `${URL_BASE_ARCHIVOS}${rutaArchivo}`;
+}
+
 const URL_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Opciones por defecto para todas las solicitudes

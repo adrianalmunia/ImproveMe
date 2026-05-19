@@ -44,6 +44,14 @@ html, body {
 
 ::-webkit-scrollbar-track {
   background: var(--scrollbar-track);
+  margin-top: 12px;
+  margin-bottom: 12px;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-track:horizontal {
+  margin-left: 12px;
+  margin-right: 12px;
 }
 
 ::-webkit-scrollbar-thumb {

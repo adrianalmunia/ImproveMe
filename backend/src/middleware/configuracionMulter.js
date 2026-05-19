@@ -8,17 +8,8 @@ if (!fs.existsSync(dirSubidas)) {
     fs.mkdirSync(dirSubidas, { recursive: true });
 }
 
-// Configuración de almacenamiento
-const almacenamiento = multer.diskStorage({
-    destination: (req, archivo, cb) => {
-        cb(null, dirSubidas);
-    },
-    filename: (req, archivo, cb) => {
-        // Nombre único: timestamp + nombre original
-        const nombreUnico = `${Date.now()}-${archivo.originalname.replace(/\s+/g, '_')}`;
-        cb(null, nombreUnico);
-    }
-});
+// Configuración de almacenamiento en memoria RAM (ideal para subir a la nube como Supabase)
+const almacenamiento = multer.memoryStorage();
 
 // Filtro de archivos
 const filtroArchivos = (req, archivo, cb) => {

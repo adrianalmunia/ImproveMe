@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { subirArchivoASupabase } = require('../servicios/servicioStorage');
 
 async function guardarEntradaDiaria(req, res) {
     const { usuario_id, puntuacion_animo, horas_sueno, contenido_texto } = req.body;
@@ -62,9 +63,8 @@ async function guardarEntradaDiaria(req, res) {
             });
         }
 
-        // 3. Procesar archivos multimedia... (el resto del código sigue igual)
+        // 3. Procesar archivos multimedia
         const { borrar_imagen, borrar_audio } = req.body;
-        // ... (continúa el procesamiento de multimedia)
 
         // Manejo de Imagen
         if (req.files?.imagen) {
@@ -73,11 +73,14 @@ async function guardarEntradaDiaria(req, res) {
                 where: { entrada_id: entrada.id, tipo_archivo: 'imagen' }
             });
             
+            // Subimos la imagen a Supabase y guardamos la URL pública
+            const urlImagen = await subirArchivoASupabase(req.files.imagen[0], 'imagenes');
+            
             await prisma.multimedia.create({
                 data: {
                     entrada_id: entrada.id,
                     tipo_archivo: 'imagen',
-                    url_archivo: `/uploads/${req.files.imagen[0].filename}`
+                    url_archivo: urlImagen
                 }
             });
         } else if (borrar_imagen === 'true') {
@@ -94,11 +97,14 @@ async function guardarEntradaDiaria(req, res) {
                 where: { entrada_id: entrada.id, tipo_archivo: 'audio' }
             });
             
+            // Subimos el audio a Supabase y guardamos la URL pública
+            const urlAudio = await subirArchivoASupabase(req.files.audio[0], 'audios');
+            
             await prisma.multimedia.create({
                 data: {
                     entrada_id: entrada.id,
                     tipo_archivo: 'audio',
-                    url_archivo: `/uploads/${req.files.audio[0].filename}`
+                    url_archivo: urlAudio
                 }
             });
         } else if (borrar_audio === 'true') {
