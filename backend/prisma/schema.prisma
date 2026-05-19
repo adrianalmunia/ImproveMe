@@ -6,8 +6,9 @@ generator cliente {
 // Configuración de la conexión a la base de datos PostgreSQL
 // La URL de conexión se guarda de forma segura en el archivo .env
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // --- MODELOS DE LA APLICACIÓN ---

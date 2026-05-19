@@ -4,7 +4,11 @@
 // Este servicio centraliza TODAS las comunicaciones con el backend.
 // Así, si cambiamos la URL o la forma de hacer requests, solo editamos aquí.
 
-const URL_BASE = 'http://localhost:3000/api';
+export const URL_BASE_ARCHIVOS = import.meta.env.VITE_API_URL 
+    ? import.meta.env.VITE_API_URL.replace('/api', '') 
+    : 'http://localhost:3000';
+
+const URL_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Opciones por defecto para todas las solicitudes
 const OPCIONES_DEFECTO = {

@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { useIdioma } from '../contextos/ContextoIdioma';
-import { guardarEntradaDiaria, obtenerEntradaHoy } from '../servicios/servicioAPI';
+import { guardarEntradaDiaria, obtenerEntradaHoy, URL_BASE_ARCHIVOS } from '../servicios/servicioAPI';
 import logoImproveMe from '../assets/logo_improveme.png';
 import logoCompleto from '../assets/logo_completo.png';
 import { PenLine, Library, BarChart2, ListTodo, Trophy, Calendar, User, Flower2 } from 'lucide-react';
@@ -117,7 +117,7 @@ export function PaginaDiario() {
 
           if (datosParaCargar.archivos) {
             datosParaCargar.archivos.forEach(archivo => {
-              const urlCompleta = `http://localhost:3000${archivo.url_archivo}`;
+              const urlCompleta = `${URL_BASE_ARCHIVOS}${archivo.url_archivo}`;
               if (archivo.tipo_archivo === 'imagen') setImagen(urlCompleta);
               if (archivo.tipo_archivo === 'audio') setAudio(urlCompleta);
             });
