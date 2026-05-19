@@ -20,8 +20,8 @@ const rutasSoporte = require('./rutas/rutasSoporte');
 
 // ============ CONFIGURACIÓN BÁSICA ============
 const app = express();
-const PUERTO = process.env.PUERTO || 3000;
 const ENTORNO = process.env.NODE_ENV || 'desarrollo';
+const PUERTO = process.env.PORT || process.env.PUERTO || (ENTORNO === 'produccion' ? 10000 : 3000);
 
 // ============ MIDDLEWARES GLOBALES ============
 // Estos se ejecutan en TODAS las solicitudes
