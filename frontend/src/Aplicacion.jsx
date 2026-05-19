@@ -1,7 +1,7 @@
 // ================================================================================
 // APLICACION.JSX - COMPONENTE RAÍZ DE LA APLICACIÓN
 // ================================================================================
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ProveedorAutenticacion, useAutenticacion } from './contextos/ContextoAutenticacion';
 import { ProveedorTema } from './contextos/ContextoTema';
 import { ProveedorIdioma } from './contextos/ContextoIdioma';
@@ -27,6 +27,21 @@ function ContenidoAplicacion() {
   const [vistaActual, setVistaActual] = useState('diario');
   const [mostrarAuth, setMostrarAuth] = useState(false);
   const [modoAuth, setModoAuth] = useState('login'); // 'login' o 'registro'
+
+  // Forzar modo claro en Landing Page y Autenticacion
+  useEffect(() => {
+    if (!usuario) {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+    } else {
+      // Si el usuario está autenticado, re-aplicar preferencia de tema
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+      }
+    }
+  }, [usuario]);
 
   console.log("ContenidoAplicacion renderizando con usuario:", usuario?.nombre_usuario, "y vista:", vistaActual);
 

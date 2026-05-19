@@ -542,7 +542,7 @@ export function PaginaDiario() {
                 layout
                 onMouseMove={manejarMouseMoveTarjeta}
                 onMouseLeave={manejarMouseLeaveTarjeta}
-                className="w-[420px] h-[600px] rounded-[55px] shadow-2xl p-[3px] flex flex-col items-center justify-center text-center relative z-10 cursor-default"
+                className="w-[88vw] xs:w-[360px] sm:w-[420px] h-[500px] xs:h-[550px] sm:h-[600px] rounded-[36px] sm:rounded-[55px] shadow-2xl p-[3px] flex flex-col items-center justify-center text-center relative z-10 cursor-default"
                 style={{
                   background: 'linear-gradient(180deg, #4F99CC 0%, #C6A55E 100%)',
                   rotateX,
@@ -552,7 +552,7 @@ export function PaginaDiario() {
                   backfaceVisibility: "hidden"
                 }}
               >
-                <div className="w-full h-full bg-white dark:bg-gray-800 rounded-[52px] relative overflow-hidden transition-colors duration-300">
+                <div className="w-full h-full bg-white dark:bg-gray-800 rounded-[33px] sm:rounded-[52px] relative overflow-hidden transition-colors duration-300">
                   {/* Degradado sutil de fondo en la tarjeta */}
                   <div className="absolute inset-0 bg-gradient-to-b from-white dark:from-gray-800 to-[#4F99CC]/5 pointer-events-none transition-colors duration-300"></div>
 
@@ -640,7 +640,7 @@ export function PaginaDiario() {
                   key={humor}
                   initial={{ scale: 0, rotate: -15 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  className="absolute -top-10 -left-10 w-32 h-32 bg-white dark:bg-gray-800 rounded-full shadow-2xl border-4 flex items-center justify-center overflow-hidden z-20 transition-colors duration-300"
+                  className="absolute -top-6 -left-6 sm:-top-10 sm:-left-10 w-20 h-20 sm:w-32 sm:h-32 bg-white dark:bg-gray-800 rounded-full shadow-2xl border-[3px] sm:border-4 flex items-center justify-center overflow-hidden z-20 transition-colors duration-300"
                   style={{
                     borderColor: humores.find(h => h.id === humor)?.color || '#4F99CC',
                     transform: "translateZ(60px)", // Pop-out effect
