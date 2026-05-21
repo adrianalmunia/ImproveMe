@@ -114,10 +114,16 @@ async function iniciarServidor() {
         // Verificamos la conexión a la base de datos
         await prisma.$queryRaw`SELECT 1`;
         console.log('✅ Conexión a BD establecida');
+    } catch (error) {
+        console.warn('⚠️  ADVERTENCIA: No se pudo verificar la conexión a la base de datos Supabase Online en el arranque.');
+        console.warn(`   Detalle: ${error.message}`);
+        console.warn('   Nota: Si estás en desarrollo local, es posible que tu proveedor de internet o firewall bloquee el puerto 6543.');
+        console.warn('   La aplicación seguirá ejecutándose y funcionará en la nube una vez desplegada.');
+    }
 
-        // Iniciamos el servidor Express
-        app.listen(PUERTO, () => {
-            console.log(`
+    // Iniciamos el servidor Express
+    app.listen(PUERTO, () => {
+        console.log(`
 ╔════════════════════════════════════════════╗
 ║          🚀 ImproveMe - Backend 🚀        ║
 ╠════════════════════════════════════════════╣
@@ -126,12 +132,8 @@ async function iniciarServidor() {
 ║ 🌐 URL: http://localhost:${PUERTO}              ║
 ║ 📝 Prueba: http://localhost:${PUERTO}/probar     ║
 ╚════════════════════════════════════════════╝
-            `);
-        });
-    } catch (error) {
-        console.error('Error al iniciar servidor:', error.message);
-        process.exit(1); // Salir con código de error
-    }
+        `);
+    });
 }
 
 // ============ MANEJO DE SEÑALES DEL SISTEMA ============
