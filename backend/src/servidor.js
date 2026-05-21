@@ -41,7 +41,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Middleware para logging (mostrar información de las solicitudes)
 app.use((req, res, siguiente) => {
-    console.log(`📨 ${req.method} ${req.path}`);
+    console.log(`[Request] ${req.method} ${req.path}`);
     if (req.method !== 'GET') {
         console.log(`   Headers:`, req.headers['content-type']);
         console.log(`   Body:`, req.body ? 'Presente' : 'Ausente/Undefined');
@@ -50,6 +50,15 @@ app.use((req, res, siguiente) => {
 });
 
 // ============ RUTAS ============
+
+// Ruta raiz para health check de Render (Evita el estado Failed)
+app.get('/', (req, res) => {
+    return res.status(200).json({
+        estado: 'online',
+        mensaje: 'ImproveMe Backend esta funcionando correctamente',
+        entorno: ENTORNO
+    });
+});
 
 // Ruta de prueba para verificar que el servidor funciona
 app.get('/probar', async (req, res) => {
@@ -64,12 +73,12 @@ app.get('/probar', async (req, res) => {
         });
 
         return res.json({
-            mensaje: '✅ ¡Conexión exitosa con la base de datos!',
+            mensaje: 'Conexion exitosa con la base de datos!',
             usuariosRegistrados: listaUsuarios.length,
             usuarios: listaUsuarios
         });
     } catch (error) {
-        console.error('❌ Error en /probar:', error.message);
+        console.error('Error en /probar:', error.message);
         return res.status(500).json({
             error: 'No se pudo conectar a la base de datos',
             mensaje: error.message
@@ -113,9 +122,9 @@ async function iniciarServidor() {
     try {
         // Verificamos la conexión a la base de datos
         await prisma.$queryRaw`SELECT 1`;
-        console.log('✅ Conexión a BD establecida');
+        console.log('Conexion a BD establecida');
     } catch (error) {
-        console.warn('⚠️  ADVERTENCIA: No se pudo verificar la conexión a la base de datos Supabase Online en el arranque.');
+        console.warn('ADVERTENCIA: No se pudo verificar la conexión a la base de datos Supabase Online en el arranque.');
         console.warn(`   Detalle: ${error.message}`);
         console.warn('   Nota: Si estás en desarrollo local, es posible que tu proveedor de internet o firewall bloquee el puerto 6543.');
         console.warn('   La aplicación seguirá ejecutándose y funcionará en la nube una vez desplegada.');
@@ -125,12 +134,12 @@ async function iniciarServidor() {
     app.listen(PUERTO, () => {
         console.log(`
 ╔════════════════════════════════════════════╗
-║          🚀 ImproveMe - Backend 🚀        ║
+║          ImproveMe - Backend               ║
 ╠════════════════════════════════════════════╣
-║ 🔗 Servidor corriendo en puerto: ${PUERTO}        ║
-║ 📍 Entorno: ${ENTORNO}                       ║
-║ 🌐 URL: http://localhost:${PUERTO}              ║
-║ 📝 Prueba: http://localhost:${PUERTO}/probar     ║
+║ Servidor corriendo en puerto: ${PUERTO}        ║
+║ Entorno: ${ENTORNO}                       ║
+║ URL: http://localhost:${PUERTO}              ║
+║ Prueba: http://localhost:${PUERTO}/probar     ║
 ╚════════════════════════════════════════════╝
         `);
     });
@@ -140,7 +149,7 @@ async function iniciarServidor() {
 // Cuando el proceso recibe CTRL+C, cerramos gracefully
 
 process.on('SIGINT', async () => {
-    console.log('\n\n⏹️  Cerrando servidor gracefully...');
+    console.log('\n\nCerrando servidor gracefully...');
     await prisma.$disconnect();
     console.log('Conexión a BD cerrada');
     process.exit(0);

@@ -15,25 +15,35 @@ const subirArchivoASupabase = async (archivo, carpeta = 'diario') => {
 
   const nombreLimpio = `${Date.now()}-${archivo.originalname.replace(/\s+/g, '_')}`;
 
-  // Si no hay configuracion de Supabase valida, guardamos en disco local como fallback
-  if (!urlSupabase || !claveSupabase || claveSupabase.includes('TU_CLAVE_ANONIMA')) {
-    console.warn('[Storage] Supabase no configurado o clave invalida. Guardando archivo en disco local.');
+  // Validaciones detalladas para el almacenamiento con logs sin emojis
+  if (!urlSupabase) {
+    console.warn('[Storage] Advertencia: SUPABASE_URL no esta configurada. Guardando localmente.');
+    return guardarEnLocal(archivo.buffer, nombreLimpio);
+  }
+  if (!claveSupabase || claveSupabase.includes('TU_CLAVE_ANONIMA')) {
+    console.warn('[Storage] Advertencia: SUPABASE_SERVICE_KEY o SUPABASE_KEY no esta configurada o es invalida. Guardando localmente.');
     return guardarEnLocal(archivo.buffer, nombreLimpio);
   }
 
   // Intentamos subir el archivo a Supabase Storage
   const urlDestino = `${urlSupabase}/storage/v1/object/multimedia/${carpeta}/${nombreLimpio}`;
-  console.log(`[Storage] Subiendo a Supabase: ${carpeta}/${nombreLimpio}`);
+  console.log(`[Storage] Subiendo a Supabase: ${carpeta}/${nombreLimpio} (${archivo.size} bytes)`);
 
   try {
+    // Evitar bugs de serializacion de Buffer en Node.js (Undici fetch) convirtiendolo a un Blob estandar
+    const cuerpoCarga = typeof Blob !== 'undefined'
+      ? new Blob([archivo.buffer], { type: archivo.mimetype })
+      : archivo.buffer;
+
     const respuesta = await fetch(urlDestino, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${claveSupabase}`,
         'apikey': claveSupabase,
-        'Content-Type': archivo.mimetype
+        'Content-Type': archivo.mimetype,
+        'Content-Length': archivo.size.toString()
       },
-      body: archivo.buffer
+      body: cuerpoCarga
     });
 
     if (!respuesta.ok) {
