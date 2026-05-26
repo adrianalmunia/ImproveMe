@@ -275,7 +275,7 @@ export function Autenticacion({
                                             value={nombreUsuario}
                                             onChange={(e) => setNombreUsuario(e.target.value)}
                                             placeholder="Tu alias"
-                                            className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus:border-[#4F99CC] outline-none px-5 py-2.5 text-sm"
+                                            className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus:border-[#4F99CC] outline-none px-5 py-2.5 text-sm text-gray-800 dark:text-white"
                                         />
                                     </div>
                                 )}
@@ -286,7 +286,7 @@ export function Autenticacion({
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="tu@email.com"
-                                        className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus:border-[#4F99CC] outline-none px-6 py-3 text-sm"
+                                        className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus:border-[#4F99CC] outline-none px-6 py-3 text-sm text-gray-800 dark:text-white"
                                     />
                                 </div>
                                 <div className="space-y-1">
@@ -296,7 +296,7 @@ export function Autenticacion({
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
-                                        className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus:border-[#4F99CC] outline-none px-6 py-3 text-sm"
+                                        className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus:border-[#4F99CC] outline-none px-6 py-3 text-sm text-gray-800 dark:text-white"
                                     />
                                 </div>
 
