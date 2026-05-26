@@ -1,31 +1,12 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+
+// Si no hay API Key de Resend (por ejemplo, en desarrollo local), usamos un fallback en consola para comodidad
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 const enviarReporteError = async (datos) => {
   const { descripcion, infoTecnica } = datos;
-
-  const usuario = process.env.EMAIL_USUARIO;
-  const password = process.env.EMAIL_PASSWORD;
-  const destino = process.env.EMAIL_DESTINO || usuario || 'adrianalmuniapiertolas@gmail.com';
-
-  if (!usuario || !password) {
-    console.error('[Email] Error: No se han configurado las credenciales de correo (EMAIL_USUARIO / EMAIL_PASSWORD).');
-    throw new Error('Configuración de correo incompleta en el servidor.');
-  }
-
-  console.log(`[Email] Enviando reporte de error a ${destino} a través de Gmail SMTP (Nodemailer)...`);
-
-  const transportar = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // false para puerto 587
-    auth: {
-      user: usuario,
-      pass: password
-    },
-    tls: {
-      rejectUnauthorized: false // Evita problemas con certificados SSL locales
-    }
-  });
 
   const htmlContent = `
     <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
@@ -54,19 +35,31 @@ const enviarReporteError = async (datos) => {
     </div>
   `;
 
-  const mailOptions = {
-    from: `"Soporte ImproveMe" <${usuario}>`,
-    to: destino,
+  if (!resend) {
+    console.log("=== [DESARROLLO] Resend no configurado. Reporte simulado con éxito ===");
+    console.log("Descripción:", descripcion);
+    console.log("Info Técnica:", infoTecnica);
+    return { id: 'simulado_dev_ok' };
+  }
+
+  const resultado = await resend.emails.send({
+    from: 'ImproveMe Soporte <onboarding@resend.dev>',
+    to: process.env.EMAIL_DESTINO || 'adrianalmuniapiertolas@gmail.com',
     subject: '🚨 NUEVO REPORTE DE ERROR - ImproveMe',
     html: htmlContent
-  };
+  });
 
-  const resultado = await transportar.sendMail(mailOptions);
-  console.log(`[Email] Reporte enviado con éxito a través de Gmail SMTP! ID: ${resultado.messageId}`);
-  return resultado;
+  if (resultado.error) {
+    console.error('[Resend Error]:', resultado.error);
+    throw new Error(resultado.error.message || 'Error al enviar a través de Resend API');
+  }
+
+  console.log(`[Email] Reporte enviado con éxito a través de Resend API! ID: ${resultado.data?.id}`);
+  return resultado.data;
 };
 
 module.exports = {
   enviarReporteError
 };
+
 
