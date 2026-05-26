@@ -4,6 +4,8 @@
 import { useState, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
+import { Sun, Moon } from 'lucide-react';
+import { useTema } from '../contextos/ContextoTema';
 import logoImproveMe from '../assets/logo_improveme.png';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -40,6 +42,7 @@ export function Autenticacion({
     modoInicial = 'login',
     onVolverALanding = () => { }
 }) {
+    const { temaOscuro, toggleTema } = useTema();
     const { login, registrar, loginGoogle, estaCargando, error } = useAutenticacion();
     const [esLogin, setEsLogin] = useState(modoInicial === 'login');
 
@@ -212,6 +215,15 @@ export function Autenticacion({
                     <div className="absolute top-6 left-6 z-20">
                         <button onClick={onVolverALanding} className="text-gray-400 hover:text-[#4F99CC] transition-colors text-[10px] font-bold uppercase tracking-widest">
                             ← Volver
+                        </button>
+                    </div>
+
+                    <div className="absolute top-6 right-6 z-20">
+                        <button onClick={toggleTema}
+                          className="p-2 text-gray-500 hover:text-[#2C4159] dark:text-gray-400 dark:hover:text-white bg-gray-100/50 hover:bg-gray-100 dark:bg-gray-700/40 dark:hover:bg-gray-700/80 rounded-full transition-all duration-300 flex items-center justify-center border border-gray-200/20 dark:border-gray-700/20"
+                          title={temaOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+                        >
+                          {temaOscuro ? <Sun size={15} /> : <Moon size={15} />}
                         </button>
                     </div>
 

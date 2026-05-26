@@ -28,20 +28,7 @@ function ContenidoAplicacion() {
   const [mostrarAuth, setMostrarAuth] = useState(false);
   const [modoAuth, setModoAuth] = useState('login'); // 'login' o 'registro'
 
-  // Forzar modo claro en Landing Page y Autenticacion
-  useEffect(() => {
-    if (!usuario) {
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('dark');
-    } else {
-      // Si el usuario está autenticado, re-aplicar preferencia de tema
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-        document.body.classList.add('dark');
-      }
-    }
-  }, [usuario]);
+
 
   console.log("ContenidoAplicacion renderizando con usuario:", usuario?.nombre_usuario, "y vista:", vistaActual);
 

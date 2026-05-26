@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Shield, Zap, TrendingUp, CheckCircle2, Brain, X } from 'lucide-react';
+import { ArrowRight, Shield, Zap, TrendingUp, CheckCircle2, Brain, X, Sun, Moon } from 'lucide-react';
+import { useTema } from '../contextos/ContextoTema';
 import logoCompleto from '../assets/logo_completo.png';
 import {
   MoodDoughnutChart, MeditationCard, SleepScatterChart, HabitCard,
@@ -8,6 +9,7 @@ import {
 } from './LandingSections';
 
 const LandingPage = ({ onIrAAutenticacion }) => {
+  const { temaOscuro, toggleTema } = useTema();
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [mostrarAcerca, setMostrarAcerca] = useState(false);
   const [mostrarReportarError, setMostrarReportarError] = useState(false);
@@ -25,6 +27,12 @@ const LandingPage = ({ onIrAAutenticacion }) => {
             <img src={logoCompleto} alt="ImproveMe" className="h-9 object-contain" />
           </div>
           <div className="flex items-center gap-3">
+            <button onClick={toggleTema}
+              className="p-2.5 text-gray-500 hover:text-[#2C4159] dark:text-gray-400 dark:hover:text-white bg-gray-100/50 hover:bg-gray-100 dark:bg-gray-800/40 dark:hover:bg-gray-800/80 rounded-full transition-all duration-300 flex items-center justify-center border border-gray-200/20 dark:border-gray-700/20"
+              title={temaOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+            >
+              {temaOscuro ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
             <button onClick={() => onIrAAutenticacion('login')}
               className="hidden sm:block px-5 py-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-[#2C4159] dark:hover:text-white transition-colors">
               Iniciar Sesión
