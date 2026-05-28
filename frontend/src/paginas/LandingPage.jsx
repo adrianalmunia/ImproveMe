@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Shield, Zap, TrendingUp, CheckCircle2, Brain, X, Sun, Moon, Accessibility, Type, BookOpen } from 'lucide-react';
+import { ArrowRight, Shield, Zap, TrendingUp, CheckCircle2, Brain, X, Sun, Moon, Accessibility, Type, BookOpen, Globe } from 'lucide-react';
 import { useTema } from '../contextos/ContextoTema';
 import { useAccesibilidad } from '../contextos/ContextoAccesibilidad';
+import { useIdioma } from '../contextos/ContextoIdioma';
 import logoCompleto from '../assets/logo_completo.png';
 import {
   MoodDoughnutChart, MeditationCard, SleepScatterChart, HabitCard,
@@ -12,6 +13,7 @@ import {
 const LandingPage = ({ onIrAAutenticacion }) => {
   const { temaOscuro, toggleTema } = useTema();
   const { letraGrande, fuenteDislexia, toggleLetraGrande, toggleFuenteDislexia } = useAccesibilidad();
+  const { idioma, setIdioma } = useIdioma();
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [mostrarAcerca, setMostrarAcerca] = useState(false);
   const [mostrarReportarError, setMostrarReportarError] = useState(false);
@@ -127,6 +129,21 @@ const LandingPage = ({ onIrAAutenticacion }) => {
                 )}
               </AnimatePresence>
             </div>
+
+            {/* ── Idioma ── */}
+            <button
+              onClick={() => setIdioma(idioma === 'es' ? 'en' : 'es')}
+              className={`h-9 px-3 rounded-full transition-all duration-300 flex items-center gap-1.5 border text-xs font-bold tracking-wide ${
+                idioma === 'en'
+                  ? 'text-[#4F99CC] bg-blue-50 dark:bg-blue-900/30 border-blue-200/40 dark:border-blue-700/40'
+                  : 'text-gray-500 hover:text-[#2C4159] dark:text-gray-400 dark:hover:text-white bg-gray-100/50 hover:bg-gray-100 dark:bg-gray-800/40 dark:hover:bg-gray-800/80 border-gray-200/20 dark:border-gray-700/20'
+              }`}
+              title={idioma === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+              aria-label="Cambiar idioma"
+            >
+              <Globe size={14} />
+              {idioma === 'es' ? 'ES' : 'EN'}
+            </button>
 
             {/* ── Tema ── */}
             <button onClick={toggleTema}
