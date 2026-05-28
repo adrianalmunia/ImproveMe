@@ -31,6 +31,11 @@ const mesesEn = [
   'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
 ];
 
+const mesesFr = [
+  'JANVIER', 'FÉVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN',
+  'JUILLET', 'AOÛT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DÉCEMBRE'
+];
+
 // Componente Tarjeta 3D
 const TarjetaMiniatura = ({ entrada, onClick }) => {
   const { idioma, t } = useIdioma();
@@ -60,12 +65,12 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
 
   const humorInfo = humores.find(h => h.id === entrada.puntuacion_animo) || humores[2];
   const fechaObj = new Date(entrada.fecha);
-  const fechaStr = fechaObj.toLocaleDateString(idioma === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const fechaStr = fechaObj.toLocaleDateString(idioma === 'es' ? 'es-ES' : (idioma === 'fr' ? 'fr-FR' : 'en-US'), { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
   // Extraer un fragmento del texto
   const extracto = entrada.contenido_texto && entrada.contenido_texto.length > 100 
     ? entrada.contenido_texto.substring(0, 100) + '...' 
-    : entrada.contenido_texto || (idioma === 'es' ? "Sin contenido escrito para este día." : "No written content for this day.");
+    : entrada.contenido_texto || t('registros_sin_contenido');
 
   return (
     <div style={{ perspective: 1200 }} className="relative">
@@ -74,7 +79,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
         onMouseMove={manejarMouseMove}
         onMouseLeave={manejarMouseLeave}
         whileHover={{ scale: 1.02 }}
-        aria-label={idioma === 'es' ? `Ver registro del ${fechaStr}` : `View record for ${fechaStr}`}
+        aria-label={`${t('registros_ver_registro')} ${fechaStr}`}
         className="w-full h-[400px] rounded-[40px] shadow-xl p-[3px] flex flex-col items-center justify-center text-center relative z-10 outline-none focus:ring-4 focus:ring-[#4F99CC] focus:ring-offset-4 dark:focus:ring-offset-gray-900 group"
         style={{ 
           background: 'linear-gradient(180deg, #4F99CC 0%, #C6A55E 100%)',
@@ -94,7 +99,7 @@ const TarjetaMiniatura = ({ entrada, onClick }) => {
             
             <div className="bg-[#4F99CC]/5 border border-[#4F99CC]/10 px-2 py-0.5 rounded-full shadow-sm">
               <p className="text-[9px] font-bold text-[#4F99CC] leading-none">
-                {entrada.horas_sueno >= 10 ? '+10' : entrada.horas_sueno}h {idioma === 'es' ? 'de sueño' : 'sleep'}
+                {entrada.horas_sueno >= 10 ? '+10' : entrada.horas_sueno}h {idioma === 'es' ? 'de sueño' : (idioma === 'fr' ? 'de sommeil' : 'sleep')}
               </p>
             </div>
           </div>
@@ -210,7 +215,7 @@ export function PaginaRegistros() {
     setFechaFiltro(nuevaFecha);
   };
 
-  const meses = idioma === 'es' ? mesesEs : mesesEn;
+  const meses = idioma === 'es' ? mesesEs : (idioma === 'fr' ? mesesFr : mesesEn);
   const nombreMesAnio = `${meses[fechaFiltro.getMonth()]} ${fechaFiltro.getFullYear()}`;
 
   // Ya no filtramos localmente, lo hace el backend globalmente si hay búsqueda
@@ -274,7 +279,7 @@ export function PaginaRegistros() {
             <input
               ref={inputBusquedaRef}
               type="text"
-              placeholder={idioma === 'es' ? 'Buscar en el historial... (Ctrl + F)' : 'Search history... (Ctrl + F)'}
+              placeholder={t('registros_buscar_placeholder')}
               className="w-full bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-full px-6 py-3 text-sm outline-none focus:border-[#4F99CC] transition-all shadow-sm dark:text-white"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
@@ -296,10 +301,10 @@ export function PaginaRegistros() {
           <div className="text-center py-20 text-gray-400 dark:text-gray-500 transition-colors duration-300">
             <p className="text-xl font-['Tilt_Warp']">
               {busqueda 
-                ? (idioma === 'es' ? `No se encontraron resultados para "${busqueda}"` : `No results found for "${busqueda}"`)
-                : (idioma === 'es' ? `No hay registros en ${nombreMesAnio.toLowerCase()}.` : `No records in ${nombreMesAnio.toLowerCase()}.`)}
+                ? `${t('registros_no_resultados')} "${busqueda}"`
+                : `${t('registros_no_registros')} ${nombreMesAnio.toLowerCase()}.`}
             </p>
-            <p className="mt-2 text-sm">{idioma === 'es' ? 'Prueba con otros términos o cambia de mes.' : 'Try other terms or change the month.'}</p>
+            <p className="mt-2 text-sm">{t('registros_prueba_otros')}</p>
           </div>
         ) : (
           <motion.div 
@@ -349,13 +354,13 @@ export function PaginaRegistros() {
 
                   <div className="mb-2 relative z-10 shrink-0 text-center">
                     <p className="text-xs font-black text-[#4F99CC] uppercase tracking-[0.2em]">
-                      {new Date(entradaSeleccionada.fecha).toLocaleDateString(idioma === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}
+                      {new Date(entradaSeleccionada.fecha).toLocaleDateString(idioma === 'es' ? 'es-ES' : (idioma === 'fr' ? 'fr-FR' : 'en-US'), { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}
                     </p>
                     <div className="w-12 h-0.5 bg-[#4F99CC]/30 mx-auto mt-1 rounded-full"></div>
                   </div>
 
                   <div className="mb-4 flex items-center gap-2 bg-[#4F99CC]/10 px-4 py-1.5 rounded-full border border-[#4F99CC]/20 shrink-0">
-                    <span className="text-xs font-bold text-[#4F99CC]">{entradaSeleccionada.horas_sueno >= 10 ? '+10' : entradaSeleccionada.horas_sueno}h {idioma === 'es' ? 'de sueño' : 'sleep'}</span>
+                    <span className="text-xs font-bold text-[#4F99CC]">{entradaSeleccionada.horas_sueno >= 10 ? '+10' : entradaSeleccionada.horas_sueno}h {idioma === 'es' ? 'de sueño' : (idioma === 'fr' ? 'de sommeil' : 'sleep')}</span>
                   </div>
 
                   {/* Mostrar Imagen si existe */}
@@ -382,7 +387,7 @@ export function PaginaRegistros() {
 
                   <div className="flex-1 w-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-start py-4 px-2">
                     <p className="text-xl font-['Tilt_Warp'] text-gray-800 dark:text-white leading-snug text-center w-full break-words transition-colors duration-300">
-                      {entradaSeleccionada.contenido_texto || (idioma === 'es' ? "Sin contenido..." : "No content...")}
+                      {entradaSeleccionada.contenido_texto || t('registros_sin_contenido_corto')}
                     </p>
                   </div>
                 </div>

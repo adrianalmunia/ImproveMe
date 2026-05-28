@@ -29,7 +29,7 @@ export function PaginaDiario() {
   const [audio, setAudio] = useState(null); // URL local para preview o URL del backend
   const [archivoImagen, setArchivoImagen] = useState(null); // Objeto File real
   const [archivoAudio, setArchivoAudio] = useState(null); // Objeto File real
-  const fecha = new Date().toLocaleDateString(idioma === 'es' ? 'es-ES' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+  const fecha = new Date().toLocaleDateString(idioma === 'es' ? 'es-ES' : (idioma === 'fr' ? 'fr-FR' : 'en-US'), { day: 'numeric', month: 'long', year: 'numeric' });
   const [mensajeStatus, setMensajeStatus] = useState({ texto: '', tipo: '' }); // { texto, tipo: 'exito' | 'error' }
   const [estaGuardando, setEstaGuardando] = useState(false);
 
@@ -178,9 +178,9 @@ export function PaginaDiario() {
       localStorage.removeItem(borradorKey);
 
       if (respuesta && respuesta.xpGanada > 0) {
-        setMensajeStatus({ texto: `¡Entrada guardada! +${respuesta.xpGanada} XP`, tipo: 'exito' });
+        setMensajeStatus({ texto: `${t('diario_entrada_guardada')} +${respuesta.xpGanada} XP`, tipo: 'exito' });
       } else {
-        setMensajeStatus({ texto: 'Entrada actualizada con éxito', tipo: 'exito' });
+        setMensajeStatus({ texto: t('diario_entrada_actualizada'), tipo: 'exito' });
       }
       
       setArchivoImagen(null);
@@ -201,7 +201,7 @@ export function PaginaDiario() {
       }
 
     } catch (error) {
-      setMensajeStatus({ texto: 'Error al guardar la entrada', tipo: 'error' });
+      setMensajeStatus({ texto: t('diario_error_guardar'), tipo: 'error' });
     } finally {
       setEstaGuardando(false);
     }
@@ -361,11 +361,11 @@ export function PaginaDiario() {
   };
 
   const humores = [
-    { id: 1, imagen: moodFatal, color: '#EF4444', label: idioma === 'es' ? 'Fatal' : 'Fatal' },
-    { id: 2, imagen: moodMal, color: '#F97316', label: idioma === 'es' ? 'Mal' : 'Bad' },
-    { id: 3, imagen: moodDecente, color: '#FACC15', label: idioma === 'es' ? 'Decente' : 'Decent' },
-    { id: 4, imagen: moodBien, color: '#90BE6D', label: idioma === 'es' ? 'Bien' : 'Good' },
-    { id: 5, imagen: moodGenial, color: '#4D908E', label: idioma === 'es' ? 'Genial' : 'Great' },
+    { id: 1, imagen: moodFatal, color: '#EF4444', label: idioma === 'es' ? 'Fatal' : (idioma === 'fr' ? 'Terrible' : 'Fatal') },
+    { id: 2, imagen: moodMal, color: '#F97316', label: idioma === 'es' ? 'Mal' : (idioma === 'fr' ? 'Mauvais' : 'Bad') },
+    { id: 3, imagen: moodDecente, color: '#FACC15', label: idioma === 'es' ? 'Decente' : (idioma === 'fr' ? 'Pas mal' : 'Decent') },
+    { id: 4, imagen: moodBien, color: '#90BE6D', label: idioma === 'es' ? 'Bien' : (idioma === 'fr' ? 'Bien' : 'Good') },
+    { id: 5, imagen: moodGenial, color: '#4D908E', label: idioma === 'es' ? 'Genial' : (idioma === 'fr' ? 'Génial' : 'Great') },
   ];
 
   return (
@@ -393,7 +393,7 @@ export function PaginaDiario() {
             <div>
               <h2 className="text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white tracking-tight transition-colors duration-300">{t('nav_diario')} - {fecha}</h2>
               <p className="text-md text-gray-500 dark:text-gray-400 mt-1 transition-colors duration-300">
-                {usuario?.alias ? `${idioma === 'es' ? 'Hola' : 'Hello'} ${usuario.alias}, ${t('diario_titulo').toLowerCase()}` : t('diario_titulo')}
+                {usuario?.alias ? `${t('diario_hola')} ${usuario.alias}, ${t('diario_titulo').toLowerCase()}` : t('diario_titulo')}
               </p>
             </div>
 
@@ -436,7 +436,7 @@ export function PaginaDiario() {
             <div className="space-y-4 px-4">
               <div className="flex justify-between items-end">
                 <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{t('diario_sueno')}</label>
-                <span className="text-[#4F99CC] font-bold">{sueno >= 10 ? '+10' : sueno} {idioma === 'es' ? 'horas' : 'hours'}</span>
+                <span className="text-[#4F99CC] font-bold">{sueno >= 10 ? '+10' : sueno} {t('diario_horas')}</span>
               </div>
               <div className="relative h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-visible transition-colors duration-300">
                 <div
@@ -474,12 +474,12 @@ export function PaginaDiario() {
                 onClick={() => inputImagenRef.current.click()}
                 className={`flex-1 relative py-3 px-6 bg-white dark:bg-gray-800 border rounded-full text-xs font-bold flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors outline-none focus:ring-2 focus:ring-[#4F99CC] ${imagen ? 'border-[#4F99CC] text-[#4F99CC]' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300'}`}
               >
-                {imagen ? (idioma === 'es' ? 'Imagen Lista' : 'Image Ready') : (idioma === 'es' ? 'Añadir Imagen' : 'Add Image')}
+                {imagen ? t('diario_imagen_lista') : t('diario_anadir_imagen')}
                 {imagen && (
                   <motion.button
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
                     onClick={eliminarImagen}
-                    aria-label={idioma === 'es' ? 'Eliminar imagen' : 'Delete image'}
+                    aria-label={t('diario_eliminar_imagen')}
                     className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 focus:ring-2 focus:ring-red-400 focus:ring-offset-2 outline-none"
                   >
                     ✕
@@ -496,12 +496,12 @@ export function PaginaDiario() {
                       : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
               >
-                {estaGrabando ? (idioma === 'es' ? 'Grabando...' : 'Recording...') : audio ? (idioma === 'es' ? 'Audio Listo' : 'Audio Ready') : (idioma === 'es' ? 'Grabar Audio' : 'Record Audio')}
+                {estaGrabando ? t('diario_grabando') : audio ? t('diario_audio_listo') : t('diario_grabar_audio')}
                 {audio && !estaGrabando && (
                   <motion.button
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
                     onClick={eliminarAudio}
-                    aria-label={idioma === 'es' ? 'Eliminar audio' : 'Delete audio'}
+                    aria-label={t('diario_eliminar_audio')}
                     className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-600 focus:ring-2 focus:ring-red-400 focus:ring-offset-2 outline-none"
                   >
                     ✕
@@ -565,7 +565,7 @@ export function PaginaDiario() {
 
                     {/* Indicador de Sueño en la Tarjeta */}
                     <div className="mb-4 flex items-center gap-2 bg-[#4F99CC]/10 px-4 py-1.5 rounded-full border border-[#4F99CC]/20 shrink-0">
-                      <span className="text-xs font-bold text-[#4F99CC]">{sueno >= 10 ? '+10' : sueno}{idioma === 'es' ? 'h de sueño' : 'h sleep'}</span>
+                      <span className="text-xs font-bold text-[#4F99CC]">{sueno >= 10 ? '+10' : sueno} {t('diario_h_sueno')}</span>
                     </div>
 
                     {/* Vista previa de Imagen */}
@@ -626,7 +626,7 @@ export function PaginaDiario() {
                     {/* Contenedor de Texto con Scroll Independiente */}
                     <div className="flex-1 w-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-start py-2" style={{ transform: "translateZ(0)" }}>
                       <p className="text-lg font-['Tilt_Warp'] text-gray-800 dark:text-white leading-tight text-center w-full break-words transition-colors duration-300">
-                        {texto || (idioma === 'es' ? 'Aquí se muestra cómo queda la entrada...' : 'This is how your entry will look...')}
+                        {texto || t('diario_preview_placeholder')}
                       </p>
                     </div>
 

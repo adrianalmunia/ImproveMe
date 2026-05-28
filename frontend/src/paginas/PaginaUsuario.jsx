@@ -450,14 +450,14 @@ export function PaginaUsuario() {
             </h3>
             <form onSubmit={manejarGuardarPerfil} className="space-y-4 flex flex-col flex-1">
               <div>
-                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Nombre de Usuario' : 'Username'}</label>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Nombre de Usuario' : (idioma === 'fr' ? "Nom d'utilisateur" : 'Username')}</label>
                 <input
                   type="text" value={nombre} onChange={(e) => setNombre(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all font-medium"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Alias (Cómo te llamamos)' : 'Alias (How we call you)'}</label>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Alias (Cómo te llamamos)' : (idioma === 'fr' ? 'Alias (Comment nous vous appelons)' : 'Alias (How we call you)')}</label>
                 <input
                   type="text" value={alias} onChange={(e) => setAlias(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all font-medium"
@@ -465,7 +465,7 @@ export function PaginaUsuario() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Correo' : 'Email'}</label>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Correo' : (idioma === 'fr' ? 'E-mail' : 'Email')}</label>
                 <input
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all font-medium"
@@ -488,7 +488,7 @@ export function PaginaUsuario() {
               {/* Usuarios de Google no necesitan contraseña actual */}
               {!esUsuarioGoogle && (
                 <div className="relative">
-                  <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Contraseña Actual' : 'Current Password'}</label>
+                  <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Contraseña Actual' : (idioma === 'fr' ? 'Mot de passe actuel' : 'Current Password')}</label>
                   <input
                     type={verActualPasswordSeguridad ? "text" : "password"} value={actualPasswordSeguridad} onChange={(e) => setActualPasswordSeguridad(e.target.value)}
                     className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all" placeholder="••••••••"
@@ -504,7 +504,7 @@ export function PaginaUsuario() {
                 </div>
               )}
               <div className="relative">
-                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Nueva Clave' : 'New Password'}</label>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Nueva Clave' : (idioma === 'fr' ? 'Nouveau mot de passe' : 'New Password')}</label>
                 <input
                   type={verNewPassword ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all" placeholder="••••••••"
@@ -514,7 +514,7 @@ export function PaginaUsuario() {
                 </button>
               </div>
               <div className="relative">
-                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Confirmar Clave' : 'Confirm Password'}</label>
+                <label className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase ml-2 mb-1 block">{idioma === 'es' ? 'Confirmar Clave' : (idioma === 'fr' ? 'Confirmer le mot de passe' : 'Confirm Password')}</label>
                 <input
                   type={verConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 text-gray-800 dark:text-white rounded-2xl outline-none transition-all" placeholder="••••••••"
@@ -540,11 +540,11 @@ export function PaginaUsuario() {
                 <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6 text-[#4F99CC]">
                   <ShieldCheck size={40} />
                 </div>
-                <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-2">{idioma === 'es' ? 'Confirmar Cambios' : 'Confirm Changes'}</h3>
+                <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-2">{idioma === 'es' ? 'Confirmar Cambios' : (idioma === 'fr' ? 'Confirmer les changements' : 'Confirm Changes')}</h3>
                 <p className="text-sm mb-8 text-gray-500 dark:text-gray-400">
                   {esUsuarioGoogle 
-                    ? (idioma === 'es' ? 'Confirma los cambios en tu perfil.' : 'Confirm the changes to your profile.')
-                    : (idioma === 'es' ? `Por seguridad, introduce tu contraseña actual para aplicar los cambios en tu ${tipoCambio === 'perfil' ? 'perfil' : 'contraseña'}.` : `For security, enter your current password to apply changes to your ${tipoCambio === 'perfil' ? 'profile' : 'password'}.`)
+                    ? (idioma === 'es' ? 'Confirma los cambios en tu perfil.' : (idioma === 'fr' ? 'Confirmez les modifications apportées à votre profil.' : 'Confirm the changes to your profile.'))
+                    : (idioma === 'es' ? `Por seguridad, introduce tu contraseña actual para aplicar los cambios en tu ${tipoCambio === 'perfil' ? 'perfil' : 'contraseña'}.` : (idioma === 'fr' ? `Par sécurité, saisissez votre mot de passe actuel pour appliquer les modifications à votre ${tipoCambio === 'perfil' ? 'profil' : 'mot de passe'}.` : `For security, enter your current password to apply changes to your ${tipoCambio === 'perfil' ? 'profile' : 'password'}.`))
                   }
                 </p>
  
@@ -554,7 +554,7 @@ export function PaginaUsuario() {
                        type="password"
                        value={passwordConfirmacion}
                        onChange={(e) => setPasswordConfirmacion(e.target.value)}
-                       placeholder={idioma === 'es' ? "Contraseña actual" : "Current password"}
+                       placeholder={idioma === 'es' ? "Contraseña actual" : (idioma === 'fr' ? "Mot de passe actuel" : "Current password")}
                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-2xl outline-none text-center font-bold dark:text-white transition-colors"
                        autoFocus
                      />
@@ -567,13 +567,13 @@ export function PaginaUsuario() {
                      disabled={estaCargando || (!esUsuarioGoogle && !passwordConfirmacion)}
                      className="w-full py-4 bg-[#4F99CC] dark:bg-[#4F99CC]/80 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg hover:bg-[#3d82b3] dark:hover:bg-[#4F99CC] disabled:opacity-50 transition-all"
                    >
-                     {estaCargando ? (idioma === 'es' ? 'Procesando...' : 'Processing...') : (idioma === 'es' ? 'Confirmar y Guardar' : 'Confirm and Save')}
+                     {estaCargando ? (idioma === 'es' ? 'Procesando...' : (idioma === 'fr' ? 'Traitement...' : 'Processing...')) : (idioma === 'es' ? 'Confirmar y Guardar' : (idioma === 'fr' ? 'Confirmer et sauvegarder' : 'Confirm and Save'))}
                    </button>
                    <button
                      onClick={() => { setMostrarConfirmacion(false); setPasswordConfirmacion(''); }}
                      className="w-full py-4 bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-300 rounded-2xl font-bold hover:bg-gray-100 dark:hover:bg-gray-600 transition-all"
                    >
-                     {idioma === 'es' ? 'Cancelar' : 'Cancel'}
+                     {idioma === 'es' ? 'Cancelar' : (idioma === 'fr' ? 'Annuler' : 'Cancel')}
                    </button>
                  </div>
               </motion.div>
