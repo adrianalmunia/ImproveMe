@@ -93,7 +93,7 @@ ImproveMe/
 │   │   ├── Principal.jsx                    # Punto de entrada
 │   │   ├── paginas/
 │   │   │   ├── LandingPage.jsx              # Página de inicio pública
-│   │   │   ├── LandingSections.jsx          # Secciones de la landing
+│   │   │   ├── SeccionesLanding.jsx          # Secciones de la landing
 │   │   │   ├── Autenticacion.jsx            # Login y registro
 │   │   │   ├── PaginaHabitos.jsx
 │   │   │   ├── PaginaDiario.jsx

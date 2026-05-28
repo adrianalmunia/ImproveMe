@@ -661,11 +661,11 @@ export function PaginaUsuario() {
               </div>
               <div>
                 <h4 className="font-['Tilt_Warp'] text-lg">{t('idioma')}</h4>
-                <p className="text-gray-400 dark:text-gray-500 text-[10px]">{idioma === 'es' ? 'Elegir idioma / Language' : 'Select language'}</p>
+                <p className="text-gray-400 dark:text-gray-500 text-[10px]">{idioma === 'es' ? 'Elegir idioma / Language' : idioma === 'en' ? 'Select language' : 'Choisir la langue'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-gray-400 uppercase">{idioma === 'es' ? 'Español' : 'English'}</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase">{idioma === 'es' ? 'Español' : idioma === 'en' ? 'English' : 'Français'}</span>
               <ChevronRight size={20} className="opacity-30 dark:opacity-50" />
             </div>
           </motion.button>
@@ -952,8 +952,8 @@ export function PaginaUsuario() {
               <div className="w-20 h-20 bg-green-50 dark:bg-green-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6 text-green-500 transition-colors duration-300">
                 <Languages size={40} />
               </div>
-              <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-2">{idioma === 'es' ? 'Seleccionar Idioma' : 'Select Language'}</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">{idioma === 'es' ? 'Elige el idioma de la aplicación.' : 'Choose the application language.'}</p>
+              <h3 className="text-2xl font-['Tilt_Warp'] text-gray-800 dark:text-white mb-2">{idioma === 'es' ? 'Seleccionar Idioma' : idioma === 'en' ? 'Select Language' : 'Choisir la Langue'}</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-8">{idioma === 'es' ? 'Elige el idioma de la aplicación.' : idioma === 'en' ? 'Choose the application language.' : 'Choisissez la langue de l\'application.'}</p>
 
               <div className="flex flex-col gap-3">
                 <button
@@ -976,6 +976,17 @@ export function PaginaUsuario() {
                     <span>English</span>
                   </div>
                   {idioma === 'en' && <ShieldCheck size={18} />}
+                </button>
+
+                <button
+                  onClick={() => { setIdioma('fr'); setMostrarIdiomas(false); }}
+                  className={`w-full py-4 border rounded-2xl font-bold flex items-center justify-between px-6 transition-all group ${idioma === 'fr' ? 'bg-green-500 border-green-600 text-white shadow-lg' : 'bg-gray-50 dark:bg-gray-700 border-gray-100 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/30'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🇫🇷</span>
+                    <span>Français</span>
+                  </div>
+                  {idioma === 'fr' && <ShieldCheck size={18} />}
                 </button>
 
                 <button

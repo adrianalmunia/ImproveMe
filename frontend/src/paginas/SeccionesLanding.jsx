@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Target, BarChart2, Flower2, CheckCircle2, Trophy, Smile, Calendar, BookOpen, Moon, Flame, TrendingUp, Zap } from 'lucide-react';
 import { Doughnut, Scatter, Line, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, PointElement, LinearScale, CategoryScale, LineElement, BarElement, Filler } from 'chart.js';
+import { useIdioma } from '../contextos/ContextoIdioma';
 
 import genial from '../assets/estados_animo/genial.png';
 import bien from '../assets/estados_animo/bien.png';
@@ -26,12 +27,13 @@ const tt = { backgroundColor: '#2C4159', cornerRadius: 10, displayColors: false,
 
 /* ── 1. DOUGHNUT: Clima Emocional ── */
 export const MoodDoughnutChart = () => {
+  const { idioma } = useIdioma();
   const moods = [
-    { img: genial, label: 'Genial', color: '#4D908E', val: 35 },
-    { img: bien, label: 'Bien', color: '#90BE6D', val: 25 },
-    { img: decente, label: 'Decente', color: '#FACC15', val: 15 },
-    { img: mal, label: 'Mal', color: '#F97316', val: 12 },
-    { img: fatal, label: 'Fatal', color: '#EF4444', val: 13 },
+    { img: genial, label: idioma === 'es' ? 'Genial' : 'Great', color: '#4D908E', val: 35 },
+    { img: bien, label: idioma === 'es' ? 'Bien' : 'Good', color: '#90BE6D', val: 25 },
+    { img: decente, label: idioma === 'es' ? 'Decente' : 'Decent', color: '#FACC15', val: 15 },
+    { img: mal, label: idioma === 'es' ? 'Mal' : 'Bad', color: '#F97316', val: 12 },
+    { img: fatal, label: idioma === 'es' ? 'Fatal' : 'Fatal', color: '#EF4444', val: 13 },
   ];
   const data = {
     labels: moods.map(m => m.label),
@@ -40,7 +42,9 @@ export const MoodDoughnutChart = () => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[40px] p-6 md:p-8 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center">
       <div className="w-full flex items-center justify-between mb-6 shrink-0">
-        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Clima Emocional</p>
+        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
+          {idioma === 'es' ? 'Clima Emocional' : 'Emotional Climate'}
+        </p>
         <Smile size={18} className="text-[#C6A55E]" />
       </div>
       <div className="h-48 w-full max-w-[240px]">
@@ -60,21 +64,32 @@ export const MoodDoughnutChart = () => {
 
 /* ── 2. MEDITATION CARD: Paz Mental ── */
 export const MeditationCard = () => {
-  const labels = ['L', 'M', 'X', 'J', 'V', 'S', 'D', 'L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  const { idioma } = useIdioma();
+  const labels = idioma === 'es' 
+    ? ['L', 'M', 'X', 'J', 'V', 'S', 'D', 'L', 'M', 'X', 'J', 'V', 'S', 'D']
+    : ['M', 'T', 'W', 'T', 'F', 'S', 'S', 'M', 'T', 'W', 'T', 'F', 'S', 'S'];
   const values = [0, 12, 22, 8, 30, 35, 20, 0, 5, 28, 15, 32, 40, 25];
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[40px] p-6 md:p-8 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col min-h-[420px]">
       <div className="flex justify-between items-center mb-6 shrink-0">
         <div className="flex items-center gap-2">
           <Flower2 size={20} className="text-teal-500" />
-          <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Paz Mental</p>
+          <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
+            {idioma === 'es' ? 'Paz Mental' : 'Mental Peace'}
+          </p>
         </div>
         <div className="bg-teal-50 dark:bg-teal-900/30 px-4 py-1.5 rounded-full">
-          <span className="text-[11px] font-black text-teal-600 uppercase tracking-widest">14d Racha</span>
+          <span className="text-[11px] font-black text-teal-600 uppercase tracking-widest">
+            {idioma === 'es' ? '14d Racha' : '14d Streak'}
+          </span>
         </div>
       </div>
       <div className="grid grid-cols-3 gap-4 mb-8 shrink-0">
-        {[{ label: 'Sesiones', val: '47' }, { label: 'Total h', val: '12.4' }, { label: 'Racha', val: '14d' }].map((s, i) => (
+        {[
+          { label: idioma === 'es' ? 'Sesiones' : 'Sessions', val: '47' },
+          { label: idioma === 'es' ? 'Total h' : 'Total hrs', val: '12.4' },
+          { label: idioma === 'es' ? 'Racha' : 'Streak', val: '14d' }
+        ].map((s, i) => (
           <div key={i} className="text-center p-3 bg-teal-50/50 dark:bg-teal-900/10 rounded-2xl">
             <p className="text-base font-black text-teal-600 dark:text-teal-400">{s.val}</p>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{s.label}</p>
@@ -84,7 +99,7 @@ export const MeditationCard = () => {
       <div className="flex-1 w-full" style={{ minHeight: 180 }}>
         <Bar
           data={{ labels, datasets: [{ label: 'min', data: values, backgroundColor: values.map(v => v > 0 ? '#10B981' : '#f1f5f9'), borderRadius: 6, barThickness: 16 }] }}
-          options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...tt, callbacks: { label: c => `${c.raw} min` } } }, scales: { y: { display: false, beginAtZero: true }, x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' } } } }}
+          options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...tt, callbacks: { label: c => `${c.raw} ${idioma === 'es' ? 'min' : 'mins'}` } } }, scales: { y: { display: false, beginAtZero: true }, x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' } } } }}
         />
       </div>
     </div>
@@ -94,6 +109,7 @@ export const MeditationCard = () => {
 /* ── 3. SCATTER: Descanso vs Ánimo ── */
 const getC = (h) => { if (h < 4) return '#EF4444'; const r = Math.min(Math.max((h - 4) / 6, 0), 1); return `rgb(${Math.round(79 + 89 * r)},${Math.round(153 - 68 * r)},${Math.round(204 + 43 * r)})`; };
 export const SleepScatterChart = () => {
+  const { idioma } = useIdioma();
   const pts = [
     { x: 3.5, y: 1 }, { x: 4.5, y: 1 }, { x: 5, y: 2 }, { x: 5.5, y: 2 }, { x: 6, y: 3 }, 
     { x: 6.5, y: 2 }, { x: 7, y: 4 }, { x: 7.5, y: 3 }, { x: 7.5, y: 5 }, { x: 8, y: 4 }, 
@@ -103,51 +119,63 @@ export const SleepScatterChart = () => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[40px] p-6 md:p-8 shadow-xl border border-gray-100 dark:border-gray-700 min-h-[380px]">
       <div className="flex items-center justify-between mb-6">
-        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Descanso vs Ánimo</p>
+        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
+          {idioma === 'es' ? 'Descanso vs Ánimo' : 'Sleep vs Mood'}
+        </p>
         <Moon size={18} className="text-indigo-400" />
       </div>
       <div className="h-64">
-        <Scatter data={{ datasets: [{ label: 'Días', data: pts, backgroundColor: pts.map(d => getC(d.x)), pointRadius: pts.map(d => 6 + d.y * 1.5), pointHoverRadius: 14, borderWidth: 2, borderColor: 'rgba(255,255,255,0.9)' }] }}
-          options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...tt, callbacks: { label: c => [`Sueño: ${c.raw.x}h`, `Ánimo: ${c.raw.y}/5`] } } }, scales: { x: { min: 3, max: 11, grid: { display: true, color: 'rgba(0,0,0,0.03)' }, ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' }, title: { display: true, text: 'Horas de sueño', font: { size: 10 }, color: '#94a3b8' } }, y: { min: 0, max: 6, grid: { display: true, color: 'rgba(0,0,0,0.03)' }, ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' }, title: { display: true, text: 'Ánimo', font: { size: 10 }, color: '#94a3b8' } } } }} />
+        <Scatter data={{ datasets: [{ label: idioma === 'es' ? 'Días' : 'Days', data: pts, backgroundColor: pts.map(d => getC(d.x)), pointRadius: pts.map(d => 6 + d.y * 1.5), pointHoverRadius: 14, borderWidth: 2, borderColor: 'rgba(255,255,255,0.9)' }] }}
+          options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...tt, callbacks: { label: c => [`${idioma === 'es' ? 'Sueño' : 'Sleep'}: ${c.raw.x}h`, `${idioma === 'es' ? 'Ánimo' : 'Mood'}: ${c.raw.y}/5`] } } }, scales: { x: { min: 3, max: 11, grid: { display: true, color: 'rgba(0,0,0,0.03)' }, ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' }, title: { display: true, text: idioma === 'es' ? 'Horas de sueño' : 'Sleep hours', font: { size: 10 }, color: '#94a3b8' } }, y: { min: 0, max: 6, grid: { display: true, color: 'rgba(0,0,0,0.03)' }, ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' }, title: { display: true, text: idioma === 'es' ? 'Ánimo' : 'Mood', font: { size: 10 }, color: '#94a3b8' } } } }} />
       </div>
     </div>
   );
 };
 
 /* ── 4. HABIT CARD ── */
-export const HabitCard = () => (
-  <div className="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[40px] p-6 md:p-8 shadow-xl border border-gray-100 dark:border-gray-700">
-    <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6">Hábitos de Hoy</p>
-    <div className="space-y-3">
-      {[
-        { name: 'Meditar 10 min', icon: <Flower2 size={18} />, done: true, streak: 14, color: 'text-teal-500 bg-teal-50 dark:bg-teal-900/30' },
-        { name: 'Ejercicio', icon: <Flame size={18} />, done: true, streak: 7, color: 'text-orange-500 bg-orange-50 dark:bg-orange-900/30' },
-        { name: 'Leer 30 min', icon: <BookOpen size={18} />, done: false, streak: 3, color: 'text-blue-500 bg-blue-50 dark:bg-blue-900/30' },
-      ].map((h, i) => (
-        <div key={i} className={`flex items-center gap-4 p-4 rounded-[28px] ${h.done ? 'bg-green-50/50 dark:bg-green-900/10' : 'bg-gray-50 dark:bg-gray-700/50'}`}>
-          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${h.color}`}>{h.icon}</div>
-          <div className="flex-1">
-            <p className={`text-base font-black ${h.done ? 'line-through text-gray-400' : 'text-[#2C4159] dark:text-white'}`}>{h.name}</p>
-            <div className="flex items-center gap-1"><Flame size={12} className="text-orange-500" /><p className="text-[11px] text-gray-400 font-bold">{h.streak} días</p></div>
+export const HabitCard = () => {
+  const { idioma } = useIdioma();
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[40px] p-6 md:p-8 shadow-xl border border-gray-100 dark:border-gray-700">
+      <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6">
+        {idioma === 'es' ? 'Hábitos de Hoy' : "Today's Habits"}
+      </p>
+      <div className="space-y-3">
+        {[
+          { name: idioma === 'es' ? 'Meditar 10 min' : 'Meditate 10 min', icon: <Flower2 size={18} />, done: true, streak: 14, color: 'text-teal-500 bg-teal-50 dark:bg-teal-900/30' },
+          { name: idioma === 'es' ? 'Ejercicio' : 'Exercise', icon: <Flame size={18} />, done: true, streak: 7, color: 'text-orange-500 bg-orange-50 dark:bg-orange-900/30' },
+          { name: idioma === 'es' ? 'Leer 30 min' : 'Read 30 min', icon: <BookOpen size={18} />, done: false, streak: 3, color: 'text-blue-500 bg-blue-50 dark:bg-blue-900/30' },
+        ].map((h, i) => (
+          <div key={i} className={`flex items-center gap-4 p-4 rounded-[28px] ${h.done ? 'bg-green-50/50 dark:bg-green-900/10' : 'bg-gray-50 dark:bg-gray-700/50'}`}>
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${h.color}`}>{h.icon}</div>
+            <div className="flex-1">
+              <p className={`text-base font-black ${h.done ? 'line-through text-gray-400' : 'text-[#2C4159] dark:text-white'}`}>{h.name}</p>
+              <div className="flex items-center gap-1"><Flame size={12} className="text-orange-500" /><p className="text-[11px] text-gray-400 font-bold">{h.streak} {idioma === 'es' ? 'días' : 'days'}</p></div>
+            </div>
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${h.done ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : 'border-2 border-gray-200 dark:border-gray-600'}`}>
+              {h.done && <CheckCircle2 size={18} />}
+            </div>
           </div>
-          <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${h.done ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : 'border-2 border-gray-200 dark:border-gray-600'}`}>
-            {h.done && <CheckCircle2 size={18} />}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 /* ── 5. LINE: Bienestar Emocional con colores (como la app) ── */
 const coloresMood = { 1: '#EF4444', 2: '#F97316', 3: '#FACC15', 4: '#90BE6D', 5: '#4D908E' };
 export const MoodLineChart = () => {
-  const labels = ['24 Abr', '26 Abr', '28 Abr', '30 Abr', '2 May', '4 May', '6 May', '8 May', '10 May', '12 May'];
+  const { idioma } = useIdioma();
+  const labels = idioma === 'es'
+    ? ['24 Abr', '26 Abr', '28 Abr', '30 Abr', '2 May', '4 May', '6 May', '8 May', '10 May', '12 May']
+    : ['Apr 24', 'Apr 26', 'Apr 28', 'Apr 30', 'May 2', 'May 4', 'May 6', 'May 8', 'May 10', 'May 12'];
   const values = [2, 4, 3, 5, 1, 4, 5, 3, 4, 5];
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[40px] p-6 md:p-8 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center">
       <div className="w-full flex items-center justify-between mb-4">
-        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Bienestar Emocional</p>
+        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
+          {idioma === 'es' ? 'Bienestar Emocional' : 'Emotional Well-being'}
+        </p>
         <TrendingUp size={20} className="text-[#4F99CC]" />
       </div>
       <div className="h-48 w-full">
@@ -155,7 +183,7 @@ export const MoodLineChart = () => {
           data={{
             labels,
             datasets: [{
-              label: 'Ánimo', data: values,
+              label: idioma === 'es' ? 'Ánimo' : 'Mood', data: values,
               borderColor: '#4F99CC',
               segment: { borderColor: ctx => coloresMood[Math.round(ctx.p1.parsed.y)] || '#4F99CC' },
               backgroundColor: ctx => {
@@ -170,7 +198,7 @@ export const MoodLineChart = () => {
               pointBorderColor: '#fff', pointBorderWidth: 2.5, pointHoverRadius: 10, borderWidth: 4
             }]
           }}
-          options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...tt, callbacks: { label: c => `Ánimo: ${c.raw}/5` } } }, scales: { y: { min: 0, max: 6, grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' } }, x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' } } } }}
+          options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { ...tt, callbacks: { label: c => `${idioma === 'es' ? 'Ánimo' : 'Mood'}: ${c.raw}/5` } } }, scales: { y: { min: 0, max: 6, grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' } }, x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' }, color: '#94a3b8' } } } }}
         />
       </div>
     </div>
@@ -179,17 +207,22 @@ export const MoodLineChart = () => {
 
 /* ── 6. HEATMAP: Consistencia de Hábitos (3 filas de 10) ── */
 export const HabitHeatmap = () => {
+  const { idioma } = useIdioma();
   const habits = [
-    { nombre: 'Meditar', textColor: 'text-blue-500', bgColor: 'bg-blue-500', dias: [1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,0,1] },
-    { nombre: 'Ejercicio', textColor: 'text-amber-500', bgColor: 'bg-amber-500', dias: [1,0,1,1,0,1,1,1,0,1,1,1,0,0,1,1,1,0,1,1,0,1,1,0,1,1,0,1,1,1] },
-    { nombre: 'Leer', textColor: 'text-emerald-500', bgColor: 'bg-emerald-500', dias: [0,1,1,1,0,0,1,1,1,0,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,0,0,1,1,1] },
+    { nombre: idioma === 'es' ? 'Meditar' : 'Meditate', textColor: 'text-blue-500', bgColor: 'bg-blue-500', dias: [1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,0,1] },
+    { nombre: idioma === 'es' ? 'Ejercicio' : 'Exercise', textColor: 'text-amber-500', bgColor: 'bg-amber-500', dias: [1,0,1,1,0,1,1,1,0,1,1,1,0,0,1,1,1,0,1,1,0,1,1,0,1,1,0,1,1,1] },
+    { nombre: idioma === 'es' ? 'Leer' : 'Read', textColor: 'text-emerald-500', bgColor: 'bg-emerald-500', dias: [0,1,1,1,0,0,1,1,1,0,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,0,0,1,1,1] },
   ];
   return (
     <div className="bg-white dark:bg-gray-800 rounded-3xl md:rounded-[40px] p-6 md:p-8 shadow-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center">
       <div className="w-full flex items-center justify-between mb-4">
-        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Consistencia</p>
+        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
+          {idioma === 'es' ? 'Consistencia' : 'Consistency'}
+        </p>
         <div className="px-4 py-1 bg-amber-50 dark:bg-amber-900/30 rounded-full">
-          <span className="text-[11px] font-black text-amber-600 uppercase tracking-widest">30 días</span>
+          <span className="text-[11px] font-black text-amber-600 uppercase tracking-widest">
+            {idioma === 'es' ? '30 días' : '30 days'}
+          </span>
         </div>
       </div>
       <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-8 mt-4">
@@ -214,7 +247,9 @@ export const HabitHeatmap = () => {
                   />
                 ))}
               </div>
-              <p className="text-[10px] font-black text-gray-400 uppercase mt-4 tracking-widest">{completedCount}/30 DÍAS COMPLETADOS</p>
+              <p className="text-[10px] font-black text-gray-400 uppercase mt-4 tracking-widest">
+                {completedCount}/30 {idioma === 'es' ? 'DÍAS COMPLETADOS' : 'DAYS COMPLETED'}
+              </p>
             </div>
           );
         })}
@@ -225,16 +260,17 @@ export const HabitHeatmap = () => {
 
 /* ── 7. RANK PREVIEW ── */
 export const RankPreview = () => {
+  const { idioma } = useIdioma();
   const ranks = [
-    { name: 'Sin Rango', img: sinRango, color: 'text-gray-400' },
-    { name: 'Bronce I', img: bronce1, color: 'text-amber-700' },
-    { name: 'Plata I', img: plata1, color: 'text-slate-400' },
-    { name: 'Oro I', img: oro, color: 'text-yellow-500' },
-    { name: 'Esmeralda I', img: esmeralda, color: 'text-emerald-500' },
-    { name: 'Diamante I', img: diamante, color: 'text-blue-400' },
-    { name: 'Zafiro I', img: zafiro, color: 'text-blue-600' },
-    { name: 'Amatista I', img: amatista1, color: 'text-purple-500' },
-    { name: 'Rubí I', img: rubi1, color: 'text-red-500' },
+    { name: idioma === 'es' ? 'Sin Rango' : 'No Rank', img: sinRango, color: 'text-gray-400' },
+    { name: idioma === 'es' ? 'Bronce I' : 'Bronze I', img: bronce1, color: 'text-amber-700' },
+    { name: idioma === 'es' ? 'Plata I' : 'Silver I', img: plata1, color: 'text-slate-400' },
+    { name: idioma === 'es' ? 'Oro I' : 'Gold I', img: oro, color: 'text-yellow-500' },
+    { name: idioma === 'es' ? 'Esmeralda I' : 'Emerald I', img: esmeralda, color: 'text-emerald-500' },
+    { name: idioma === 'es' ? 'Diamante I' : 'Diamond I', img: diamante, color: 'text-blue-400' },
+    { name: idioma === 'es' ? 'Zafiro I' : 'Sapphire I', img: zafiro, color: 'text-blue-600' },
+    { name: idioma === 'es' ? 'Amatista I' : 'Amethyst I', img: amatista1, color: 'text-purple-500' },
+    { name: idioma === 'es' ? 'Rubí I' : 'Ruby I', img: rubi1, color: 'text-red-500' },
   ];
   return (
     <div className="flex flex-wrap justify-center gap-4 md:gap-6">
@@ -252,10 +288,10 @@ export const RankPreview = () => {
 
 /* ── 8. FEATURES ── */
 export const features = [
-  { icon: <Smile size={28} />, title: 'Diario Emocional', desc: 'Registra tu estado de ánimo, pensamientos y horas de sueño cada día. Adjunta fotos y notas de voz.', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'hover:border-blue-200 dark:hover:border-blue-800' },
-  { icon: <Target size={28} />, title: 'Hábitos Gamificados', desc: 'Crea hábitos, diarias y tareas. Gana XP por completarlas y mantén tus rachas al máximo.', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'hover:border-amber-200 dark:hover:border-amber-800' },
-  { icon: <BarChart2 size={28} />, title: 'Estadísticas Inteligentes', desc: 'Correlaciones ánimo-sueño, consistencia de hábitos y tendencias con gráficos interactivos.', color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/20', border: 'hover:border-indigo-200 dark:hover:border-indigo-800' },
-  { icon: <Flower2 size={28} />, title: 'Meditación Guiada', desc: 'Técnicas de respiración y sonidos ambiente. Temporizador integrado y seguimiento de sesiones.', color: 'text-teal-500', bg: 'bg-teal-50 dark:bg-teal-900/20', border: 'hover:border-teal-200 dark:hover:border-teal-800' },
-  { icon: <Calendar size={28} />, title: 'Calendario Visual', desc: 'Revisa tu historial día a día con un mapa de calor de emociones y resúmenes diarios.', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/20', border: 'hover:border-rose-200 dark:hover:border-rose-800' },
-  { icon: <Trophy size={28} />, title: 'Sistema de Rangos', desc: 'Desde "Sin Rango" hasta "Rubí I". Asciende en la jerarquía de ligas con tu disciplina.', color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'hover:border-purple-200 dark:hover:border-purple-800' },
+  { icon: <Smile size={28} />, titleKey: 'landing_feat_diario_title', descKey: 'landing_feat_diario_desc', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'hover:border-blue-200 dark:hover:border-blue-800' },
+  { icon: <Target size={28} />, titleKey: 'landing_feat_habitos_title', descKey: 'landing_feat_habitos_desc', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'hover:border-amber-200 dark:hover:border-amber-800' },
+  { icon: <BarChart2 size={28} />, titleKey: 'landing_feat_stats_title', descKey: 'landing_feat_stats_desc', color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/20', border: 'hover:border-indigo-200 dark:hover:border-indigo-800' },
+  { icon: <Flower2 size={28} />, titleKey: 'landing_feat_med_title', descKey: 'landing_feat_med_desc', color: 'text-teal-500', bg: 'bg-teal-50 dark:bg-teal-900/20', border: 'hover:border-teal-200 dark:hover:border-teal-800' },
+  { icon: <Calendar size={28} />, titleKey: 'landing_feat_cal_title', descKey: 'landing_feat_cal_desc', color: 'text-rose-500', bg: 'bg-rose-50 dark:bg-rose-900/20', border: 'hover:border-rose-200 dark:hover:border-rose-800' },
+  { icon: <Trophy size={28} />, titleKey: 'landing_feat_ranks_title', descKey: 'landing_feat_ranks_desc', color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'hover:border-purple-200 dark:hover:border-purple-800' },
 ];

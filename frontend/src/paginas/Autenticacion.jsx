@@ -6,21 +6,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAutenticacion } from '../contextos/ContextoAutenticacion';
 import { Sun, Moon } from 'lucide-react';
 import { useTema } from '../contextos/ContextoTema';
+import { useIdioma } from '../contextos/ContextoIdioma';
 import logoImproveMe from '../assets/logo_improveme.png';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 // --- COMPONENTES AUXILIARES (Fuera para evitar re-renderizados innecesarios) ---
 
-const Separador = memo(() => (
-    <div className="flex items-center gap-3 my-3 mt-4">
-        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
-        <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-            o continúa con
-        </span>
-        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
-    </div>
-));
+const Separador = memo(() => {
+    const { t } = useIdioma();
+    return (
+        <div className="flex items-center gap-3 my-3 mt-4">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+            <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                {t('auth_separador')}
+            </span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+        </div>
+    );
+});
 
 const SeccionGoogle = memo(({ googleNoConfigurado, botonGoogleRef }) => (
     <div className="w-full min-h-[44px]">
@@ -43,6 +47,7 @@ export function Autenticacion({
     onVolverALanding = () => { }
 }) {
     const { temaOscuro, toggleTema } = useTema();
+    const { idioma, t } = useIdioma();
     const { login, registrar, loginGoogle, estaCargando, error } = useAutenticacion();
     const [esLogin, setEsLogin] = useState(modoInicial === 'login');
 
@@ -60,11 +65,11 @@ export function Autenticacion({
     // Detectar si el error global es de sesión expirada
     useEffect(() => {
         if (error && (error.includes('expirada') || error.includes('token') || error.includes('sesión'))) {
-            setNotificacion({ mensaje: 'Sesión expirada', tipo: 'info' });
+            setNotificacion({ mensaje: t('auth_error_sesion_exp'), tipo: 'info' });
         } else if (error) {
             setNotificacion({ mensaje: error, tipo: 'error' });
         }
-    }, [error]);
+    }, [error, t]);
 
     const manejarCredencialGoogle = useCallback(async (respuesta) => {
         setNotificacion(null);
@@ -72,9 +77,9 @@ export function Autenticacion({
             const usuario = await loginGoogle(respuesta.credential);
             onAccesoExitoso(usuario);
         } catch (err) {
-            setNotificacion({ mensaje: err.message || 'Error al iniciar sesión con Google', tipo: 'error' });
+            setNotificacion({ mensaje: err.message || t('auth_error_google'), tipo: 'error' });
         }
-    }, [loginGoogle, onAccesoExitoso]);
+    }, [loginGoogle, onAccesoExitoso, t]);
 
     const renderizarBotonEnElemento = useCallback((elemento) => {
         if (!window.google?.accounts?.id || !elemento) return;
@@ -89,9 +94,9 @@ export function Autenticacion({
             text: 'continue_with',
             shape: 'pill',
             width: elemento.parentElement?.offsetWidth || 300,
-            locale: 'es',
+            locale: idioma === 'es' ? 'es' : 'en',
         });
-    }, []);
+    }, [idioma]);
 
     // La clave es que esta ref solo dispare el renderizado si el NODO cambia (cambio de pestaña)
     const botonGoogleRef = useCallback((nodo) => {
@@ -139,7 +144,7 @@ export function Autenticacion({
         setNotificacion(null);
         try {
             if (!email || !password) {
-                setNotificacion({ mensaje: 'Email y contraseña son obligatorios', tipo: 'validacion' });
+                setNotificacion({ mensaje: t('auth_error_credenciales'), tipo: 'validacion' });
                 return;
             }
             const usuario = await login(email, password);
@@ -147,9 +152,9 @@ export function Autenticacion({
         } catch (err) {
             // Si el error parece de conexión (no hay respuesta o mensaje de fetch)
             if (err.message?.includes('fetch') || err.message?.includes('Network')) {
-                setNotificacion({ mensaje: 'Error al sincronizar datos', tipo: 'error' });
+                setNotificacion({ mensaje: t('auth_error_sinc'), tipo: 'error' });
             } else {
-                setNotificacion({ mensaje: err.message || 'Error al iniciar sesión', tipo: 'error' });
+                setNotificacion({ mensaje: err.message || t('auth_error_login'), tipo: 'error' });
             }
         }
     }
@@ -159,11 +164,11 @@ export function Autenticacion({
         setNotificacion(null);
         try {
             if (!nombreUsuario || !email || !password) {
-                setNotificacion({ mensaje: 'Todos los campos son obligatorios', tipo: 'validacion' });
+                setNotificacion({ mensaje: t('auth_error_registro'), tipo: 'validacion' });
                 return;
             }
             if (password.length < 8) {
-                setNotificacion({ mensaje: 'La contraseña debe tener al menos 8 caracteres', tipo: 'validacion' });
+                setNotificacion({ mensaje: t('auth_error_pass_corta'), tipo: 'validacion' });
                 return;
             }
             const resultado = await registrar(nombreUsuario, email, password);
@@ -172,9 +177,9 @@ export function Autenticacion({
             }
         } catch (err) {
             if (err.message?.includes('fetch') || err.message?.includes('Network')) {
-                setNotificacion({ mensaje: 'Error al sincronizar datos', tipo: 'error' });
+                setNotificacion({ mensaje: t('auth_error_sinc'), tipo: 'error' });
             } else {
-                setNotificacion({ mensaje: err.message || 'Error al registrarse', tipo: 'error' });
+                setNotificacion({ mensaje: err.message || t('auth_error_singup'), tipo: 'error' });
             }
         }
     }
@@ -188,7 +193,7 @@ export function Autenticacion({
     const googleNoConfigurado = !GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('TU_GOOGLE');
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-neutral-100 dark:bg-gray-900 overflow-y-auto font-['Inter'] transition-colors duration-300 p-4 sm:p-8">
+        <div className="flex items-center justify-center min-h-screen bg-neutral-100 dark:bg-gray-950 overflow-y-auto font-['Inter'] transition-colors duration-300 p-4 sm:p-8">
             <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -202,10 +207,14 @@ export function Autenticacion({
                             <img src={logoImproveMe} alt="Logo" className="w-full h-full object-contain" />
                         </div>
                         <h1 className="text-white text-4xl font-['Tilt_Warp'] leading-tight mb-4">
-                            Desbloquea tu<br />mejor versión.
+                            {idioma === 'es' ? (
+                                <>Desbloquea tu<br />mejor versión.</>
+                            ) : (
+                                <>Unlock your<br />best version.</>
+                            )}
                         </h1>
                         <p className="text-white/80 text-sm max-w-[80%] font-medium">
-                            Únete a ImproveMe y comienza a transformar tus hábitos.
+                            {idioma === 'es' ? 'Únete a ImproveMe y comienza a transformar tus hábitos.' : 'Join ImproveMe and start transforming your habits.'}
                         </p>
                     </div>
                 </div>
@@ -214,14 +223,14 @@ export function Autenticacion({
                 <div className="w-full md:w-[55%] p-6 sm:p-8 lg:p-12 flex flex-col justify-center relative bg-white dark:bg-gray-800">
                     <div className="absolute top-6 left-6 z-20">
                         <button onClick={onVolverALanding} className="text-gray-400 hover:text-[#4F99CC] transition-colors text-[10px] font-bold uppercase tracking-widest">
-                            ← Volver
+                            ← {t('auth_volver')}
                         </button>
                     </div>
 
                     <div className="absolute top-6 right-6 z-20">
                         <button onClick={toggleTema}
                           className="p-2 text-gray-500 hover:text-[#2C4159] dark:text-gray-400 dark:hover:text-white bg-gray-100/50 hover:bg-gray-100 dark:bg-gray-700/40 dark:hover:bg-gray-700/80 rounded-full transition-all duration-300 flex items-center justify-center border border-gray-200/20 dark:border-gray-700/20"
-                          title={temaOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+                          title={temaOscuro ? t('auth_tema_claro') : t('auth_tema_oscuro')}
                         >
                           {temaOscuro ? <Sun size={15} /> : <Moon size={15} />}
                         </button>
@@ -238,10 +247,10 @@ export function Autenticacion({
                         >
                             <div className="mb-6 mt-8 sm:mt-4 text-center md:text-left">
                                 <h2 className="text-2xl sm:text-3xl font-['Tilt_Warp'] text-gray-800 dark:text-white">
-                                    {esLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta'}
+                                    {esLogin ? t('auth_bienvenido') : t('auth_crea')}
                                 </h2>
                                 <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">
-                                    {esLogin ? 'Inicia sesión para continuar' : 'Comienza tu viaje de mejora'}
+                                    {esLogin ? t('auth_inicia') : t('auth_viaje')}
                                 </p>
                             </div>
 
@@ -269,33 +278,33 @@ export function Autenticacion({
                             <form onSubmit={esLogin ? manejarLogin : manejarRegistro} className="space-y-3 sm:space-y-4">
                                 {!esLogin && (
                                     <div className="space-y-1">
-                                        <label className="text-xs font-bold text-gray-500 ml-4 uppercase tracking-widest">Usuario</label>
+                                        <label className="text-xs font-bold text-gray-500 ml-4 uppercase tracking-widest">{t('auth_usuario')}</label>
                                         <input
                                             type="text"
                                             value={nombreUsuario}
                                             onChange={(e) => setNombreUsuario(e.target.value)}
-                                            placeholder="Tu alias"
+                                            placeholder={t('auth_usuario_placeholder')}
                                             className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus:border-[#4F99CC] outline-none px-5 py-2.5 text-sm text-gray-800 dark:text-white"
                                         />
                                     </div>
                                 )}
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-500 ml-4 uppercase tracking-widest">Email</label>
+                                    <label className="text-xs font-bold text-gray-500 ml-4 uppercase tracking-widest">{t('auth_email')}</label>
                                     <input
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="tu@email.com"
+                                        placeholder={t('auth_email_placeholder')}
                                         className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus:border-[#4F99CC] outline-none px-6 py-3 text-sm text-gray-800 dark:text-white"
                                     />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-500 ml-4 uppercase tracking-widest">Contraseña</label>
+                                    <label className="text-xs font-bold text-gray-500 ml-4 uppercase tracking-widest">{t('auth_pass')}</label>
                                     <input
                                         type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="••••••••"
+                                        placeholder={t('auth_pass_placeholder')}
                                         className="w-full bg-neutral-50 dark:bg-gray-900/50 rounded-full border-2 border-transparent focus:border-[#4F99CC] outline-none px-6 py-3 text-sm text-gray-800 dark:text-white"
                                     />
                                 </div>
@@ -305,15 +314,15 @@ export function Autenticacion({
                                     disabled={estaCargando}
                                     className={`w-full py-4 mt-4 rounded-full font-bold shadow-xl transition-all ${esLogin ? 'bg-black text-white' : 'bg-gradient-to-r from-[#4F99CC] to-[#C6A55E] text-white'}`}
                                 >
-                                    {estaCargando ? 'Procesando...' : (esLogin ? 'Entrar a ImproveMe' : 'Crear Cuenta')}
+                                    {estaCargando ? t('auth_cargando') : (esLogin ? t('auth_btn_entrar') : t('auth_btn_crear'))}
                                 </button>
                             </form>
 
                             <div className="mt-4 text-center">
                                 <p className="text-gray-500 text-sm">
-                                    {esLogin ? '¿No tienes cuenta?' : '¿Ya eres miembro?'} {' '}
+                                    {esLogin ? t('auth_no_cuenta') : t('auth_ya_miembro')} {' '}
                                     <button onClick={alternarVista} className="text-[#4F99CC] font-bold hover:underline">
-                                        {esLogin ? 'Regístrate aquí' : 'Inicia Sesión'}
+                                        {esLogin ? t('auth_registrate') : t('auth_inicia_link')}
                                     </button>
                                 </p>
                             </div>
