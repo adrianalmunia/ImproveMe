@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Shield, Zap, TrendingUp, CheckCircle2, Brain, X, Sun, Moon } from 'lucide-react';
+import { ArrowRight, Shield, Zap, TrendingUp, CheckCircle2, Brain, X, Sun, Moon, Accessibility, Type, BookOpen } from 'lucide-react';
 import { useTema } from '../contextos/ContextoTema';
+import { useAccesibilidad } from '../contextos/ContextoAccesibilidad';
 import logoCompleto from '../assets/logo_completo.png';
 import {
   MoodDoughnutChart, MeditationCard, SleepScatterChart, HabitCard,
@@ -10,12 +11,28 @@ import {
 
 const LandingPage = ({ onIrAAutenticacion }) => {
   const { temaOscuro, toggleTema } = useTema();
+  const { letraGrande, fuenteDislexia, toggleLetraGrande, toggleFuenteDislexia } = useAccesibilidad();
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [mostrarAcerca, setMostrarAcerca] = useState(false);
   const [mostrarReportarError, setMostrarReportarError] = useState(false);
   const [descripcionError, setDescripcionError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [enviadoExito, setEnviadoExito] = useState(false);
+
+  // Accesibilidad
+  const [panelAccesibilidad, setPanelAccesibilidad] = useState(false);
+  const panelRef = useRef(null);
+
+  // Cerrar panel al hacer clic fuera
+  useEffect(() => {
+    const handler = (e) => {
+      if (panelRef.current && !panelRef.current.contains(e.target)) {
+        setPanelAccesibilidad(false);
+      }
+    };
+    if (panelAccesibilidad) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [panelAccesibilidad]);
 
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-gray-950 font-['Inter'] selection:bg-blue-100 selection:text-blue-600 transition-colors duration-300 overflow-x-hidden">
@@ -27,6 +44,91 @@ const LandingPage = ({ onIrAAutenticacion }) => {
             <img src={logoCompleto} alt="ImproveMe" className="h-9 object-contain" />
           </div>
           <div className="flex items-center gap-3">
+            {/* ── Accesibilidad ── */}
+            <div className="relative" ref={panelRef}>
+              <button
+                onClick={() => setPanelAccesibilidad(v => !v)}
+                className={`p-2.5 rounded-full transition-all duration-300 flex items-center justify-center border ${
+                  panelAccesibilidad || letraGrande || fuenteDislexia
+                    ? 'text-[#4F99CC] bg-blue-50 dark:bg-blue-900/30 border-blue-200/40 dark:border-blue-700/40'
+                    : 'text-gray-500 hover:text-[#2C4159] dark:text-gray-400 dark:hover:text-white bg-gray-100/50 hover:bg-gray-100 dark:bg-gray-800/40 dark:hover:bg-gray-800/80 border-gray-200/20 dark:border-gray-700/20'
+                }`}
+                title="Opciones de accesibilidad"
+                aria-label="Opciones de accesibilidad"
+              >
+                <Accessibility size={18} />
+              </button>
+
+              <AnimatePresence>
+                {panelAccesibilidad && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.92, y: -6 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.92, y: -6 }}
+                    transition={{ duration: 0.18 }}
+                    className="absolute right-0 top-12 w-64 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700/60 p-4 z-50"
+                  >
+                    <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 px-1">Accesibilidad</p>
+
+                    {/* Texto grande */}
+                    <button
+                      onClick={() => toggleLetraGrande()}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+                        letraGrande
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-[#4F99CC]'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                        letraGrande ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-gray-100 dark:bg-gray-800'
+                      }`}>
+                        <Type size={15} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-xs font-bold leading-tight">Texto grande</p>
+                        <p className="text-[10px] text-gray-400 leading-tight mt-0.5">Aumenta el tamaño base</p>
+                      </div>
+                      <div className={`ml-auto w-8 h-5 rounded-full transition-colors relative shrink-0 ${
+                        letraGrande ? 'bg-[#4F99CC]' : 'bg-gray-200 dark:bg-gray-700'
+                      }`}>
+                        <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${
+                          letraGrande ? 'left-3.5' : 'left-0.5'
+                        }`} />
+                      </div>
+                    </button>
+
+                    {/* Fuente para dislexia */}
+                    <button
+                      onClick={() => toggleFuenteDislexia()}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all mt-1 ${
+                        fuenteDislexia
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-[#4F99CC]'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                        fuenteDislexia ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-gray-100 dark:bg-gray-800'
+                      }`}>
+                        <BookOpen size={15} />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-xs font-bold leading-tight">Fuente dislexia</p>
+                        <p className="text-[10px] text-gray-400 leading-tight mt-0.5">OpenDyslexic</p>
+                      </div>
+                      <div className={`ml-auto w-8 h-5 rounded-full transition-colors relative shrink-0 ${
+                        fuenteDislexia ? 'bg-[#4F99CC]' : 'bg-gray-200 dark:bg-gray-700'
+                      }`}>
+                        <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${
+                          fuenteDislexia ? 'left-3.5' : 'left-0.5'
+                        }`} />
+                      </div>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* ── Tema ── */}
             <button onClick={toggleTema}
               className="p-2.5 text-gray-500 hover:text-[#2C4159] dark:text-gray-400 dark:hover:text-white bg-gray-100/50 hover:bg-gray-100 dark:bg-gray-800/40 dark:hover:bg-gray-800/80 rounded-full transition-all duration-300 flex items-center justify-center border border-gray-200/20 dark:border-gray-700/20"
               title={temaOscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}

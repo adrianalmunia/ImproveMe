@@ -1,152 +1,156 @@
-# 🚀 ImproveMe - Aplicación de Desarrollo Personal
+# ImproveMe — Aplicación de Desarrollo Personal
 
-**ImproveMe** es una aplicación holística de bienestar personal que fusiona **productividad** (gestión de hábitos) con **bienestar emocional** (diario personal) para ayudarte a ver cómo tu disciplina afecta tu estado mental y descanso.
+**ImproveMe** es una aplicación web de bienestar personal que combina la gestión de hábitos con el seguimiento del estado emocional. La idea es sencilla: ayudarte a ver cómo tu disciplina diaria impacta en tu descanso, tu ánimo y tu progreso personal.
 
-## 📋 Características Principales
+El proyecto está **completamente desarrollado** y listo para usar.
 
-✅ **Gestión de Hábitos**
-- CRUD completo para hábitos personalizados
-- Categorías e iconos
-- Seguimiento diario de cumplimiento
-- Histórico de progreso
+---
 
-✅ **Diario de Bienestar**
-- Registro diario de estado de ánimo (mood score)
-- Horas de sueño registradas
-- Notas y reflexiones personales
-- Multimedia asociada (fotos, etc.)
+## ✨ Qué puedes hacer con ImproveMe
 
-✅ **Gamificación**
-- Sistema de puntos XP
-- Rangos de progresión (Novato → Maestro de la Disciplina)
-- Visualización de progreso
+**Hábitos**
+- Crear, editar y eliminar hábitos personalizados con categorías e iconos
+- Marcar hábitos como completados cada día
+- Consultar el historial de cumplimiento a lo largo del tiempo
 
-✅ **Autenticación Segura**
-- Registro de nuevos usuarios
-- Login con JWT
+**Diario de bienestar**
+- Registrar tu estado de ánimo diario (mood score)
+- Anotar las horas de sueño
+- Escribir reflexiones personales y adjuntar multimedia
+
+**Estadísticas y progreso**
+- Gráficos y métricas de evolución personal
+- Sistema de puntos XP con rangos de progresión (Novato → Maestro de la Disciplina)
+- Página de registros y calendario de actividad
+
+**Meditación y enfoque**
+- Sesiones guiadas de meditación integradas en la app
+
+**Perfil de usuario**
+- Gestión completa de la cuenta: datos personales, contraseña y preferencias
+- Soporte y contacto desde dentro de la aplicación
+
+**Autenticación segura**
+- Registro e inicio de sesión con JWT
 - Contraseñas encriptadas con bcrypt
 
-## 🛠️ Stack Tecnológico
+---
+
+## 🛠️ Stack tecnológico
 
 ### Backend
-- **Node.js** + **Express** - servidor web
-- **Prisma ORM** - acceso a base de datos
-- **PostgreSQL** - base de datos relacional
-- **JWT** - autenticación sin sesiones
-- **Bcrypt** - encriptación de contraseñas
+| Tecnología | Uso |
+|---|---|
+| Node.js + Express | Servidor web y API REST |
+| Prisma ORM | Acceso a base de datos |
+| PostgreSQL | Base de datos relacional |
+| JWT | Autenticación sin sesiones |
+| Bcrypt | Encriptación de contraseñas |
+| Multer | Gestión de archivos multimedia |
 
 ### Frontend
-- **React 19** - librería de UI
-- **JavaScript (ES6+)** - lógica del cliente
-- **Vite** - bundler de desarrollo rápido
-- **Tailwind CSS** - estilos (próximamente)
-- **Context API** - estado global
+| Tecnología | Uso |
+|---|---|
+| React 19 | Librería de UI |
+| Vite | Bundler de desarrollo |
+| Context API | Estado global de la aplicación |
+| Chart.js | Gráficos de estadísticas |
 
-## 📁 Estructura del Proyecto
+---
+
+## 📁 Estructura del proyecto
 
 ```
 ImproveMe/
 ├── backend/
 │   ├── src/
-│   │   ├── servidor.js                 # Punto de entrada
+│   │   ├── servidor.js                      # Punto de entrada principal
+│   │   ├── inicio.js                        # Configuración de Express
 │   │   ├── configuracion/
-│   │   │   ├── baseDatos.js            # Instancia Prisma
-│   │   │   └── jwt.js                  # Generación y validación de tokens
+│   │   │   ├── baseDatos.js                 # Instancia de Prisma
+│   │   │   └── jwt.js                       # Generación y validación de tokens
 │   │   ├── middleware/
-│   │   │   └── autenticacion.js        # Verificación JWT
+│   │   │   └── autenticacion.js             # Verificación JWT
 │   │   ├── rutas/
-│   │   │   └── rutasAutenticacion.js   # Endpoints de auth
-│   │   ├── controladores/
-│   │   │   └── controladorAutenticacion.js  # Lógica HTTP
-│   │   ├── servicios/
-│   │   │   └── servicioAutenticacion.js     # Lógica de negocio
-│   │   └── utilidades/
-│   │       └── validadores.js          # Validación de datos
+│   │   │   ├── rutasAutenticacion.js
+│   │   │   ├── rutasDiario.js
+│   │   │   ├── rutasCalendario.js
+│   │   │   ├── rutasEstadisticas.js
+│   │   │   ├── rutasMeditacion.js
+│   │   │   ├── rutasTareas.js
+│   │   │   └── rutasSoporte.js
+│   │   ├── controladores/                   # Lógica HTTP por módulo
+│   │   ├── servicios/                       # Lógica de negocio
+│   │   └── utilidades/                      # Validadores y helpers
 │   ├── prisma/
-│   │   └── schema.prisma               # Modelo de datos
-│   ├── .env                            # Variables de entorno
+│   │   └── schema.prisma                    # Modelo de datos
+│   ├── .env
 │   └── package.json
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx                     # Componente raíz
-│   │   ├── main.jsx                    # Punto de entrada
-│   │   ├── componentes/
-│   │   │   ├── CampoFormulario.jsx     # Input reutilizable
-│   │   │   └── Boton.jsx               # Botón reutilizable
+│   │   ├── Aplicacion.jsx                   # Componente raíz y rutas
+│   │   ├── Principal.jsx                    # Punto de entrada
 │   │   ├── paginas/
-│   │   │   ├── PaginaLogin.jsx         # Login
-│   │   │   └── PaginaRegistro.jsx      # Registro
-│   │   ├── servicios/
-│   │   │   └── servicioAPI.js          # Cliente HTTP
-│   │   ├── contextos/
-│   │   │   └── ContextoAutenticacion.jsx  # Estado global auth
-│   │   ├── estilos/
-│   │   │   ├── App.css
-│   │   │   ├── CampoFormulario.css
-│   │   │   ├── Boton.css
-│   │   │   ├── PaginaLogin.css
-│   │   │   └── PaginaRegistro.css
-│   │   └── utilidades/                 # Funciones auxiliares
-│   ├── .env                            # Variables de entorno
+│   │   │   ├── LandingPage.jsx              # Página de inicio pública
+│   │   │   ├── LandingSections.jsx          # Secciones de la landing
+│   │   │   ├── Autenticacion.jsx            # Login y registro
+│   │   │   ├── PaginaHabitos.jsx
+│   │   │   ├── PaginaDiario.jsx
+│   │   │   ├── PaginaEstadisticas.jsx
+│   │   │   ├── PaginaCalendario.jsx
+│   │   │   ├── PaginaMeditacion.jsx
+│   │   │   ├── PaginaRangos.jsx
+│   │   │   ├── PaginaRegistros.jsx
+│   │   │   └── PaginaUsuario.jsx
+│   │   ├── componentes/                     # Componentes reutilizables
+│   │   ├── contextos/                       # Estado global (auth, etc.)
+│   │   ├── servicios/                       # Cliente HTTP y llamadas a la API
+│   │   ├── estilos/                         # CSS por componente/página
+│   │   └── utilidades/                      # Funciones auxiliares
+│   ├── .env
 │   └── package.json
 │
-└── README.md (este archivo)
+└── README.md
 ```
-
-## 📚 Estructura de Capas
-
-### Backend
-```
-Rutas (Express) 
-    ↓
-Controladores (manejo HTTP)
-    ↓
-Servicios (lógica de negocio)
-    ↓
-Base de Datos (Prisma)
-```
-
-### Frontend
-```
-Componentes de Página
-    ↓
-Componentes Reutilizables
-    ↓
-Servicios de API
-    ↓
-Contextos (estado global)
-```
-
-## 🔒 Seguridad
-
-- ✅ Contraseñas encriptadas con bcrypt (10 vueltas)
-- ✅ JWT para autenticación sin sesiones
-- ✅ CORS configurado
-- ✅ Validación de inputs
-- ✅ Variables sensibles en .env (nunca en Git)
-
-## 🚧 Próximas Funcionalidades
-
-- [ ] Dashboard principal con widgets
-- [ ] CRUD de hábitos en frontend
-- [ ] Página de diario de bienestar
-- [ ] Gráficos de progreso (Chart.js)
-- [ ] Sistema de notificaciones
-- [ ] Sincronización offline-first
-- [ ] Temas oscuro/claro
-- [ ] Responsive design mejorado
-
-## 👤 Contribuidores
-
-- **Adrian** - Desarrollador principal
-
-## 📄 Licencia
-
-Proyecto personal - Todos los derechos reservados © 2026
 
 ---
 
-**¡Gracias por usar ImproveMe! 🌟**
+## 🔒 Seguridad
 
-¿Preguntas? Revisa la memoria del proyecto o contacta al desarrollador.
+- Contraseñas encriptadas con bcrypt (10 rondas)
+- Autenticación stateless con JWT
+- CORS configurado en el servidor
+- Validación de inputs en cliente y servidor
+- Variables sensibles en `.env`, excluidas del repositorio
+
+---
+
+## 🚀 Cómo ejecutar el proyecto
+
+**Backend**
+```bash
+cd backend
+npm install
+npx prisma migrate dev
+npm run dev
+```
+
+**Frontend**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Asegúrate de configurar las variables de entorno en `backend/.env` y `frontend/.env` antes de arrancar.
+
+---
+
+## 👤 Autor
+
+**Adrian** — Desarrollador del proyecto
+
+---
+
+*Proyecto personal © 2026. Todos los derechos reservados.*

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { ProveedorAutenticacion, useAutenticacion } from './contextos/ContextoAutenticacion';
 import { ProveedorTema } from './contextos/ContextoTema';
 import { ProveedorIdioma } from './contextos/ContextoIdioma';
+import { ProveedorAccesibilidad } from './contextos/ContextoAccesibilidad';
 import Autenticacion from './paginas/Autenticacion';
 import PaginaDiario from './paginas/PaginaDiario';
 import PaginaRegistros from './paginas/PaginaRegistros';
@@ -84,9 +85,11 @@ export function Aplicacion() {
   return (
     <ProveedorIdioma>
       <ProveedorTema>
-        <ProveedorAutenticacion>
-          <ContenidoAplicacion />
-        </ProveedorAutenticacion>
+        <ProveedorAccesibilidad>
+          <ProveedorAutenticacion>
+            <ContenidoAplicacion />
+          </ProveedorAutenticacion>
+        </ProveedorAccesibilidad>
       </ProveedorTema>
     </ProveedorIdioma>
   );
